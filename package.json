@@ -1,7 +1,9 @@
 {
   "name": "sacn-view-react-js",
   "version": "0.1.0",
+  "description": "A simple viewer for sACN (ANSI E1.31) packets",
   "private": true,
+  "main": "electron/main.js",
   "dependencies": {
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^13.0.0",
@@ -9,13 +11,22 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
-    "web-vitals": "^2.1.0"
+    "sacn": "^4.2.0"
+  },
+  "devDependencies": {
+    "concurrently": "^7.6.0",
+    "cross-env": "^7.0.3",
+    "electron": "^22.1.0",
+    "electron-reload": "^2.0.0-alpha.1",
+    "wait-on": "^7.0.1"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "react-start": "react-scripts start",
+    "react-build": "react-scripts build",
+    "react-test": "react-scripts test",
+    "react-eject": "react-scripts eject",
+    "electron-start": "electron electron/main.js",
+    "start": "concurrently \"cross-env BROWSER=none yarn react-start\" \"wait-on http://127.0.0.1:3000 && yarn electron-start\""
   },
   "eslintConfig": {
     "extends": [

@@ -1,38 +1,67 @@
+:root {
+  --default-bg-color: rgb(17, 18, 24);
+  --default-highlight-color: rgb(22, 158, 227);
+}
+
 .App {
   text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
+  background-color: var(--default-bg-color);
   min-height: 100vh;
+}
+
+.Column {
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+}
+
+.Column-header {
+  height: 30px;
+  width:  100%;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 100%;
+  color: rgba(255, 255, 255, 0.8);
+  background-color: rgb(44, 44, 44);
+}
+
+.DMXUniverse {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  flex-shrink: 10;
+  justify-content: left;
+}
+
+.ChannelBox {
+  position: relative;
+  width: 40px;
+  height: 30px;
+  background-color: inherit;
+}
+
+.ChannelBoxValue {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: auto;
+  font-size: 75%;
+  font-weight: 400;
   color: white;
+  opacity: 0.9;
 }
 
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.ChannelBoxBackground {
+  position: absolute;
+  background-color: var(--default-highlight-color);
+  box-sizing: border-box;
+/*  border-style: solid;
+  border-width: 4px;
+  border-color: rgb(17, 18, 24);*/
 }
