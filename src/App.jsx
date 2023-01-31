@@ -1,14 +1,16 @@
-import logo from './logo.svg';
 import './App.css';
-
-import { DMXUniverse } from './textbox';
+import { DMXUniverse, DMXData } from './textbox';
 
 
 function App() {
+  console.log("Hello from Renderer");
 
   return (
     <div className="App">
-      <DMXUniverse />
+      <div className="Columns">
+        <DMXUniverse />
+        <DMXData />
+      </div>
     </div>
   );
 }

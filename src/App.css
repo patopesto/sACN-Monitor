@@ -9,10 +9,26 @@
   min-height: 100vh;
 }
 
+.Columns {
+  display: flex;
+  flex-direction: row;
+}
+
+.UniverseColumn {
+  width: 250px;
+}
+
+.DMXColumn {
+  width: 60%;
+}
+
 .Column {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  box-sizing: border-box;
+  border-style: solid;
+  border-width: 1px;
+  border-color: rgb(60, 60, 60);
 }
 
 .Column-header {
@@ -23,11 +39,52 @@
   justify-content: center;
   align-items: center;
   font-size: 100%;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.9);
   background-color: rgb(44, 44, 44);
 }
 
-.DMXUniverse {
+
+
+
+.DMXUniverses {
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+}
+
+.UniverseBox {
+  width: 96%;
+  height: 30px;
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+  align-items: center;
+  font-size: 80%;
+}
+
+.UniverseBoxValue {
+  height: 100%;
+  width: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.UniverseBoxNode {
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  padding-left: 5%;
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+
+
+
+.DMXChannels {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
