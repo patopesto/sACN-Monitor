@@ -5,20 +5,21 @@
   "private": true,
   "main": "electron/main.js",
   "dependencies": {
+    "@reduxjs/toolkit": "^1.9.2",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^13.0.0",
     "@testing-library/user-event": "^13.2.1",
-    "@reduxjs/toolkit": "^1.9.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-scripts": "5.0.1",
     "react-redux": "^8.0.5",
+    "react-scripts": "5.0.1",
     "sacn": "^4.2.0"
   },
   "devDependencies": {
     "concurrently": "^7.6.0",
     "cross-env": "^7.0.3",
     "electron": "^22.1.0",
+    "electron-devtools-installer": "^3.2.0",
     "electron-reload": "^2.0.0-alpha.1",
     "wait-on": "^7.0.1"
   },
@@ -27,7 +28,7 @@
     "react-build": "react-scripts build",
     "react-test": "react-scripts test",
     "react-eject": "react-scripts eject",
-    "electron-start": "electron electron/main.js",
+    "electron-start": "electron .",
     "start": "concurrently \"cross-env BROWSER=none yarn react-start\" \"wait-on http://127.0.0.1:3000 && yarn electron-start\""
   },
   "eslintConfig": {
