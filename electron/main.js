@@ -1,15 +1,31 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
-const { default: installExtension, REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS } = require('electron-devtools-installer');
 const { Receiver } = require('sacn');
 
-let win;
+const isDevelopment = process.env.APP_ENV === 'dev';
+
+let mainWindow = null;
+let forceQuit = false;
+
+const installExtensions = () => {
+    const installer = require('electron-devtools-installer');
+    const extensions = ['REACT_DEVELOPER_TOOLS', 'REDUX_DEVTOOLS'];
+    const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
+    for (const name of extensions) {
+        try {
+            installer.default(installer[name], forceDownload);
+        } catch (e) {
+            console.log(`Error installing ${name} extension: ${e.message}`);
+        }
+    }
+};
 
 const createWindow = () => {
-    win = new BrowserWindow({
+    mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
         title: "sACN View",
+        show: false,
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
@@ -18,12 +34,12 @@ const createWindow = () => {
     });
 
     if (app.isPackaged) {
-        win.loadURL(`file://${path.join(__dirname, "/../index.html")}`);
+        mainWindow.loadURL(`file://${path.join(__dirname, "/../index.html")}`);
     }
     else {
-        win.loadURL("http://localhost:3000");
+        mainWindow.loadURL("http://localhost:3000");
 
-        win.webContents.openDevTools();
+        mainWindow.webContents.openDevTools();
 
         console.log("_dirname",__dirname);
 
@@ -32,31 +48,62 @@ const createWindow = () => {
             forceHardReset: true,
             hardResetMethod: 'exit'
         });
-    }  
+    }
+
+    // show window once on first load
+    mainWindow.webContents.once('did-finish-load', () => {
+        mainWindow.show();
+    });
+
+    mainWindow.webContents.on('did-finish-load', () => {
+    // Handle window logic properly on macOS:
+    // 1. App should not terminate if window has been closed
+    // 2. Click on icon in dock should re-open the window
+    // 3. ⌘+Q should close the window and quit the app
+    if (process.platform === 'darwin') {
+      mainWindow.on('close', function (e) {
+        if (!forceQuit) {
+          e.preventDefault();
+          mainWindow.hide();
+        }
+      });
+
+      app.on('activate', () => {
+        mainWindow.show();
+      });
+
+      app.on('before-quit', () => {
+        forceQuit = true;
+      });
+    } else {
+      mainWindow.on('closed', () => {
+        mainWindow = null;
+      });
+    }
+  });
 };
 
 
 app.whenReady().then(() => {
-    createWindow();
     console.log("Hello from Electron");
+    if (isDevelopment) {
+        console.log("Installing extensions");
+        installExtensions();
+    }
+
+    createWindow();
 
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) createWindow();
-    })
-
-    if (!app.isPackaged) {
-        const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
-        const tools = [REACT_DEVELOPER_TOOLS, REDUX_DEVTOOLS]
-        installExtension(tools, forceDownload)
-            .then((name) => console.log(`Added Extension:  ${name}`))
-            .catch((err) => console.log('An error occurred: ', err));
-    }
+    });
 
 })
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit();
 })
+
+
 
 // hack to listen for multiple universes
 const NUM_UNIVERSES = 512;
@@ -72,7 +119,7 @@ const receiver = new Receiver({
 
 receiver.on('packet', (packet) => {
     // console.log("new packet for universe", packet.universe);
-    if (win != null) {
-        win.webContents.send("dmx-data", packet);
+    if (mainWindow != null) {
+        mainWindow.webContents.send("dmx-data", packet);
     }
 })
