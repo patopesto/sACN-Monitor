@@ -104,6 +104,10 @@
   width: 40px;
   height: 30px;
   background-color: inherit;
+  box-sizing: border-box;
+  border-style: none ;
+  border-width: 2px;
+  border-color: rgb(255, 255, 255);
 }
 
 .ChannelBoxValue {
@@ -147,17 +151,19 @@
   margin: 0 15px;
   font-size: 80%;
   color: white;
-  opacity: 0.9;
 }
 
 .StatsBoxName {
   display: flex;
   justify-content: center;
+  opacity: 0.8;
 }
 
 .StatsBoxValue {
   display: flex;
   justify-content: center;
+  opacity: 1;
+  font-weight: 500;
 }
 
 

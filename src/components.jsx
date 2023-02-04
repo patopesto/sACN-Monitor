@@ -1,5 +1,12 @@
 import { useSelector, useDispatch } from 'react-redux';
-import { selectUniverse, getSelectedUniverse, getUniverses, getSelectedUniverseData } from './reducer';
+import { 
+    selectUniverse,
+    selectChannel,
+    getUniverses,
+    getSelectedUniverse,
+    getSelectedUniverseData ,
+    getSelectedChannel,
+} from './reducer';
 
 const NUM_CHANNELS = 512;
 
@@ -9,10 +16,19 @@ function DMXData() {
     if (data !== undefined) {
         dmx = data.dmx;
     }
+
+    const selected = useSelector(getSelectedChannel);
     const channels = [];
 
     for (let i = 0; i < NUM_CHANNELS; i++) {
-        channels.push(<ChannelBox key={i} channel={i+1} value={dmx[i]} />);
+        channels.push(
+            <ChannelBox 
+                key={i}
+                channel={i+1}
+                value={dmx[i]}
+                selected={i+1 === selected}
+            />
+        );
     }
 
     return (
@@ -25,6 +41,7 @@ function DMXData() {
 
 function ChannelBox(props) {
 
+    const dispatch = useDispatch();
     const percentage = props.value * 100 / 255;
     const styleBackground = {
         height: `${percentage}%`,
@@ -32,14 +49,22 @@ function ChannelBox(props) {
         width: "100%",
     }
 
+    const handleClick = function() {
+        dispatch(selectChannel(props.channel));
+    }
+
     const styleValue = {
         opacity: props.value > 0 ? 1 : 0.5,
     }
 
+    const styleBox = {
+        "border-style": props.selected === true ? 'solid' : 'none' 
+    }
+
     return (
-        <div className="ChannelBox">
+        <div className="ChannelBox"  style={styleBox} onClick={handleClick}>
             <div className="ChannelBoxBackground" style={styleBackground} />
-            <div className="ChannelBoxValue" style={styleValue} >{props.channel}</div>
+            <div className="ChannelBoxValue" style={styleValue}>{props.channel}</div>
         </div>
     );
 }
@@ -108,23 +133,37 @@ function UniverseBox(props) {
 
 function DMXStats() {
 
-    const selected = useSelector(getSelectedUniverse);
-    const selected_hex = Number(selected).toString(16).toUpperCase();
+    var sel_universe = useSelector(getSelectedUniverse);
     const data = useSelector(getSelectedUniverseData);
-    var dmx = []
-    var node = "";
-    if (data !== undefined) {
-        dmx = data.dmx;
-        node = data.node;
+    var sel_channel = useSelector(getSelectedChannel);
+
+    var universe, universe_hex, node, channel, channel_data = "";
+
+    if (sel_universe > 0) {
+        universe = sel_universe
+        universe_hex = Number(universe).toString(16).toUpperCase();
     }
 
+    if (data !== undefined) {
+        node = data.node;
+        let dmx = data.dmx;
+        if (sel_channel > 0) {
+            channel = sel_channel;
+            let value = dmx[channel-1];
+            let value_percent = (value * 100 / 255).toFixed(1);
+            channel_data = value + " (" + value_percent + "%)";
+        }
+    }
+    
     return (
         <div className="Column StatsColumn">
             <div className="Column-header">STATISTICS</div>
             <div className="DMXStats">
-                <StatsBox name="Universe" value={selected} />
-                <StatsBox name="Universe Hex" value={selected_hex} />
+                <StatsBox name="Universe" value={universe} />
+                <StatsBox name="Universe Hex" value={universe_hex} />
                 <StatsBox name="Node" value={node} />
+                <StatsBox name="Selected Channel" value={channel} />
+                <StatsBox name="Selected Value" value={channel_data} />
             </div>
         </div>
     );
