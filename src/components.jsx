@@ -26,16 +26,20 @@ function DMXData() {
 function ChannelBox(props) {
 
     const percentage = props.value * 100 / 255;
-    const fillerStyles = {
+    const styleBackground = {
         height: `${percentage}%`,
         // height: "1%",
         width: "100%",
     }
 
+    const styleValue = {
+        opacity: props.value > 0 ? 1 : 0.5,
+    }
+
     return (
         <div className="ChannelBox">
-            <div className="ChannelBoxBackground" style={fillerStyles} />
-            <div className="ChannelBoxValue">{props.channel}</div>
+            <div className="ChannelBoxBackground" style={styleBackground} />
+            <div className="ChannelBoxValue" style={styleValue} >{props.channel}</div>
         </div>
     );
 }
@@ -102,4 +106,39 @@ function UniverseBox(props) {
     );
 }
 
-export { DMXUniverse, DMXData };
+function DMXStats() {
+
+    const selected = useSelector(getSelectedUniverse);
+    const selected_hex = Number(selected).toString(16).toUpperCase();
+    const data = useSelector(getSelectedUniverseData);
+    var dmx = []
+    var node = "";
+    if (data !== undefined) {
+        dmx = data.dmx;
+        node = data.node;
+    }
+
+    return (
+        <div className="Column StatsColumn">
+            <div className="Column-header">STATISTICS</div>
+            <div className="DMXStats">
+                <StatsBox name="Universe" value={selected} />
+                <StatsBox name="Universe Hex" value={selected_hex} />
+                <StatsBox name="Node" value={node} />
+            </div>
+        </div>
+    );
+}
+
+function StatsBox(props) {
+
+    return (
+        <div className="StatsBox">
+            <div className="StatsBoxName">{props.name}</div>
+            <div className="StatsBoxValue">{props.value}</div>
+        </div>
+    );
+
+}
+
+export { DMXUniverse, DMXData, DMXStats};

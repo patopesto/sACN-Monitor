@@ -12,14 +12,21 @@
 .Columns {
   display: flex;
   flex-direction: row;
+  align-items: stretch;
 }
 
 .UniverseColumn {
   width: 250px;
+  flex-shrink: 0;
 }
 
 .DMXColumn {
-  width: 60%;
+
+}
+
+.StatsColumn {
+  width: 250px;
+  flex-shrink: 0;
 }
 
 .Column {
@@ -111,7 +118,7 @@
   font-size: 75%;
   font-weight: 400;
   color: white;
-  opacity: 0.9;
+  opacity: 0.5;
 }
 
 .ChannelBoxBackground {
@@ -122,3 +129,35 @@
   border-width: 4px;
   border-color: rgb(17, 18, 24);*/
 }
+
+
+
+.DMXStats {
+  display: flex;
+  flex-direction: column;
+  margin-top: 5px;
+}
+
+.StatsBox {
+  height: 25px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 15px;
+  font-size: 80%;
+  color: white;
+  opacity: 0.9;
+}
+
+.StatsBoxName {
+  display: flex;
+  justify-content: center;
+}
+
+.StatsBoxValue {
+  display: flex;
+  justify-content: center;
+}
+
+

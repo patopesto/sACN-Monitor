@@ -1,6 +1,6 @@
 import { useDispatch } from 'react-redux';
 import './App.css';
-import { DMXUniverse, DMXData } from './components';
+import { DMXUniverse, DMXData, DMXStats } from './components';
 import { updateUniverseData } from './reducer';
 
 
@@ -24,6 +24,7 @@ function App() {
             <div className="Columns">
                 <DMXUniverse />
                 <DMXData />
+                <DMXStats />
             </div>
         </div>
     );
