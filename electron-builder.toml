@@ -1,0 +1,12 @@
+appId = "co.bambinito.sacnview"
+productName = "sACNView"
+copyright = "Copyright © 2023 Alban Moreon"
+files = [ "electron/**/*", "node_modules/**/*" ]
+[extraMetadata]
+main = "electron/main.js"
+
+[directories]
+buildResources = "assets"
+
+[mac]
+target = "default"

@@ -3,7 +3,12 @@
   "version": "0.1.0",
   "description": "A simple viewer for sACN (ANSI E1.31) packets",
   "private": true,
+  "author": {
+    "name": "Alban Moreon",
+    "email": "developer@bambinito.co"
+  },
   "main": "electron/main.js",
+  "homepage": "./",
   "dependencies": {
     "@reduxjs/toolkit": "^1.9.2",
     "@testing-library/jest-dom": "^5.14.1",
@@ -13,7 +18,8 @@
     "react-dom": "^18.2.0",
     "react-redux": "^8.0.5",
     "react-scripts": "5.0.1",
-    "sacn": "^4.2.0"
+    "sacn": "^4.2.0",
+    "toml": "^3.0.0"
   },
   "devDependencies": {
     "concurrently": "^7.6.0",
@@ -30,7 +36,12 @@
     "react-test": "react-scripts test",
     "react-eject": "react-scripts eject",
     "electron-start": "cross-env APP_ENV='dev' electron .",
-    "start": "concurrently \"cross-env BROWSER=none yarn react-start\" \"wait-on http://127.0.0.1:3000 && yarn electron-start\""
+    "electron-build": "electron-builder --config electron-builder.toml --dir",
+    "postinstall": "electron-builder install-app-deps",
+    "start": "concurrently \"cross-env BROWSER=none yarn react-start\" \"wait-on http://127.0.0.1:3000 && yarn electron-start\"",
+    "build": "yarn react-build && yarn electron-build",
+    "clean": "rm -r build dist"
+
   },
   "eslintConfig": {
     "extends": [

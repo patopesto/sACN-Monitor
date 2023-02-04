@@ -33,8 +33,10 @@ const createWindow = () => {
         }
     });
 
+    console.log(__dirname);
+
     if (app.isPackaged) {
-        mainWindow.loadURL(`file://${path.join(__dirname, "/../index.html")}`);
+        mainWindow.loadURL(`file://${path.join(__dirname, "/../build/index.html")}`);
     }
     else {
         mainWindow.loadURL("http://localhost:3000");
