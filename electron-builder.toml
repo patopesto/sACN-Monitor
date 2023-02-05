@@ -1,6 +1,6 @@
 appId = "co.bambinito.sacnview"
 productName = "sACNView"
-copyright = "Copyright © 2023 Alban Moreon"
+copyright = "Copyright © 2023 ${author}"
 files = [ "electron/**/*", "node_modules/**/*" ]
 [extraMetadata]
 main = "electron/main.js"
@@ -9,4 +9,12 @@ main = "electron/main.js"
 buildResources = "assets"
 
 [mac]
-target = "default"
+target = "dmg"
+category = "public.app-category.utilities"
+
+[win]
+target = "nsis"
+artifactName = "${productName}-Setup-${version}.${ext}"
+
+[linux]
+target = "AppImage"

@@ -36,7 +36,7 @@
     "react-test": "react-scripts test",
     "react-eject": "react-scripts eject",
     "electron-start": "cross-env APP_ENV='dev' electron .",
-    "electron-build": "electron-builder --config electron-builder.toml --dir",
+    "electron-build": "electron-builder --config electron-builder.toml",
     "postinstall": "electron-builder install-app-deps",
     "start": "concurrently \"cross-env BROWSER=none yarn react-start\" \"wait-on http://127.0.0.1:3000 && yarn electron-start\"",
     "build": "yarn react-build && yarn electron-build",

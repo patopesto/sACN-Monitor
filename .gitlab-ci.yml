@@ -1,0 +1,71 @@
+stages:         
+  - build
+  - release
+
+variables:
+  PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${CI_PROJECT_TITLE}/${CI_COMMIT_TAG}"
+
+
+build-job:  
+  stage: build
+  tags:
+    - macos
+  script:
+    - yarn install
+    - yarn build --macos --windows --linux
+  after_script:
+    - mkdir -p packages
+    - cp ./dist/*.dmg packages
+    - cp ./dist/*.exe packages
+    - cp ./dist/*.AppImage packages
+    # Get packages filenames for future jobs
+    - echo "MACOS_PACKAGE=$(basename ./packages/*.dmg)" >> variables.env
+    - echo "WINDOWS_PACKAGE=$(basename ./packages/*.exe)" >> variables.env
+    - echo "LINUX_PACKAGE=$(basename ./packages/*.AppImage)" >> variables.env
+  artifacts:
+    expire_in: 2 days
+    # public: true
+    paths:
+      - ./packages/
+    reports:
+      dotenv: variables.env
+
+upload-job:
+  stage: release
+  image: curlimages/curl:latest
+  tags:
+    - docker
+  rules:
+    - if: $CI_COMMIT_TAG                # Run this job when a tag is created
+  script:
+    - |
+      echo "Uploading package ${MACOS_PACKAGE}"
+      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file "packages/${MACOS_PACKAGE}" "${PACKAGE_REGISTRY_URL}/${MACOS_PACKAGE}"
+      echo "Uploading package ${WINDOWS_PACKAGE}"
+      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file "packages/${WINDOWS_PACKAGE}" "${PACKAGE_REGISTRY_URL}/${WINDOWS_PACKAGE}"
+      echo "Uploading package ${LINUX_PACKAGE}"
+      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file "packages/${LINUX_PACKAGE}" "${PACKAGE_REGISTRY_URL}/${LINUX_PACKAGE}"
+
+
+
+release-job:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  tags:
+    - docker
+  rules:
+    - if: $CI_COMMIT_TAG                 # Run this job when a tag is created
+  script:
+    - echo "Release job for ${CI_COMMIT_TAG}"
+  release:                        
+    name: '$CI_COMMIT_TAG'
+    tag_name: '$CI_COMMIT_TAG'
+    description: 'Release $CI_COMMIT_TAG'
+    assets:
+      links:
+        - name: "macOS package"
+          url: "${PACKAGE_REGISTRY_URL}/${MACOS_PACKAGE}"
+        - name: "Windows package"
+          url: "${PACKAGE_REGISTRY_URL}/${WINDOWS_PACKAGE}"
+        - name: "Linux package"
+          url: "${PACKAGE_REGISTRY_URL}/${LINUX_PACKAGE}"
