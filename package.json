@@ -2,13 +2,14 @@
   "name": "sacn-view",
   "version": "0.1.0",
   "description": "A simple viewer for sACN (ANSI E1.31) packets",
-  "private": true,
+  "license": "GPL-3.0",
   "author": {
     "name": "Alban Moreon",
     "email": "developer@bambinito.co"
   },
   "main": "electron/main.js",
   "homepage": "./",
+  "private": true,
   "dependencies": {
     "@reduxjs/toolkit": "^1.9.2",
     "@testing-library/jest-dom": "^5.14.1",

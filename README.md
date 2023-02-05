@@ -4,6 +4,11 @@ An app to view DMX data received over sACN (ANSI E1.31) in the style of Haute Te
 Built using [ElectronJS](https://www.electronjs.org/) and [React](https://reactjs.org/).
 
 
+## Install
+
+Precompiled binaries for macOS, Windows and Linux (AppImage) can be found on the [Releases](https://gitlab.com/patopest/sacnview/-/releases) page.
+
+
 ## Dev
 
 - Install dependencies
@@ -21,8 +26,10 @@ This starts the React frontend with webpack and a local dev server then launches
 
 - Build App
 
-TBD
-
+```shell
+yarn build
+yarn build --mac --windows --linux   # for all platforms
+```
 
 ## References
 
