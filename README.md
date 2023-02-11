@@ -1,4 +1,4 @@
-# sACNView
+# sACN Monitor
 
 An app to view DMX data received over sACN (ANSI E1.31) in the style of Haute Technique's [ArtNetView](https://artnetview.com/).  
 Built using [ElectronJS](https://www.electronjs.org/) and [React](https://reactjs.org/).

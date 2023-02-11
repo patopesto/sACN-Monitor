@@ -1,5 +1,5 @@
-appId = "co.bambinito.sacnview"
-productName = "sACNView"
+appId = "co.bambinito.sacn-monitor"
+productName = "sACN Monitor"
 copyright = "Copyright © 2023 ${author}"
 files = [ "electron/**/*", "node_modules/**/*" ]
 [extraMetadata]
