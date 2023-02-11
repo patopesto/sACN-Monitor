@@ -24,7 +24,7 @@ const createWindow = () => {
     mainWindow = new BrowserWindow({
         width: 1280,
         height: 720,
-        title: "sACN View",
+        title: "sACN Monitor",
         show: false,
         webPreferences: {
             nodeIntegration: false,
@@ -116,7 +116,6 @@ for (let i = 1; i < NUM_UNIVERSES; i++) {
 const receiver = new Receiver({
     universes: universes,
     reuseAddr: true,
-    iface: "0.0.0.0"
 })
 
 receiver.on('packet', (packet) => {

@@ -6,7 +6,7 @@ Built using [ElectronJS](https://www.electronjs.org/) and [React](https://reactj
 
 ## Install
 
-Precompiled binaries for macOS, Windows and Linux (AppImage) can be found on the [Releases](https://gitlab.com/patopest/sacnview/-/releases) page.
+Precompiled binaries for macOS, Windows and Linux (AppImage) can be found on the [Releases](https://gitlab.com/patopest/sacn-monitor/-/releases) page.
 
 
 ## Dev

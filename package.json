@@ -1,5 +1,5 @@
 {
-  "name": "sacn-view",
+  "name": "sACN-Monitor",
   "version": "0.1.0",
   "description": "A simple viewer for sACN (ANSI E1.31) packets",
   "license": "GPL-3.0",
