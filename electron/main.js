@@ -1,9 +1,13 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, Menu, shell } = require('electron');
+const defaultMenu = require('electron-default-menu');
 const path = require('path');
-const { Receiver } = require('sacn');
+const sacn = require('./sacn_receiver');
+const interface = require('./interface');
 
 const isDevelopment = process.env.APP_ENV === 'dev';
 
+
+/* -------- Electron app --------- */
 let mainWindow = null;
 let forceQuit = false;
 
@@ -19,6 +23,7 @@ const installExtensions = () => {
         }
     }
 };
+
 
 const createWindow = () => {
     mainWindow = new BrowserWindow({
@@ -86,6 +91,42 @@ const createWindow = () => {
 };
 
 
+const createMenu = () => {
+    // const default_menu = Menu.getApplicationMenu();
+    const menu = defaultMenu(app, shell);
+    const ifaces = interface.get();
+    const iface_submenu = [];
+    for (const name in ifaces) {
+        const ip = ifaces[name][0].address;
+        iface_submenu.push({
+            label: name + " (" + ip + ")",
+            click: (item, focusedWindow) => {
+              interface.select(name, ip);
+            },
+        })
+    }
+
+    const custom_menu = {
+        label: "Settings",
+        submenu: [
+            { 
+                label: "Interfaces",
+                submenu: iface_submenu,
+            },
+            { type:  "separator" },
+            { label: "Test" },
+        ]
+    };
+
+    // const menu_template = [ ...default_menu?.items||[], custom_menu ];
+    menu.splice(1, 0, custom_menu);
+    // const menu = Menu.buildFromTemplate([custom_menu])
+    // default_menu.items.insert(1, menu)
+    // Menu.setApplicationMenu(default_menu);
+    Menu.setApplicationMenu(Menu.buildFromTemplate(menu));
+};
+
+
 app.whenReady().then(() => {
     console.log("Hello from Electron");
     if (isDevelopment) {
@@ -93,6 +134,7 @@ app.whenReady().then(() => {
         installExtensions();
     }
 
+    createMenu();
     createWindow();
 
     app.on('activate', () => {
@@ -101,26 +143,26 @@ app.whenReady().then(() => {
 
 })
 
+
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit();
 })
 
 
 
-// hack to listen for multiple universes
-const NUM_UNIVERSES = 512;
-const universes = []
-for (let i = 1; i < NUM_UNIVERSES; i++) {
-    universes.push(i);
-}
-const receiver = new Receiver({
-    universes: universes,
-    reuseAddr: true,
-})
+/* -------- sACN --------- */
+sacn.init();
+sacn.init_receiver(interface.selected);
 
-receiver.on('packet', (packet) => {
+sacn.on_packet((packet) => {
     // console.log("new packet for universe", packet.universe);
     if (mainWindow != null) {
         mainWindow.webContents.send("dmx-data", packet);
     }
 })
+
+interface.on_change((iface) => {
+    sacn.close_receiver(iface);
+    sacn.init_receiver(iface);
+});
+

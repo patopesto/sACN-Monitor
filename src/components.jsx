@@ -58,7 +58,7 @@ function ChannelBox(props) {
     }
 
     const styleBox = {
-        "border-style": props.selected === true ? 'solid' : 'none' 
+        borderStyle: props.selected === true ? 'solid' : 'none' 
     }
 
     return (
