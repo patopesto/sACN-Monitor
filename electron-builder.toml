@@ -11,10 +11,12 @@ buildResources = "assets"
 [mac]
 target = "dmg"
 category = "public.app-category.utilities"
+artifactName = "${name}-${version}.${ext}"
 
 [win]
 target = "nsis"
-artifactName = "${productName}-Setup-${version}.${ext}"
+artifactName = "${name}-Setup-${version}.${ext}"
 
 [linux]
 target = "AppImage"
+artifactName = "${name}-${version}.${ext}"
