@@ -7,14 +7,20 @@ const interface_selected = {
 var interface_cb = null;
 
 
+function init_interface() {
+
+    // Init with first interface found
+    let ifaces = get_interfaces();
+    let name = Object.keys(ifaces)[0];
+    select_interface(name, ifaces[name][0].address);
+}
+
 function select_interface(name, ip) {
     console.log("Selected interface", name, ip);
-    selectedInterface = {
-        name: name,
-        ip: ip,
-    };
+    interface_selected.name = name;
+    interface_selected.ip = ip;
     if (interface_cb) {
-        interface_cb(selectedInterface);
+        interface_cb(interface_selected);
     }
 }
 
@@ -38,6 +44,7 @@ function get_interfaces() {
 
 
 module.exports = {
+    init: init_interface,
     get: get_interfaces,
     select: select_interface,
     selected: interface_selected,

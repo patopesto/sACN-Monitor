@@ -20,7 +20,7 @@
     "react-dom": "^18.2.0",
     "react-redux": "^8.0.5",
     "react-scripts": "5.0.1",
-    "sacn": "^4.2.0",
+    "sacn": "git+https://gitlab.com/patopest/sacn.git#local-dependency",
     "toml": "^3.0.0"
   },
   "devDependencies": {

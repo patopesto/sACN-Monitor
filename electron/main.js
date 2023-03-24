@@ -13,7 +13,8 @@ let forceQuit = false;
 
 const installExtensions = () => {
     const installer = require('electron-devtools-installer');
-    const extensions = ['REACT_DEVELOPER_TOOLS', 'REDUX_DEVTOOLS'];
+    // const extensions = ['REACT_DEVELOPER_TOOLS', 'REDUX_DEVTOOLS'];
+    const extensions = [];
     const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
     for (const name of extensions) {
         try {
@@ -151,7 +152,8 @@ app.on('window-all-closed', () => {
 
 
 /* -------- sACN --------- */
-sacn.init();
+interface.init();
+sacn.init(interface.selected);
 sacn.init_receiver(interface.selected);
 
 sacn.on_packet((packet) => {
@@ -163,6 +165,7 @@ sacn.on_packet((packet) => {
 
 interface.on_change((iface) => {
     sacn.close_receiver(iface);
+    sacn.init(iface);
     sacn.init_receiver(iface);
-});
+})
 
