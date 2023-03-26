@@ -59,7 +59,7 @@ release-job:
   script:
     - echo "Release job for ${CI_COMMIT_TAG}"
   release:                        
-    name: 'v$CI_COMMIT_TAG'
+    name: '$CI_COMMIT_TAG'
     tag_name: '$CI_COMMIT_TAG'
     description: 'Release v$CI_COMMIT_TAG'
     assets:
