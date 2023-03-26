@@ -4,29 +4,23 @@ import {
     selectChannel,
     getUniverses,
     getSelectedUniverse,
-    getSelectedUniverseData ,
+    getSelectedUniverseData,
+    getSelectedUniverseChannel,
     getSelectedChannel,
 } from './reducer';
 
 const NUM_CHANNELS = 512;
 
 function DMXData() {
-    const data = useSelector(getSelectedUniverseData);
-    var dmx = []
-    if (data !== undefined) {
-        dmx = data.dmx;
-    }
-
     const selected = useSelector(getSelectedChannel);
     const channels = [];
 
-    for (let i = 1; i <= NUM_CHANNELS; i++) {
+    for (let i = 0; i < NUM_CHANNELS; i++) {
         channels.push(
             <ChannelBox 
                 key={i}
-                channel={i}
-                value={dmx[i]}
-                selected={i === selected}
+                channel={i+1}
+                selected={i+1 === selected}
             />
         );
     }
@@ -42,7 +36,9 @@ function DMXData() {
 function ChannelBox(props) {
 
     const dispatch = useDispatch();
-    const percentage = props.value * 100 / 255;
+    const value = useSelector((state) => getSelectedUniverseChannel(state, props.channel));
+    const percentage = value * 100 / 255;
+
     const styleBackground = {
         height: `${percentage}%`,
         // height: "1%",

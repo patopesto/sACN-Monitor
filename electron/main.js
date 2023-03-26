@@ -159,10 +159,15 @@ sacn.init_receiver(interface.selected);
 sacn.on_packet((packet) => {
     // console.log("new packet for universe", packet.universe);
 
+    // objectify dmx payload buffer
+    var dmx = {}
+    packet.privatePayload.forEach((value, channel) => {
+        dmx[channel+1] = value;
+    })
     // Sending only required properties to renderer
     let message = {
         universe: packet.universe,
-        dmx: JSON.parse(JSON.stringify(packet.privatePayload)).data,
+        dmx: dmx,
         sourceAddress: packet.sourceAddress,
         priority: packet.priority,
     }

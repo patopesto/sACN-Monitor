@@ -40,3 +40,16 @@ export const getSelectedUniverseData = createSelector(
     (id, data) => data[id],
 );
 export const getSelectedChannel = (state) => state.universes.selected_channel;
+
+export const getChannel = (state, channel) => channel;
+export const getSelectedUniverseChannel = createSelector(
+    [getSelectedUniverse, getUniverses, getChannel],
+    (id, data, channel) => {
+        if (data[id] !== undefined) {
+            return data[id].dmx[channel];
+        }
+        else {
+            return 0;
+        }
+    },
+);

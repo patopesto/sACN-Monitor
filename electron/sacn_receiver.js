@@ -77,7 +77,7 @@ function init_receiver(iface) {
     });
 
     receiver.on('packet', (packet) => {
-        console.log("new packet for universe", packet.universe);
+        // console.log("new packet for universe", packet.universe);
         if (packet_cb) {
             packet_cb(packet);
         }
