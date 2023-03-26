@@ -1,6 +1,6 @@
 {
   "name": "sACN-Monitor",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A simple viewer for sACN (ANSI E1.31) packets",
   "license": "GPL-3.0",
   "author": {
