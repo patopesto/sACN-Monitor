@@ -9,11 +9,13 @@ function App() {
     console.log("Hello from Renderer");
 
     window.api.receive('dmx-data', (data) => {
+        // Remapping properties for Redux Store
         let payload = {
             id: data.universe,
             data: {
-                dmx: JSON.parse(JSON.stringify(data.privatePayload)),
+                dmx: data.dmx,
                 node: data.sourceAddress,
+                priority: data.priority,
             } 
         };
         dispatch(updateUniverseData(payload));

@@ -20,13 +20,13 @@ function DMXData() {
     const selected = useSelector(getSelectedChannel);
     const channels = [];
 
-    for (let i = 0; i < NUM_CHANNELS; i++) {
+    for (let i = 1; i <= NUM_CHANNELS; i++) {
         channels.push(
             <ChannelBox 
                 key={i}
-                channel={i+1}
+                channel={i}
                 value={dmx[i]}
-                selected={i+1 === selected}
+                selected={i === selected}
             />
         );
     }
@@ -110,6 +110,7 @@ function UniverseBox(props) {
     const styleValueSelected = {
         color: 'black',
         backgroundColor: 'var(--default-highlight-color)',
+        fontWeight: 600,
     };
 
     const styleNodeDefault = {
@@ -137,7 +138,7 @@ function DMXStats() {
     const data = useSelector(getSelectedUniverseData);
     var sel_channel = useSelector(getSelectedChannel);
 
-    var universe, universe_hex, node, channel, channel_data = "";
+    var universe, universe_hex, node, priority, channel, channel_data = "";
 
     if (sel_universe > 0) {
         universe = sel_universe
@@ -146,10 +147,11 @@ function DMXStats() {
 
     if (data !== undefined) {
         node = data.node;
+        priority = data.priority;
         let dmx = data.dmx;
         if (sel_channel > 0) {
             channel = sel_channel;
-            let value = dmx[channel-1];
+            let value = dmx[channel];
             let value_percent = (value * 100 / 255).toFixed(1);
             channel_data = value + " (" + value_percent + "%)";
         }
@@ -162,6 +164,7 @@ function DMXStats() {
                 <StatsBox name="Universe" value={universe} />
                 <StatsBox name="Universe Hex" value={universe_hex} />
                 <StatsBox name="Node" value={node} />
+                <StatsBox name="Priority" value={priority} />
                 <StatsBox name="Selected Channel" value={channel} />
                 <StatsBox name="Selected Value" value={channel_data} />
             </div>

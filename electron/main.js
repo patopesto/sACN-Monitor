@@ -158,8 +158,16 @@ sacn.init_receiver(interface.selected);
 
 sacn.on_packet((packet) => {
     // console.log("new packet for universe", packet.universe);
+
+    // Sending only required properties to renderer
+    let message = {
+        universe: packet.universe,
+        dmx: JSON.parse(JSON.stringify(packet.privatePayload)).data,
+        sourceAddress: packet.sourceAddress,
+        priority: packet.priority,
+    }
     if (mainWindow != null) {
-        mainWindow.webContents.send("dmx-data", packet);
+        mainWindow.webContents.send("dmx-data", message);
     }
 })
 
