@@ -1,0 +1,12 @@
+# macOS
+.DS_Store
+
+# Wails specifics
+build/bin
+node_modules
+frontend/dist
+
+# NodeJS
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
