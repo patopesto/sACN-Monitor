@@ -108,11 +108,11 @@ const Channels = {
         const selected = Universes.selected_channel == index;
         const highlight = theme.selected[selected ? "on" : "off"];
         const active = theme.active[value > 0 ? "on" : "off"];
-        const height = "h-" + Math.round(value * 100 / 255 / 5) * 5 + "/100"; // Math.round(number / 10) * 10
+        const height = "height: "+(value * 100 / 255)+"%";
 
         return m("div", { id: index, class: twMerge("relative w-10 h-8 flex justify-center items-center", highlight),
               onclick: () => { Universes.select_channel(index) } },
-          m("div", { class: twMerge("absolute border-box self-end w-full", theme.background, height) } ), 
+          m("div", { class: twMerge("absolute border-box self-end w-full", theme.background), style: height} ), 
           m("div", { class: twMerge("text-xs", active) }, index + 1),
         )
       })
