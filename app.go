@@ -26,9 +26,12 @@ func NewApp() *App {
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 
-	dmx.InitReceiver()
-	dmx.RegisterCallback("universe" ,a.newUniverseEvent)
-	dmx.RegisterCallback("data", a.newDataEvent)
+	dmx.InitArtnetReceiver()
+	dmx.RegisterArtnetCallback("universe" ,a.newUniverseEvent)
+	dmx.RegisterArtnetCallback("data", a.newDataEvent)
+	dmx.InitSACNReceiver()
+	dmx.RegisterSACNCallback("universe" ,a.newUniverseEvent)
+	dmx.RegisterSACNCallback("data", a.newDataEvent)
 }
 
 func (b *App) shutdown(ctx context.Context) {

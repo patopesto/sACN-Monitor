@@ -12,25 +12,11 @@ import (
 )
 
 
-type Universe struct {
-	Id 		uuid.UUID 	`json:"id"`
-	Num 	uint16  	`json:"num"`
-	Source 	string  	`json:"source"`
-	data 	[512]byte
-}
-
-func (u Universe) GetData() [512]byte {
-	return u.data
-}
-
-
-var Universes []Universe
-
 var server *net.UDPConn
-var callbacks map[string]func(uuid.UUID)
+var artnetCallbacks map[string]func(uuid.UUID)
 
 
-func InitReceiver() {
+func InitArtnetReceiver() {
 	log.Println("Init ArtNet receiver")
 
 	addr := fmt.Sprintf(":%d", packet.ArtNetPort)
@@ -40,7 +26,7 @@ func InitReceiver() {
 	}
 	server = listener.(*net.UDPConn)
 
-	callbacks = make(map[string]func(uuid.UUID))
+	artnetCallbacks = make(map[string]func(uuid.UUID))
 	
 	go recvPackets()
 }
@@ -65,6 +51,7 @@ func recvPackets() {
 		// fmt.Println("received universe :", packet.SubUni, packet.Net)
 
 		uni := Universe {
+			Protocol: "artnet",
 			Num: uint16(packet.Net << 16 | packet.SubUni),
 			Source: source.IP.String(), 
 			data: packet.Data,
@@ -72,10 +59,10 @@ func recvPackets() {
 
 		exist := false
 		for i, u := range Universes {
-			if u.Num == uni.Num && u.Source == uni.Source {
+			if u.Protocol == "artnet" && u.Num == uni.Num && u.Source == uni.Source {
 				exist = true
 				Universes[i].data = uni.data // copy array in original struct
-				callback := callbacks["data"]
+				callback := artnetCallbacks["data"]
 				if callback != nil {
 					callback(u.Id)
 				}
@@ -85,7 +72,7 @@ func recvPackets() {
 		if (exist == false) {
 			uni.Id = uuid.New()
 			Universes = append(Universes, uni)
-			callback := callbacks["universe"]
+			callback := artnetCallbacks["universe"]
 			if callback != nil {
 				callback(uni.Id)
 			}
@@ -93,6 +80,6 @@ func recvPackets() {
 	}
 }
 
-func RegisterCallback(name string, fn func(uuid.UUID)) {
-	callbacks[name] = fn
+func RegisterArtnetCallback(name string, fn func(uuid.UUID)) {
+	artnetCallbacks[name] = fn
 }
