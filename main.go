@@ -23,6 +23,7 @@ var configWails string
 func main() {
 	// Create an instance of the app structure
 	app := NewApp()
+	// Load variables from embedded wails config file
 	name := gjson.Get(configWails , "name")
 	version := gjson.Get(configWails , "info.productVersion")
 	copyright := gjson.Get(configWails , "info.copyright")

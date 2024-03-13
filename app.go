@@ -26,10 +26,11 @@ func NewApp() *App {
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 
+	ifaces := dmx.GetInterfaces()
 	dmx.InitArtnetReceiver()
 	dmx.RegisterArtnetCallback("universe" ,a.newUniverseEvent)
 	dmx.RegisterArtnetCallback("data", a.newDataEvent)
-	dmx.InitSACNReceiver()
+	dmx.InitSACNReceiver(ifaces[0])
 	dmx.RegisterSACNCallback("universe" ,a.newUniverseEvent)
 	dmx.RegisterSACNCallback("data", a.newDataEvent)
 }
@@ -38,6 +39,14 @@ func (b *App) shutdown(ctx context.Context) {
 	log.Println("Shutting down")
 }
 
+func (a *App) GetInterfaces() []dmx.Interface {
+	return dmx.GetInterfaces()
+}
+
+func (a *App) SetInterface(iface dmx.Interface) {
+	log.Println("Setting interface to", iface)
+	dmx.InitSACNReceiver(iface)
+}
 
 func (a *App) GetUniverses() []dmx.Universe {
 	return dmx.Universes

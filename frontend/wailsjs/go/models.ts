@@ -1,5 +1,19 @@
 export namespace dmx {
 	
+	export class Interface {
+	    name: string;
+	    ip: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Interface(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.ip = source["ip"];
+	    }
+	}
 	export class Universe {
 	    id: number[];
 	    protocol: string;

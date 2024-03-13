@@ -1,10 +1,20 @@
-import { GetUniverses, GetUniverseData } from '../../wailsjs/go/main/App';
+import { GetUniverses, GetUniverseData } from '../../wailsjs/go/main/App'
 // import { EventsOn } from '../../wailsjs/runtime/runtime';
-
+import { Settings } from './settings.js'
 
 export const Universes = {
   // All Universes
   list: [],
+  get_list: function() {
+    if (Settings.protocol === 'mixed') {
+      return this.list;
+    }
+    else {
+      return this.list.filter((u) => {
+        return u.protocol === Settings.protocol;
+      });
+    }
+  },
   get_universes: function() {
     GetUniverses().then((unis) => {
       if (unis == null) {
@@ -14,7 +24,7 @@ export const Universes = {
         return !this.list.some((v) => {
           return u.num === v.num && u.source === v.source;
         });
-      });
+      })
       // this.list = unis;
       this.list = unis.sort((a, b) => {
           return a.num - b.num;
@@ -33,10 +43,10 @@ export const Universes = {
   callback_fn: null,
   on_change: function(callback) {
     window.runtime.EventsOn("universes.new", () => {
-      console.log("Event: universes.new");
-      this.get_universes();
+      console.log("Event: universes.new")
+      this.get_universes()
     });
-    this.callback_fn = callback;
+    this.callback_fn = callback
   },
 
   // Universe of interest
@@ -53,7 +63,7 @@ export const Universes = {
   get_data: function() {
     GetUniverseData(this.selected).then((data) => {
       // console.log(data);
-      this.data = data;
+      this.data = data
       if (this.data_callback_fn) {
         this.data_callback_fn()
       }
@@ -62,16 +72,16 @@ export const Universes = {
   data_callback_fn: null,
   on_data_change: function(callback) {
     window.runtime.EventsOn("universe.data", () => {
-      console.log("Event: universe.data");
+      console.log("Event: universe.data")
       this.get_data()
     });
-    this.data_callback_fn = callback;
+    this.data_callback_fn = callback
   },
 
   // Channel
   selected_channel: null,
   select_channel: function(channel) {
-    this.selected_channel = channel;
-  }
+    this.selected_channel = channel
+  },
 
 }

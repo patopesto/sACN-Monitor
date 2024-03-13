@@ -16,18 +16,34 @@ var sacnCallbacks map[string]func(uuid.UUID)
 var discoveredUniverses map[uint16]bool
 
 
-func InitSACNReceiver() {
+func InitSACNReceiver(iface Interface) {
     log.Println("Init sACN receiver")
 
-    sacnCallbacks = make(map[string]func(uuid.UUID))
-    discoveredUniverses = make(map[uint16]bool)
+    if iface.Name == "" {
+        log.Println("No interface specified for sacnReceiver")
+        return
+    }
+    itf, _ := net.InterfaceByName(iface.Name)
 
-    itf, _ := net.InterfaceByName("en0") // specific to your machine
+    if discoveredUniverses == nil {
+        sacnCallbacks = make(map[string]func(uuid.UUID))
+        discoveredUniverses = make(map[uint16]bool)
+    }
+
+    if receiver != nil {
+        receiver.Stop()
+    }
     receiver = sacn.NewReceiver(itf)
-    receiver.JoinUniverse(sacn.DISCOVERY_UNIVERSE)
-    receiver.JoinUniverse(1)
     receiver.RegisterPacketCallback(packet.PacketTypeDiscovery, discoveryPacketCallback)
     receiver.RegisterPacketCallback(packet.PacketTypeData, dataPacketCallback)
+
+    receiver.JoinUniverse(sacn.DISCOVERY_UNIVERSE)
+    // Join already discovered universes
+    for uni := range discoveredUniverses {
+        fmt.Println("Joining known universe", uni)
+        receiver.JoinUniverse(uni)
+    }
+
     receiver.Start()
 }
 

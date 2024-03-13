@@ -1,14 +1,16 @@
 import m from "mithril";
 import { twMerge } from "tailwind-merge";
-
+import { Button, Range, Label, Dropdown } from 'flowbite-mithril';
+import { appTheme } from "../theme.js";
 import { GetUniverses } from '../../wailsjs/go/main/App';
 import { Universes } from '../models/universes';
+import { Settings } from '../models/settings';
 
 
 export const DMX = {
   view: function(vnode) {
 
-    return m("div", { class: "flex flex-row justify-items-center h-screen bg-zinc-900 bg-opacity-75" }, // min-h-screen
+    return m("div", { class: "flex flex-row justify-items-center h-screen overflow-hidden bg-zinc-900 bg-opacity-75" }, // min-h-screen
       m(Column, { title: "UNIVERSES", class: "basis-1/5" },
         m(UniverseList),
       ),
@@ -17,10 +19,14 @@ export const DMX = {
       ),
       m(Column, { title: "STATISTICS", class: "basis-1/5" },
         m(Stats),
+        m(Column, { title: "SETTINGS", class: "" },
+          m(SettingsPane),
+        ),
       ),
     );
   }
 }
+
 
 const Column = {
   view({ attrs, children }) {
@@ -47,26 +53,30 @@ const UniverseList = {
   },
 
   view: function(vnode) {
+    const color = appTheme[Settings.theme];
     const theme = {
       base: {
+        root: "hover:" + color.secondary,
         off: "",
-        on: "bg-sky-800",
+        on: color.secondary,
       },
       value: {
         off: "text-slate-100",
-        on:  "text-black bg-sky-500",
+        on:  twMerge("text-black", color.primary),
       },
     };
 
     console.log("universes view()");
 
-    return m("div", { class: "flex flex-col py-2" },
-      Universes.list.map((universe, index) => {
+    const universes = Universes.get_list();
+
+    return m("div", { class: "flex flex-col py-2 overflow-auto overscroll-none" },
+      universes.map((universe, index) => {
         const selected = Universes.selected === universe.id;
         const highlight = theme.base[selected ? "on" : "off"];
         const value = theme.value[selected ? "on" : "off"];
 
-        return m("div", { class: twMerge("flex flex-row h-8 items-center hover:bg-sky-800", highlight),
+        return m("div", { class: twMerge("flex flex-row h-8 items-center", theme.base.root, highlight),
             onclick: () => { Universes.select(universe.id) } },
           m("div", { class: twMerge("basis-14 text-xs font-medium flex h-full items-center justify-center", value) }, 
             universe.num
@@ -92,7 +102,7 @@ const Channels = {
   view: function(vnode) {
     const theme = {
       base: "flex flex-row flex-wrap overflow-auto overscroll-none",
-      background: "bg-sky-500",
+      background: appTheme[Settings.theme].primary,
       active: {
         off: "text-white opacity-50",
         on: "text-white opacity-90",
@@ -136,7 +146,7 @@ const Stats = {
       channel_value = value + " (" + Math.ceil(value / 255 * 100) + "%)";
     }
 
-    return m("div", { class: "flex flex-col py-2" },
+    return m("div", { class: "h-full flex flex-col py-2" },
       m(StatsBox, { name: "Universe", value: universe?.num } ),
       m(StatsBox, { name: "Universe Hex", value: universe_hex } ),
       m(StatsBox, { name: "Node", value: universe?.source } ),
@@ -156,3 +166,77 @@ const StatsBox = {
     );
   }
 }
+
+
+const SettingsPane = {
+  oncreate: function(vnode) {
+    Settings.get_interfaces()
+  },
+  view: function(vnode) {
+    console.log("Settings view")
+    const protocol = Settings.protocol;
+    const interfaces = Settings.interfaces;
+    // const opacity = Settings.opacity;
+    const color = Settings.theme;
+
+    const set_mode = (mode) => {
+      Settings.set_protocol(mode);
+    };
+
+    const set_interface = (itf) => {
+      Settings.set_interface(itf);
+    };
+
+    // const set_opacity = (opacity) => {
+    //   Settings.set_opacity(opacity);
+    // };
+
+    const set_theme = (theme) => {
+      Settings.set_theme(theme);
+    };
+
+    const themeOn = { // custom themes for the selected button
+      outline: {
+        on: "dark:" + appTheme[color].secondary,
+      }
+    };
+    const themeOff = { // custom themes for other buttons
+      outline: {
+        on: "dark:bg-zinc-800",
+      }
+    };
+
+
+    return  m("div", { class: "flex flex-col items-center gap-2 px-5 py-3" }, [
+      m("div", { class: "w-full" },
+        m(Button.Group, { outline: true }, [
+          m(Button, { theme: protocol === "sacn" ? themeOn : themeOff,   color: color, onclick: () => {set_mode("sacn")} },   "sACN"),
+          m(Button, { theme: protocol === "artnet" ? themeOn : themeOff, color: color, onclick: () => {set_mode("artnet")} }, "ArtNet"),
+          m(Button, { theme: protocol === "mixed" ? themeOn : themeOff,  color: color, onclick: () => {set_mode("mixed")} },  "Both"),
+        ]),
+      ),
+      m("div", { class: "pt-3" },
+        m(Dropdown, { label: "Interfaces", dismissOnClick: true }, [
+          interfaces.map((itf) => {
+            return m(Dropdown.Item, { onclick: () => {set_interface(itf)} }, `${itf.name} (${itf.ip})`)
+          })
+        ]),
+      ),
+      // m("div", { class: "pt-5 w-full" },
+      //   m(Label, { for: "opacity", class: "text-xs dark:text-slate-300" }, "Opacity"),
+      //   m(Range, { id: "opacity", min: 0, max: 100, value: opacity, step: 10, size: "sm", oninput: (e) => {set_opacity(e.target.value)} }),
+      // ),
+      m("div", { class: "w-full" },
+        m(Label, { class: "text-xs dark:text-slate-300" }, "Theme"),
+        m("div", { class: "py-3 grid justify-items-center grid-cols-5 gap-3"},
+          m("button", { onclick: () => {set_theme("cyan")},   class: "flex w-4 h-4 bg-cyan-500 rounded-full" }),
+          m("button", { onclick: () => {set_theme("blue")},   class: "flex w-4 h-4 bg-blue-600 rounded-full" }),
+          m("button", { onclick: () => {set_theme("purple")}, class: "flex w-4 h-4 bg-purple-500 rounded-full" }),
+          m("button", { onclick: () => {set_theme("red")},    class: "flex w-4 h-4 bg-red-500 rounded-full" }),
+          m("button", { onclick: () => {set_theme("dark")},   class: "flex w-4 h-4 bg-gray-900 rounded-full dark:bg-gray-700" }),
+        ),
+      ),
+    ]);
+  }
+}
+

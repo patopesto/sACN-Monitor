@@ -5,6 +5,7 @@ module.exports = {
     "./node_modules/flowbite-mithril/**/*.js"
   ],
   theme: {},
+  darkMode: 'class',
   plugins: [
     require("flowbite/plugin")
   ],
