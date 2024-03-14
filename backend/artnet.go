@@ -2,19 +2,17 @@ package dmx
 
 import (
 	"fmt"
-	"net"
 	"log"
+	"net"
 
-    "github.com/libp2p/go-reuseport"
-    "github.com/jsimonetti/go-artnet/packet"
-    "github.com/jsimonetti/go-artnet/packet/code"
-    "github.com/google/uuid"
+	"github.com/google/uuid"
+	"github.com/jsimonetti/go-artnet/packet"
+	"github.com/jsimonetti/go-artnet/packet/code"
+	"github.com/libp2p/go-reuseport"
 )
-
 
 var server *net.UDPConn
 var artnetCallbacks map[string]func(uuid.UUID)
-
 
 func InitArtnetReceiver() {
 	log.Println("Init ArtNet receiver")
@@ -27,10 +25,9 @@ func InitArtnetReceiver() {
 	server = listener.(*net.UDPConn)
 
 	artnetCallbacks = make(map[string]func(uuid.UUID))
-	
+
 	go recvPackets()
 }
-
 
 func recvPackets() {
 	defer server.Close()
@@ -50,11 +47,11 @@ func recvPackets() {
 		packet := p.(*packet.ArtDMXPacket)
 		// fmt.Println("received universe :", packet.SubUni, packet.Net)
 
-		uni := Universe {
+		uni := Universe{
 			Protocol: "artnet",
-			Num: uint16(packet.Net << 16 | packet.SubUni),
-			Source: source.IP.String(), 
-			data: packet.Data,
+			Num:      uint16(packet.Net<<16 | packet.SubUni),
+			Source:   source.IP.String(),
+			data:     packet.Data,
 		}
 
 		exist := false
@@ -69,7 +66,7 @@ func recvPackets() {
 				break
 			}
 		}
-		if (exist == false) {
+		if exist == false {
 			uni.Id = uuid.New()
 			Universes = append(Universes, uni)
 			callback := artnetCallbacks["universe"]

@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/tidwall/gjson"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	"github.com/wailsapp/wails/v2/pkg/options/linux"
 	"github.com/wailsapp/wails/v2/pkg/options/mac"
 	"github.com/wailsapp/wails/v2/pkg/options/windows"
-	"github.com/wailsapp/wails/v2/pkg/options/linux"
-	"github.com/tidwall/gjson"
 )
 
 //go:embed all:frontend/dist
@@ -24,9 +24,9 @@ func main() {
 	// Create an instance of the app structure
 	app := NewApp()
 	// Load variables from embedded wails config file
-	name := gjson.Get(configWails , "name")
-	version := gjson.Get(configWails , "info.productVersion")
-	copyright := gjson.Get(configWails , "info.copyright")
+	name := gjson.Get(configWails, "name")
+	version := gjson.Get(configWails, "info.productVersion")
+	copyright := gjson.Get(configWails, "info.copyright")
 
 	// Create application with options
 	err := wails.Run(&options.App{
@@ -43,22 +43,22 @@ func main() {
 			app,
 		},
 		Mac: &mac.Options{
-            WebviewIsTransparent: true,
-            WindowIsTranslucent:  true,
-            Appearance: mac.NSAppearanceNameDarkAqua,
-            About: &mac.AboutInfo{
-                Title: fmt.Sprintf("%s", name),
-                Message: fmt.Sprintf("%s\n%s", version, copyright),
-            },
-        },
-        Windows: &windows.Options{
-            WebviewIsTransparent: true,
-            WindowIsTranslucent:  true,
-            Theme: windows.Dark,
-        },
-        Linux: &linux.Options{
-            WindowIsTranslucent: true,
-        },
+			WebviewIsTransparent: true,
+			WindowIsTranslucent:  true,
+			Appearance:           mac.NSAppearanceNameDarkAqua,
+			About: &mac.AboutInfo{
+				Title:   fmt.Sprintf("%s", name),
+				Message: fmt.Sprintf("%s\n%s", version, copyright),
+			},
+		},
+		Windows: &windows.Options{
+			WebviewIsTransparent: true,
+			WindowIsTranslucent:  true,
+			Theme:                windows.Dark,
+		},
+		Linux: &linux.Options{
+			WindowIsTranslucent: true,
+		},
 	})
 
 	if err != nil {

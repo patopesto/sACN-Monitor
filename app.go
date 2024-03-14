@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
-	"log"
 	"github.com/google/uuid"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
+	"log"
 
 	dmx "dmx-monitor/backend"
 )
@@ -28,10 +28,10 @@ func (a *App) startup(ctx context.Context) {
 
 	ifaces := dmx.GetInterfaces()
 	dmx.InitArtnetReceiver()
-	dmx.RegisterArtnetCallback("universe" ,a.newUniverseEvent)
+	dmx.RegisterArtnetCallback("universe", a.newUniverseEvent)
 	dmx.RegisterArtnetCallback("data", a.newDataEvent)
 	dmx.InitSACNReceiver(ifaces[0])
-	dmx.RegisterSACNCallback("universe" ,a.newUniverseEvent)
+	dmx.RegisterSACNCallback("universe", a.newUniverseEvent)
 	dmx.RegisterSACNCallback("data", a.newDataEvent)
 }
 
@@ -65,7 +65,7 @@ func (a *App) GetUniverseData(id string) [512]byte {
 		}
 	}
 	// log.Println("NOT FOUND",id)
-	var empty [512]byte 
+	var empty [512]byte
 	return empty
 }
 

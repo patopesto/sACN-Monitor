@@ -12,7 +12,9 @@
     "email": "developer@bambinito.net"
   },
   "info": {
+    "productName": "sACN Monitor",
     "productVersion": "1.0.0",
-    "copyright": "Copyright © 2024 Alban Moreon"
+    "copyright": "Copyright © 2024 Alban Moreon",
+    "comments": "An App to view sACN (ANSI E1.31) DMX data"
   }
 }
