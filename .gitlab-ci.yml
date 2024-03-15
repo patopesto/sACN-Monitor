@@ -1,0 +1,122 @@
+stages:         
+  - build
+  - upload
+  - release
+
+variables:
+  PACKAGE_NAME: "sACN-Monitor"
+  PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PACKAGE_NAME}/${CI_COMMIT_TAG}"
+  MACOS_PACKAGE: "${PACKAGE_NAME}-${CI_COMMIT_TAG}-macos-universal.tar.gz"
+  WINDOWS_AMD64_PACKAGE: "${PACKAGE_NAME}-${CI_COMMIT_TAG}-windows-amd64.tar.gz"
+  WINDOWS_ARM64_PACKAGE: "${PACKAGE_NAME}-${CI_COMMIT_TAG}-windows-arm64.tar.gz"
+
+
+
+build-macos:  
+  stage: build
+  tags:
+    - macos
+  rules:
+    - if: $CI_COMMIT_TAG   # Run this job when a tag is created
+  script:
+    - export PATH="$HOME/go/bin:$PATH"
+    - wails build --clean --platform darwin/universal
+  artifacts:
+    paths:
+      - ./build/bin/
+
+build-windows-amd64:  
+  stage: build
+  tags:
+    - macos
+  rules:
+    - if: $CI_COMMIT_TAG
+  needs:    # only enable 1 running build job on runner
+    - build-macos
+  script:
+    - export PATH="$HOME/go/bin:$PATH"
+    - wails build --clean --platform windows/amd64
+  artifacts:
+    paths:
+      - ./build/bin/
+
+build-windows-arm64:  
+  stage: build
+  tags:
+    - macos
+  rules:
+    - if: $CI_COMMIT_TAG
+  needs:    # only enable 1 running build job on runner
+    - build-windows-amd64
+  script:
+    - export PATH="$HOME/go/bin:$PATH"
+    - wails build --clean --platform windows/arm64
+  artifacts:
+    paths:
+      - ./build/bin/
+
+
+
+.upload:
+  stage: upload
+  rules:
+    - if: $CI_COMMIT_TAG
+  script:
+    - tar -czvf ${PACKAGE} -C ./build/bin .
+    - echo "Uploading package ${PACKAGE}"
+    - |
+      curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file "${PACKAGE}" "${PACKAGE_REGISTRY_URL}/${PACKAGE}"
+
+upload-macos:
+  extends: .upload
+  needs: # 'needs' enable out-of-order execution of jobs
+    - build-macos
+  dependencies: # Download artifacts from other job
+    - build-macos
+  variables:
+    PACKAGE: "${MACOS_PACKAGE}"
+
+upload-windows-amd64:
+  extends: .upload
+  needs:
+    - build-windows-amd64
+  dependencies:
+    - build-windows-amd64
+  variables:
+    PACKAGE: "${WINDOWS_AMD64_PACKAGE}"
+
+upload-windows-arm64:
+  extends: .upload
+  needs:
+    - build-windows-arm64
+  dependencies:
+    - build-windows-arm64
+  variables:
+    PACKAGE: "${WINDOWS_ARM64_PACKAGE}"
+
+
+
+release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  tags:
+    - docker
+  rules:
+    - if: $CI_COMMIT_TAG
+  script:
+    - echo "Release job for ${CI_COMMIT_TAG}"
+  release:                        
+    name: '$CI_COMMIT_TAG'
+    tag_name: '$CI_COMMIT_TAG'
+    description: 'Release $CI_COMMIT_TAG'
+    assets:
+      links:
+        - name: "macOS package"
+          filepath: "/macos-universal"
+          url: "${PACKAGE_REGISTRY_URL}/${MACOS_PACKAGE}"
+        - name: "Windows amd64 package"
+          filepath: "/windows-amd64"
+          url: "${PACKAGE_REGISTRY_URL}/${WINDOWS_AMD64_PACKAGE}"
+        - name: "Windows arm64 package"
+          filepath: "/windows-arm64"
+          url: "${PACKAGE_REGISTRY_URL}/${WINDOWS_ARM64_PACKAGE}"
