@@ -2,6 +2,8 @@
 
 An app to view DMX data received over sACN (ANSI E1.31) in the style of Haute Technique's [ArtNetView](https://artnetview.com/). 
 
+See [Documentation](https://sacn-monitor.bambinito.net).
+
 Built using:
 
 - [Wails](https://wails.io/): Go backend
@@ -11,14 +13,22 @@ Built using:
 
 ## Install
 
-Precompiled binaries for macOS, Windows and Linux (AppImage) can be found on the [Releases](https://gitlab.com/patopest/sacn-monitor/-/releases) page.
+### Manually
+
+Precompiled binaries for macOS and Windowsan be found on the [Releases](https://gitlab.com/patopest/sacn-monitor/-/releases) page.
+
+### Homebrew
+
+```shell
+brew install patopesto/tap/sacn-monitor
+```
 
 
 ## Dev
 
 - Install dependencies
 
-Follow the Wails [Getting Started](https://wails.io/docs/gettingstarted/installation).
+Follow the Wails [Getting Started](https://wails.io/docs/gettingstarted/installation) guide.
 
 You need `go` installed and `GOPATH` set in you `PATH`.
 

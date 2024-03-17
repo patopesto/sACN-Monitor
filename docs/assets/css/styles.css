@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+#mainContent > h2 {
+    @apply pt-10 mb-2 text-lg font-semibold text-gray-900 dark:text-white
+}
+
+#mainContent > ul {
+    @apply space-y-1 text-gray-500 list-disc list-inside dark:text-gray-400;
+}

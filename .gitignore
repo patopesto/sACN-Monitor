@@ -11,3 +11,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 dist/
+
+# Hugo docs
+public
+resources
+.hugo_build.lock
+

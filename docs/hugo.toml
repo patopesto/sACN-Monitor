@@ -1,0 +1,6 @@
+baseURL = 'https://sacn-monitor.bambinito.net/'
+languageCode = 'en-us'
+title = 'sACN Monitor'
+publishDir = "../public"
+disableKinds = ['taxonomy', 'term']
+# staticDir = ['static', '../build']
