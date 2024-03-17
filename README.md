@@ -18,7 +18,7 @@ Built using:
 
 ### Manually
 
-Precompiled binaries for macOS and Windowsan be found on the [Releases](https://gitlab.com/patopest/sacn-monitor/-/releases) page.
+Precompiled binaries for macOS and Windows can be found on the [Releases](https://gitlab.com/patopest/sacn-monitor/-/releases) page.
 
 ### Homebrew
 

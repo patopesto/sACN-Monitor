@@ -4,7 +4,7 @@
     | resources.ExecuteAsTemplate (printf "styles.%s.css" $time) $time
 }}
 
-{{ if .Site.IsServer }}
+{{ if hugo.IsServer }}
     <link rel="stylesheet" href="{{ $styles.RelPermalink }}">
 {{ else }}
     {{ $styles := $styles | minify | fingerprint | resources.PostCSS }}
