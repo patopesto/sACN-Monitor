@@ -11,6 +11,9 @@ Built using:
 - [TailwindCSS](https://tailwindcss.com/) and [Flowbite](https://flowbite.com/) on top of Mithril
 
 
+![App image](docs/static/images/app.png "")
+
+
 ## Install
 
 ### Manually

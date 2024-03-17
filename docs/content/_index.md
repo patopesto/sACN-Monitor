@@ -6,6 +6,13 @@ keywords = ["sACN", "ArtNet", "ANSI", "E1.31", "DMX", "GrandMA2", "GrandMA3", "l
   windows = "https://gitlab.com/patopest/sacn-monitor/-/releases/permalink/latest/downloads/windows-amd64"
 +++
 
+
+{{< jumbotron title="A simple app to view and monitor sACN data"
+  subtitle="Discover and monitor all the Streaming ACN (ANSI E1.31) DMX universes on your network" >}}
+
+{{< image src="/images/app.png" alt="App image">}}
+
+
 ## Features
 
 - Simple and reliable UI
