@@ -120,3 +120,22 @@ release:
         - name: "Windows arm64 package"
           filepath: "/windows-arm64"
           url: "${PACKAGE_REGISTRY_URL}/${WINDOWS_ARM64_PACKAGE}"
+
+
+
+pages:
+  stage: release
+  image:
+    name: floryn90/hugo:0.123.8-ext-alpine
+    entrypoint: [""]
+  tags:
+    - docker
+  # rules:
+  #   - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  before_script:
+    - cd ./docs && npm install
+  script:
+    - hugo
+  artifacts:
+    paths:
+      - public
