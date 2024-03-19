@@ -3,6 +3,7 @@ export namespace dmx {
 	export class Interface {
 	    name: string;
 	    ip: string;
+	    active: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new Interface(source);
@@ -12,6 +13,7 @@ export namespace dmx {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.name = source["name"];
 	        this.ip = source["ip"];
+	        this.active = source["active"];
 	    }
 	}
 	export class Universe {

@@ -17,8 +17,16 @@ export const Settings = {
       this.interfaces = list
     })
   },
-  set_interface: function(name) {
-    SetInterface(name)
+  set_interface: function(itf) {
+    for (const i of this.interfaces) {
+      if (i.name == itf.name) {
+        i.active = true
+      }
+      else {
+        i.active = false
+      }
+    }
+    SetInterface(itf)
   },
 
   // Opacity

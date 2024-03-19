@@ -10,7 +10,7 @@ import { Settings } from '../models/settings';
 export const DMX = {
   view: function(vnode) {
 
-    return m("div", { class: "flex flex-row justify-items-center h-screen overflow-hidden bg-zinc-900 bg-opacity-75" }, // min-h-screen
+    return m("div", { class: "flex flex-row justify-items-center h-screen overflow-hidden bg-zinc-900 bg-opacity-60" }, // min-h-screen
       m(Column, { title: "UNIVERSES", class: "basis-1/5" },
         m(UniverseList),
       ),
@@ -33,7 +33,7 @@ const Column = {
     const { title, class: className, ...props } = attrs;
 
     return m("column", { class: twMerge(className, "flex flex-col") },
-      m("header", { class: "flex justify-center bg-zinc-800 text-neutral-300 bg-opacity-75 p-1" },
+      m("header", { class: "flex justify-center bg-zinc-800 text-neutral-300 bg-opacity-60 p-1" },
         m("h2", { class: "" }, title),
       ),
       children,
@@ -185,6 +185,7 @@ const SettingsPane = {
 
     const set_interface = (itf) => {
       Settings.set_interface(itf);
+      m.redraw();
     };
 
     // const set_opacity = (opacity) => {
@@ -195,7 +196,8 @@ const SettingsPane = {
       Settings.set_theme(theme);
     };
 
-    const themeOn = { // custom themes for the selected button
+    // custom themes for the selected button
+    const themeOn = {
       outline: {
         on: "dark:" + appTheme[color].secondary,
       }
@@ -204,6 +206,11 @@ const SettingsPane = {
       outline: {
         on: "dark:bg-zinc-800",
       }
+    };
+
+    const themeItfSelected = {
+      on: "bg-gray-600",
+      off: "",
     };
 
 
@@ -218,7 +225,9 @@ const SettingsPane = {
       m("div", { class: "pt-3" },
         m(Dropdown, { label: "Interfaces", dismissOnClick: true }, [
           interfaces.map((itf) => {
-            return m(Dropdown.Item, { onclick: () => {set_interface(itf)} }, `${itf.name} (${itf.ip})`)
+            return m(Dropdown.Item, { onclick: () => {set_interface(itf)}, class: themeItfSelected[itf.active ? "on" : "off"] },
+              `${itf.name} (${itf.ip})`
+            )
           })
         ]),
       ),

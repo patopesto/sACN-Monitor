@@ -30,6 +30,7 @@ func (a *App) startup(ctx context.Context) {
 	dmx.InitArtnetReceiver()
 	dmx.RegisterArtnetCallback("universe", a.newUniverseEvent)
 	dmx.RegisterArtnetCallback("data", a.newDataEvent)
+	a.SetInterface(ifaces[0])
 	dmx.InitSACNReceiver(ifaces[0])
 	dmx.RegisterSACNCallback("universe", a.newUniverseEvent)
 	dmx.RegisterSACNCallback("data", a.newDataEvent)
@@ -45,6 +46,13 @@ func (a *App) GetInterfaces() []dmx.Interface {
 
 func (a *App) SetInterface(iface dmx.Interface) {
 	log.Println("Setting interface to", iface)
+	for idx, itf := range dmx.Interfaces {
+		if iface.Name == itf.Name && iface.Name == itf.Name {
+			dmx.Interfaces[idx].Active = true
+		} else {
+			dmx.Interfaces[idx].Active = false
+		}
+	}
 	dmx.InitSACNReceiver(iface)
 }
 

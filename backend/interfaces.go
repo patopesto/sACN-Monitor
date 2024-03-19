@@ -7,17 +7,22 @@ import (
 )
 
 type Interface struct {
-	Name string `json:"name"`
-	IP   string `json:"ip"`
-	itf  net.Interface
+	Name 	string `json:"name"`
+	IP   	string `json:"ip"`
+	Active 	bool   `json:"active"`
+	itf  	net.Interface
 }
 
 func (i Interface) String() string {
 	return fmt.Sprintf("%v : %s", i.Name, i.IP)
 }
 
+var Interfaces []Interface
+
 func GetInterfaces() []Interface {
-	interfaces := make([]Interface, 0)
+	if Interfaces == nil { // Init master list the first time
+		Interfaces = make([]Interface, 0)
+	}
 
 	ifaces, err := net.Interfaces()
 	if err != nil {
@@ -50,17 +55,25 @@ func GetInterfaces() []Interface {
 						IP:   v.IP.String(),
 						itf:  iface,
 					}
-					interfaces = append(interfaces, itf)
 					// fmt.Printf("%v : %s\n", itf.Name, itf.IP)
+					found := false
+					for _, i := range Interfaces {
+						if i.Name == itf.Name && i.IP == itf.IP {
+							found = true
+						}
+					}
+					if found == false {
+						Interfaces = append(Interfaces, itf)
+					}
 				}
 			}
 		}
 	}
 
 	log.Println("Interfaces found:")
-	for _, itf := range interfaces {
+	for _, itf := range Interfaces {
 		log.Println(itf)
 	}
 
-	return interfaces
+	return Interfaces
 }
