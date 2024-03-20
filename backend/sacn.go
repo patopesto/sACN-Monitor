@@ -56,9 +56,7 @@ func discoveryPacketCallback(p packet.SACNPacket, source string) {
 		var universe = d.Universes[i]
 		_, exists := discoveredUniverses[universe]
 		if !exists {
-			log.Printf("Joining universe: %d\n", universe)
-			receiver.JoinUniverse(universe)
-			discoveredUniverses[universe] = true
+			JoinSACNUniverse(universe)
 		}
 	}
 }
@@ -97,6 +95,15 @@ func dataPacketCallback(p packet.SACNPacket, source string) {
 			callback(uni.Id)
 		}
 	}
+}
+
+func JoinSACNUniverse(universe uint16) {
+	log.Printf("Joining universe: %d\n", universe)
+	err := receiver.JoinUniverse(universe)
+	if err != nil {
+		fmt.Println(err)
+	}
+	discoveredUniverses[universe] = true
 }
 
 func RegisterSACNCallback(name string, fn func(uuid.UUID)) {

@@ -77,6 +77,11 @@ func (a *App) GetUniverseData(id string) [512]byte {
 	return empty
 }
 
+func (a *App) JoinUniverse(universe uint16) {
+	log.Printf("Joining universe %d\n", universe)
+	dmx.JoinSACNUniverse(universe)
+}
+
 func (a *App) newUniverseEvent(id uuid.UUID) {
 
 	runtime.EventsEmit(a.ctx, "universes.new")

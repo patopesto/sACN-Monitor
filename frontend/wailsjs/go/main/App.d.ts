@@ -8,4 +8,6 @@ export function GetUniverseData(arg1:string):Promise<any>;
 
 export function GetUniverses():Promise<Array<dmx.Universe>>;
 
+export function JoinUniverse(arg1:number):Promise<void>;
+
 export function SetInterface(arg1:dmx.Interface):Promise<void>;

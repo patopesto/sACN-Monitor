@@ -7,10 +7,10 @@ import (
 )
 
 type Interface struct {
-	Name 	string `json:"name"`
-	IP   	string `json:"ip"`
-	Active 	bool   `json:"active"`
-	itf  	net.Interface
+	Name   string `json:"name"`
+	IP     string `json:"ip"`
+	Active bool   `json:"active"`
+	itf    net.Interface
 }
 
 func (i Interface) String() string {

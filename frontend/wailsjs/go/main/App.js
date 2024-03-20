@@ -14,6 +14,10 @@ export function GetUniverses() {
   return window['go']['main']['App']['GetUniverses']();
 }
 
+export function JoinUniverse(arg1) {
+  return window['go']['main']['App']['JoinUniverse'](arg1);
+}
+
 export function SetInterface(arg1) {
   return window['go']['main']['App']['SetInterface'](arg1);
 }

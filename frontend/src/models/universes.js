@@ -1,4 +1,4 @@
-import { GetUniverses, GetUniverseData } from '../../wailsjs/go/main/App'
+import { GetUniverses, GetUniverseData, JoinUniverse } from '../../wailsjs/go/main/App'
 // import { EventsOn } from '../../wailsjs/runtime/runtime';
 import { Settings } from './settings.js'
 
@@ -38,6 +38,10 @@ export const Universes = {
         }
       }
     })
+  },
+  join_universe: function(uni) {
+    console.log(uni)
+    JoinUniverse(uni)
   },
 
   callback_fn: null,

@@ -1,8 +1,9 @@
 import m from "mithril";
 import { twMerge } from "tailwind-merge";
-import { Button, Range, Label, Dropdown } from 'flowbite-mithril';
+import { Button, Range, Label, Dropdown, Modal, Input } from 'flowbite-mithril';
+import { PlusIcon } from "flowbite-icons-mithril/solid";
+
 import { appTheme } from "../theme.js";
-import { GetUniverses } from '../../wailsjs/go/main/App';
 import { Universes } from '../models/universes';
 import { Settings } from '../models/settings';
 
@@ -67,7 +68,6 @@ const UniverseList = {
     };
 
     console.log("universes view()");
-
     const universes = Universes.get_list();
 
     return m("div", { class: "flex flex-col py-2 overflow-auto overscroll-none" },
@@ -83,8 +83,57 @@ const UniverseList = {
           ),
           m("div", { class: "text-xs text-slate-300 pl-1" }, universe.source),
         )
-      })
+      }),
+      m(AddUniverseModal),
     );
+  }
+}
+
+
+const AddUniverseModal = {
+  universe: null,
+
+  view({attrs, state}) {
+    const color = Settings.theme;
+    const modalTheme = {
+      background: "dark:bg-neutral-900 dark:bg-opacity-10",
+      content: {
+        inner: "dark:bg-zinc-800",
+      }
+    }
+
+    const join_universe = () => {
+      if (state.universe) {
+        const uni = Number(state.universe);
+        Universes.join_universe(uni);
+        state.universe = null;
+      }
+    };
+
+    return [
+      m("button", { 'data-modal-target': 'add-modal', 'data-modal-toggle': 'add-modal',class: twMerge("fixed bottom-0 self-end m-2 rounded-md bg-blue-600", appTheme[Settings.theme].primary) },
+        m(PlusIcon, { class: "w-3 h-3 m-1 text-slate-300" }),
+      ),
+      m(Modal, { id: "add-modal", popup: true, size: "md", theme: modalTheme, class: modalTheme.background },
+        m(Modal.Header),
+        m(Modal.Body,
+          m("div", { class: "space-y-6" },
+            m("h2", { class: "text-lg font-medium text-gray-900 dark:text-slate-300" },
+              "Manually add a universe to listen to",
+            ),
+            m("div",
+              m(Input, { type: "number", id: "universe", placeholder: "123",
+                oninput: (e) => { state.universe = e.target.value } }),
+            ),
+            m("div", { class: "flex justify-end" },
+              m(Button, { color: color, onclick: join_universe },
+                "Add Universe",
+              ),
+            ),
+          ),
+        ),
+      ),
+    ]
   }
 }
 
@@ -196,18 +245,19 @@ const SettingsPane = {
       Settings.set_theme(theme);
     };
 
-    // custom themes for the selected button
+    // theme overide for the protocol button group
     const themeOn = {
       outline: {
         on: "dark:" + appTheme[color].secondary,
       }
     };
-    const themeOff = { // custom themes for other buttons
+    const themeOff = {
       outline: {
         on: "dark:bg-zinc-800",
       }
     };
 
+    // additional class for the interfaces dropdown
     const themeItfSelected = {
       on: "bg-gray-600",
       off: "",
