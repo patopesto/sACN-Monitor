@@ -273,7 +273,7 @@ const SettingsPane = {
         ]),
       ),
       m("div", { class: "pt-3" },
-        m(Dropdown, { label: "Interfaces", dismissOnClick: true }, [
+        m(Dropdown, { label: "Interfaces", dismissOnClick: true, color: color }, [
           interfaces.map((itf) => {
             return m(Dropdown.Item, { onclick: () => {set_interface(itf)}, class: themeItfSelected[itf.active ? "on" : "off"] },
               `${itf.name} (${itf.ip})`
