@@ -1,6 +1,6 @@
 import m from "mithril";
 import { twMerge } from "tailwind-merge";
-import { Button, Range, Label, Dropdown, Modal, Input } from 'flowbite-mithril';
+import { Button, Range, Label, Dropdown, Modal, Input, Badge } from 'flowbite-mithril';
 import { PlusIcon } from "flowbite-icons-mithril/solid";
 
 import { appTheme } from "../theme.js";
@@ -65,23 +65,31 @@ const UniverseList = {
         off: "text-slate-100",
         on:  twMerge("text-black", color.primary),
       },
+      badge: "font-medium dark:bg-opacity-15 dark:text-slate-300",
     };
 
     console.log("universes view()");
     const universes = Universes.get_list();
+    const protocol = Settings.protocol;
 
     return m("div", { class: "flex flex-col py-2 overflow-auto overscroll-none" },
       universes.map((universe, index) => {
         const selected = Universes.selected === universe.id;
         const highlight = theme.base[selected ? "on" : "off"];
         const value = theme.value[selected ? "on" : "off"];
+        const label = universe.protocol === "sacn" ? "sACN" : "ArtNet";
 
         return m("div", { class: twMerge("flex flex-row h-8 items-center", theme.base.root, highlight),
             onclick: () => { Universes.select(universe.id) } },
-          m("div", { class: twMerge("basis-14 text-xs font-medium flex h-full items-center justify-center", value) }, 
+          m("div", { class: twMerge("basis-14 text-xs font-bold flex h-full items-center justify-center shrink-0", value) }, 
             universe.num
           ),
-          m("div", { class: "text-xs text-slate-300 pl-1" }, universe.source),
+          m("div", { class: "shrink w-full text-xs text-slate-300 pl-1" },
+            universe.source
+          ),
+          protocol === "mixed" && m(Badge, { class: twMerge("justify-end shrink-0 m-3", theme.badge) },
+            label,
+          ),
         )
       }),
       m(AddUniverseModal),
@@ -119,7 +127,7 @@ const AddUniverseModal = {
         m(Modal.Body,
           m("div", { class: "space-y-6" },
             m("h2", { class: "text-lg font-medium text-gray-900 dark:text-slate-300" },
-              "Manually add a universe to listen to",
+              "Manually add a sACN universe to listen to",
             ),
             m("div",
               m(Input, { type: "number", id: "universe", placeholder: "123",
@@ -265,7 +273,7 @@ const SettingsPane = {
 
 
     return  m("div", { class: "flex flex-col items-center gap-2 px-5 py-3" }, [
-      m("div", { class: "w-full" },
+      m("div",
         m(Button.Group, { outline: true }, [
           m(Button, { theme: protocol === "sacn" ? themeOn : themeOff,   color: color, onclick: () => {set_mode("sacn")} },   "sACN"),
           m(Button, { theme: protocol === "artnet" ? themeOn : themeOff, color: color, onclick: () => {set_mode("artnet")} }, "ArtNet"),

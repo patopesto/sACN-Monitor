@@ -10,7 +10,7 @@ require (
 	github.com/libp2p/go-reuseport v0.4.0
 	github.com/tidwall/gjson v1.9.3
 	github.com/wailsapp/wails/v2 v2.8.0
-	gitlab.com/patopest/go-sacn v0.0.0-20240320041138-644373940357
+	gitlab.com/patopest/go-sacn v0.0.0-20240322201426-ad088dbe31bf
 )
 
 require (
