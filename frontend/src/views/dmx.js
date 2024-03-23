@@ -28,7 +28,6 @@ export const DMX = {
   }
 }
 
-
 const Column = {
   view({ attrs, children }) {
     const { title, class: className, ...props } = attrs;
@@ -43,14 +42,11 @@ const Column = {
 }
 
 
-const UniverseList = {
 
+const UniverseList = {
   oncreate: function(vnode) {
     Universes.get_universes();
-    Universes.on_change(() => {
-      console.log("universe redraw()");
-      m.redraw();
-    })
+    Universes.on_change(() => { m.redraw() });
   },
 
   view: function(vnode) {
@@ -68,7 +64,6 @@ const UniverseList = {
       badge: "font-medium dark:bg-opacity-15 dark:text-slate-300",
     };
 
-    console.log("universes view()");
     const universes = Universes.get_list();
     const protocol = Settings.protocol;
 
@@ -146,14 +141,11 @@ const AddUniverseModal = {
 }
 
 
-const Channels = {
 
+const Channels = {
   oncreate: function(vnode) {
     Universes.get_data();
-    Universes.on_data_change(() => {
-      console.log("channels redraw()");
-      m.redraw();
-    });
+    Universes.on_data_change(() => { m.redraw() });
   },
 
   view: function(vnode) {
@@ -188,8 +180,8 @@ const Channels = {
 }
 
 
-const Stats = {
 
+const Stats = {
   view: function(vnode) {
     const universe = Universes.get_selected();
     const channel = Universes.selected_channel;
@@ -206,7 +198,13 @@ const Stats = {
     return m("div", { class: "h-full flex flex-col py-2" },
       m(StatsBox, { name: "Universe", value: universe?.num } ),
       m(StatsBox, { name: "Universe Hex", value: universe_hex } ),
-      m(StatsBox, { name: "Node", value: universe?.source } ),
+      m(StatsBox, { name: "Sender", value: universe?.source } ),
+      universe?.protocol === "sacn" && [
+      m(StatsBox, { name: "Source Name", value: universe?.source_name } ),
+      m(StatsBox, { name: "Priority", value: universe?.priority } ),
+      universe?.sync_address > 0 &&
+        m(StatsBox, { name: "Sync Address", value: universe?.sync_address } ),
+      ],
       m(StatsBox, { name: "Selected Channel", value: channel_str } ),
       m(StatsBox, { name: "Selected Value", value: channel_value } ),
     );
@@ -225,12 +223,13 @@ const StatsBox = {
 }
 
 
+
 const SettingsPane = {
   oncreate: function(vnode) {
     Settings.get_interfaces()
   },
+
   view: function(vnode) {
-    console.log("Settings view")
     const protocol = Settings.protocol;
     const interfaces = Settings.interfaces;
     // const opacity = Settings.opacity;

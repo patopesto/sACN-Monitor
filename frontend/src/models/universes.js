@@ -28,7 +28,7 @@ export const Universes = {
       this.list = unis.sort((a, b) => {
           return a.num - b.num;
       });
-      console.log(this.list)
+      // console.log(this.list)
 
       if (diff.length > 0) {
         if (this.callback_fn) {
@@ -45,7 +45,7 @@ export const Universes = {
   callback_fn: null,
   on_change: function(callback) {
     window.runtime.EventsOn("universes.new", () => {
-      console.log("Event: universes.new")
+      // console.log("Event: universes.new")
       this.get_universes()
     });
     this.callback_fn = callback
@@ -73,7 +73,7 @@ export const Universes = {
   data_callback_fn: null,
   on_data_change: function(callback) {
     window.runtime.EventsOn("universe.data", () => {
-      console.log("Event: universe.data")
+      // console.log("Event: universe.data")
       this.get_data()
     });
     this.data_callback_fn = callback
