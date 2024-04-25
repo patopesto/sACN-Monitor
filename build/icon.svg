@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg width="1024px" height="1024px" viewBox="0 0 1024 1024" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient gradientUnits="objectBoundingBox" x1="0.5" y1="0" x2="0.5" y2="0.5" id="gradient_1">
+      <stop offset="0%" stop-color="#585858" />
+      <stop offset="100%" stop-color="#414141" />
+    </linearGradient>
+    <filter filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB" id="filter_1">
+      <feFlood flood-opacity="0" result="BackgroundImageFix" />
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 128 0" />
+      <feOffset dx="0" dy="2" />
+      <feGaussianBlur stdDeviation="2" />
+      <feColorMatrix type="matrix" values="0 0 0 0 0.39215687 0 0 0 0 0.39215687 0 0 0 0 0.39215687 0 0 0 1 0" />
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect0_dropShadow" />
+      <feBlend mode="normal" in="SourceGraphic" in2="effect0_dropShadow" result="shape" />
+    </filter>
+    <path d="M1024 0L1024 0L1024 1024L0 1024L0 0L1024 0Z" id="path_1" />
+    <clipPath id="clip_1">
+      <use xlink:href="#path_1" clip-rule="evenodd" fill-rule="evenodd" />
+    </clipPath>
+  </defs>
+  <g id="Icon 9">
+    <path d="M1024 0L1024 0L1024 1024L0 1024L0 0L1024 0Z" id="Icon-9" fill="none" stroke="none" />
+    <g id="Group" transform="translate(100 100)" clip-path="url(#clip_1)">
+      <path d="M654 0C747.901 0 824 76.0988 824 170L824 654C824 747.901 747.901 824 654 824L170 824C76.0988 824 0 747.901 0 654L0 170C0 76.0988 76.0988 0 170 0L654 0Z" id="Background" fill="url(#gradient_1)" stroke="none" filter="url(#filter_1)" />
+      <path d="M157 130C184.618 130 207 152.382 207 180L207 647C207 674.618 184.618 697 157 697L152 697C124.382 697 102 674.618 102 647L102 180C102 152.382 124.382 130 152 130L157 130Z" id="Channel-1" fill="#06B6D4" stroke="none" />
+      <path d="M286 282C313.618 282 336 304.382 336 332L336 647C336 674.618 313.618 697 286 697L281 697C253.382 697 231 674.618 231 647L231 332C231 304.382 253.382 282 281 282L286 282Z" id="Channel-2" fill="#06B6D4" stroke="none" />
+      <path d="M415 378C442.618 378 465 400.382 465 428L465 647C465 674.618 442.618 697 415 697L410 697C382.382 697 360 674.618 360 647L360 428C360 400.382 382.382 378 410 378L415 378Z" id="Channel-3" fill="#06B6D4" stroke="none" />
+      <path d="M544 213C571.618 213 594 235.382 594 263L594 647C594 674.618 571.618 697 544 697L539 697C511.382 697 489 674.618 489 647L489 263C489 235.382 511.382 213 539 213L544 213Z" id="Channel-4" fill="#06B6D4" stroke="none" />
+      <path d="M673 496C700.618 496 723 518.382 723 546L723 647C723 674.618 700.618 697 673 697L668 697C640.382 697 618 674.618 618 647L618 546C618 518.382 640.382 496 668 496L673 496Z" id="Channel-5" fill="#06B6D4" stroke="none" />
+    </g>
+  </g>
+</svg>
