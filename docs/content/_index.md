@@ -21,6 +21,7 @@ keywords = ["sACN", "ArtNet", "ANSI", "E1.31", "DMX", "GrandMA2", "GrandMA3", "l
 - Network interface selector
 - Also supports ArtNet v4 from Artistic Licence Holdings Ltd
 - Filter universes by protocol (sACN, ArtNet or both)
+- Show channels or values
 - Open source standalone application for both macOS and Windows
 
 

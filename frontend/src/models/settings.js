@@ -9,6 +9,13 @@ export const Settings = {
     this.protocol = protocol
   },
 
+  // View mode
+  view: 'channels', // channels or values
+  set_view: function(view) {
+    console.log("Setting view:", view)
+    this.view = view
+  },
+
   // Interfaces
   interfaces: [],
   get_interfaces: function() {

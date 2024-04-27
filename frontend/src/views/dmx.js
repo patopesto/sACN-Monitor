@@ -168,11 +168,12 @@ const Channels = {
         const highlight = theme.selected[selected ? "on" : "off"];
         const active = theme.active[value > 0 ? "on" : "off"];
         const height = "height: "+(value * 100 / 255)+"%";
+        const box_value = (Settings.view === "channels") ? (index + 1) : value;
 
         return m("div", { id: index, class: twMerge("relative w-10 h-8 flex justify-center items-center", highlight),
               onclick: () => { Universes.select_channel(index) } },
           m("div", { class: twMerge("absolute border-box self-end w-full", theme.background), style: height} ), 
-          m("div", { class: twMerge("text-xs", active) }, index + 1),
+          m("div", { class: twMerge("text-xs", active) }, box_value),
         )
       })
     );
@@ -232,12 +233,17 @@ const SettingsPane = {
   view: function(vnode) {
     const protocol = Settings.protocol;
     const interfaces = Settings.interfaces;
+    const view = Settings.view;
     // const opacity = Settings.opacity;
     const color = Settings.theme;
 
     const set_mode = (mode) => {
       Settings.set_protocol(mode);
     };
+
+    const set_view_mode = (mode) => {
+      Settings.set_view(mode)
+    }
 
     const set_interface = (itf) => {
       Settings.set_interface(itf);
@@ -277,6 +283,12 @@ const SettingsPane = {
           m(Button, { theme: protocol === "sacn" ? themeOn : themeOff,   color: color, onclick: () => {set_mode("sacn")} },   "sACN"),
           m(Button, { theme: protocol === "artnet" ? themeOn : themeOff, color: color, onclick: () => {set_mode("artnet")} }, "ArtNet"),
           m(Button, { theme: protocol === "mixed" ? themeOn : themeOff,  color: color, onclick: () => {set_mode("mixed")} },  "Both"),
+        ]),
+      ),
+      m("div", { class: "pt-3" },
+        m(Button.Group, { outline: true }, [
+          m(Button, { theme: view === "channels" ? themeOn : themeOff, color: color, onclick: () => {set_view_mode("channels")} }, "Channels"),
+          m(Button, { theme: view === "values" ? themeOn : themeOff,   color: color, onclick: () => {set_view_mode("values")} },   "\u00A0\u00A0Values\u00A0\u00A0"),
         ]),
       ),
       m("div", { class: "pt-3" },
