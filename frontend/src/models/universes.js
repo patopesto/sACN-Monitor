@@ -1,5 +1,5 @@
 import { GetUniverses, GetUniverseData, JoinUniverse } from '../../wailsjs/go/main/App'
-// import { EventsOn } from '../../wailsjs/runtime/runtime';
+// import { EventsOn } from '../../wailsjs/runtime/runtime'
 import { Settings } from './settings.js'
 
 export const Universes = {
@@ -7,12 +7,12 @@ export const Universes = {
   list: [],
   get_list: function() {
     if (Settings.protocol === 'mixed') {
-      return this.list;
+      return this.list
     }
     else {
       return this.list.filter((u) => {
-        return u.protocol === Settings.protocol;
-      });
+        return u.protocol === Settings.protocol
+      })
     }
   },
   get_universes: function() {
@@ -22,12 +22,12 @@ export const Universes = {
       }
       let diff = unis.filter((u) => {
         return !this.list.some((v) => {
-          return u.num === v.num && u.source === v.source;
-        });
+          return u.num === v.num && u.source === v.source
+        })
       })
       this.list = unis.sort((a, b) => {
-          return a.num - b.num;
-      });
+          return a.num - b.num
+      })
       // console.log(this.list)
 
       if (diff.length > 0) {
@@ -54,11 +54,11 @@ export const Universes = {
     window.runtime.EventsOn("universes.new", () => {
       // console.log("Event: universes.new")
       this.get_universes()
-    });
+    })
     window.runtime.EventsOn("universes.clear", () => {
       // console.log("Event: universes.clear")
       this.clear_universes()
-    });
+    })
     this.callback_fn = callback
   },
 
@@ -71,7 +71,7 @@ export const Universes = {
     this.get_data()
   },
   get_selected: function() {
-    return this.list.find(u => u.id === this.selected);
+    return this.list.find(u => u.id === this.selected)
   },
   get_data: function() {
     GetUniverseData(this.selected).then((data) => {
@@ -86,7 +86,7 @@ export const Universes = {
     window.runtime.EventsOn("universe.data", () => {
       // console.log("Event: universe.data")
       this.get_data()
-    });
+    })
     this.data_callback_fn = callback
   },
 

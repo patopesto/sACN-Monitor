@@ -23,4 +23,4 @@ export const appTheme = {
     primary: "bg-gray-400",
     secondary: "bg-gray-600 hover:bg-gray-600",
   }
-};
+}

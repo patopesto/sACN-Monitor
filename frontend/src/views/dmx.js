@@ -1,11 +1,11 @@
-import m from "mithril";
-import { twMerge } from "tailwind-merge";
-import { Button, Range, Label, Dropdown, Modal, Input, Badge } from 'flowbite-mithril';
-import { PlusIcon } from "flowbite-icons-mithril/solid";
+import m from "mithril"
+import { twMerge } from "tailwind-merge"
+import { Button, Range, Label, Dropdown, Modal, Input, Badge } from 'flowbite-mithril'
+import { PlusIcon } from "flowbite-icons-mithril/solid"
 
-import { appTheme } from "../theme.js";
-import { Universes } from '../models/universes';
-import { Settings } from '../models/settings';
+import { appTheme } from "../theme.js"
+import { Universes } from '../models/universes'
+import { Settings } from '../models/settings'
 
 
 export const DMX = {
@@ -30,7 +30,7 @@ export const DMX = {
 
 const Column = {
   view({ attrs, children }) {
-    const { title, class: className, ...props } = attrs;
+    const { title, class: className, ...props } = attrs
 
     return m("column", { class: twMerge(className, "flex flex-col") },
       m("header", { class: "flex justify-center bg-zinc-800 text-neutral-300 bg-opacity-60 p-1" },
@@ -45,12 +45,12 @@ const Column = {
 
 const UniverseList = {
   oncreate: function(vnode) {
-    Universes.get_universes();
-    Universes.on_change(() => { m.redraw() });
+    Universes.get_universes()
+    Universes.on_change(() => { m.redraw() })
   },
 
   view: function(vnode) {
-    const color = appTheme[Settings.theme];
+    const color = appTheme[Settings.theme]
     const theme = {
       base: {
         root: "hover:" + color.secondary,
@@ -62,29 +62,29 @@ const UniverseList = {
         on:  twMerge("text-black", color.primary),
       },
       badge: "font-medium dark:bg-opacity-15 dark:text-slate-300",
-    };
+    }
 
-    const universes = Universes.get_list();
-    const protocol = Settings.protocol;
+    const universes = Universes.get_list()
+    const protocol = Settings.protocol
 
     const navigate = (event, index, id) => {
-      event.preventDefault(); // Avoid weird "ding" noise happenning on webkit but not browsers
+      event.preventDefault() // Avoid weird "ding" noise happenning on webkit but not browsers
       if (event.key === "ArrowUp" && index - 1 >= 0) {
-        Universes.select(universes[index - 1].id);
-        document.getElementById(universes[index-1].id).focus();
+        Universes.select(universes[index - 1].id)
+        document.getElementById(universes[index-1].id).focus()
       }
       else if (event.key === "ArrowDown" && index + 1 < universes.length) {
-        Universes.select(universes[index + 1].id);
-        document.getElementById(universes[index+1].id).focus();
+        Universes.select(universes[index + 1].id)
+        document.getElementById(universes[index+1].id).focus()
       }
     }
 
     return m("div", { class: "flex flex-col py-2 overflow-auto overscroll-none" },
       universes.map((universe, index) => {
-        const selected = Universes.selected === universe.id;
-        const highlight = theme.base[selected ? "on" : "off"];
-        const value = theme.value[selected ? "on" : "off"];
-        const label = universe.protocol === "sacn" ? "sACN" : "ArtNet";
+        const selected = Universes.selected === universe.id
+        const highlight = theme.base[selected ? "on" : "off"]
+        const value = theme.value[selected ? "on" : "off"]
+        const label = universe.protocol === "sacn" ? "sACN" : "ArtNet"
 
         return m("div", { class: twMerge("flex flex-row h-8 items-center focus:outline-none", theme.base.root, highlight),
             id: universe.id,
@@ -113,7 +113,7 @@ const AddUniverseModal = {
   universe: null,
 
   view({attrs, state}) {
-    const color = Settings.theme;
+    const color = Settings.theme
     const modalTheme = {
       background: "dark:bg-neutral-900 dark:bg-opacity-10",
       content: {
@@ -123,11 +123,11 @@ const AddUniverseModal = {
 
     const join_universe = () => {
       if (state.universe) {
-        const uni = Number(state.universe);
-        Universes.join_universe(uni);
-        state.universe = null;
+        const uni = Number(state.universe)
+        Universes.join_universe(uni)
+        state.universe = null
       }
-    };
+    }
 
     return [
       m("button", { 'data-modal-target': 'add-modal', 'data-modal-toggle': 'add-modal',class: twMerge("fixed bottom-0 self-end m-2 rounded-md bg-blue-600", appTheme[Settings.theme].primary) },
@@ -152,7 +152,7 @@ const AddUniverseModal = {
           ),
         ),
       ),
-    ]
+    ];
   }
 }
 
@@ -160,8 +160,8 @@ const AddUniverseModal = {
 
 const Channels = {
   oncreate: function(vnode) {
-    Universes.get_data();
-    Universes.on_data_change(() => { m.redraw() });
+    Universes.get_data()
+    Universes.on_data_change(() => { m.redraw() })
   },
 
   view: function(vnode) {
@@ -176,7 +176,7 @@ const Channels = {
         off: "",
         on:  "border-2 border-slate-300",
       },
-    };
+    }
 
     const navigate = (event, index) => {
       event.preventDefault()
@@ -228,11 +228,11 @@ const Channels = {
 
     return m("div", { class: theme.base },
       Universes.data.map((value, index) => {
-        const selected = Universes.selected_channel == index;
-        const highlight = theme.selected[selected ? "on" : "off"];
-        const active = theme.active[value > 0 ? "on" : "off"];
-        const height = "height: "+(value * 100 / 255)+"%";
-        const box_value = (Settings.view === "channels") ? (index + 1) : value;
+        const selected = Universes.selected_channel == index
+        const highlight = theme.selected[selected ? "on" : "off"]
+        const active = theme.active[value > 0 ? "on" : "off"]
+        const height = "height: "+(value * 100 / 255)+"%"
+        const box_value = (Settings.view === "channels") ? (index + 1) : value
 
         return m("div", { id: index, class: twMerge("relative w-10 h-8 flex justify-center items-center focus:outline-none", highlight),
               id: `channel-${index}`,
@@ -252,16 +252,16 @@ const Channels = {
 
 const Stats = {
   view: function(vnode) {
-    const universe = Universes.get_selected();
-    const channel = Universes.selected_channel;
-    var universe_hex, channel_str, channel_value = "";
+    const universe = Universes.get_selected()
+    const channel = Universes.selected_channel
+    var universe_hex, channel_str, channel_value = ""
     if (universe) {
-      universe_hex = Number(universe.num).toString(16).toUpperCase();
+      universe_hex = Number(universe.num).toString(16).toUpperCase()
     }
     if (channel !== null) {
       const value = Universes.data[channel]
-      channel_str = channel + 1;
-      channel_value = value + " (" + Math.ceil(value / 255 * 100) + "%)";
+      channel_str = channel + 1
+      channel_value = value + " (" + Math.ceil(value / 255 * 100) + "%)"
     }
 
     return m("div", { class: "h-full flex flex-col py-2" },
@@ -282,7 +282,7 @@ const Stats = {
 
 const StatsBox = {
   view({ attrs }) {
-    const { name, value, ...props } = attrs;
+    const { name, value, ...props } = attrs
 
     return m("div", { class: "flex flex-row justify-between items-center mx-3.5 my-1 text-slate-300 text-xs" },
       m("div", { class: "" }, name),
@@ -299,50 +299,50 @@ const SettingsPane = {
   },
 
   view: function(vnode) {
-    const protocol = Settings.protocol;
-    const interfaces = Settings.interfaces;
-    const view = Settings.view;
-    // const opacity = Settings.opacity;
-    const color = Settings.theme;
+    const protocol = Settings.protocol
+    const interfaces = Settings.interfaces
+    const view = Settings.view
+    // const opacity = Settings.opacity
+    const color = Settings.theme
 
     const set_mode = (mode) => {
-      Settings.set_protocol(mode);
-    };
+      Settings.set_protocol(mode)
+    }
 
     const set_view_mode = (mode) => {
       Settings.set_view(mode)
     }
 
     const set_interface = (itf) => {
-      Settings.set_interface(itf);
-      m.redraw();
-    };
+      Settings.set_interface(itf)
+      m.redraw()
+    }
 
     // const set_opacity = (opacity) => {
-    //   Settings.set_opacity(opacity);
-    // };
+    //   Settings.set_opacity(opacity)
+    // }
 
     const set_theme = (theme) => {
-      Settings.set_theme(theme);
-    };
+      Settings.set_theme(theme)
+    }
 
     // theme overide for the protocol button group
     const themeOn = {
       outline: {
         on: "dark:" + appTheme[color].secondary,
       }
-    };
+    }
     const themeOff = {
       outline: {
         on: "dark:bg-zinc-800",
       }
-    };
+    }
 
     // additional class for the interfaces dropdown
     const themeItfSelected = {
       on: "bg-gray-600",
       off: "",
-    };
+    }
 
 
     return  m("div", { class: "flex flex-col items-center gap-2 px-5 py-3" }, [
