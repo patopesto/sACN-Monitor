@@ -67,6 +67,18 @@ const UniverseList = {
     const universes = Universes.get_list();
     const protocol = Settings.protocol;
 
+    const navigate = (event, index, id) => {
+      event.preventDefault(); // Avoid weird "ding" noise happenning on webkit but not browsers
+      if (event.key === "ArrowUp" && index - 1 >= 0) {
+        Universes.select(universes[index - 1].id);
+        document.getElementById(universes[index-1].id).focus();
+      }
+      else if (event.key === "ArrowDown" && index + 1 < universes.length) {
+        Universes.select(universes[index + 1].id);
+        document.getElementById(universes[index+1].id).focus();
+      }
+    }
+
     return m("div", { class: "flex flex-col py-2 overflow-auto overscroll-none" },
       universes.map((universe, index) => {
         const selected = Universes.selected === universe.id;
@@ -74,8 +86,12 @@ const UniverseList = {
         const value = theme.value[selected ? "on" : "off"];
         const label = universe.protocol === "sacn" ? "sACN" : "ArtNet";
 
-        return m("div", { class: twMerge("flex flex-row h-8 items-center", theme.base.root, highlight),
-            onclick: () => { Universes.select(universe.id) } },
+        return m("div", { class: twMerge("flex flex-row h-8 items-center focus:outline-none", theme.base.root, highlight),
+            id: universe.id,
+            tabindex: -1,
+            onclick: () => { Universes.select(universe.id) },
+            onkeydown: (event) => { navigate(event, index, universe.id) },
+          },
           m("div", { class: twMerge("basis-14 text-xs font-bold flex h-full items-center justify-center shrink-0", value) }, 
             universe.num
           ),
@@ -162,6 +178,54 @@ const Channels = {
       },
     };
 
+    const navigate = (event, index) => {
+      event.preventDefault()
+
+      if (event.key === "ArrowRight" && index + 1 < Universes.data.length) {
+        Universes.select_channel(index + 1)
+        document.getElementById(`channel-${index + 1}`).focus()
+      }
+      else if (event.key === "ArrowLeft" && index - 1 >= 0) {
+        Universes.select_channel(index - 1)
+        document.getElementById(`channel-${index - 1}`).focus()
+      }
+      else {
+        const getRect = (id) => {
+          const el = document.getElementById(id)
+          const rect = el.getBoundingClientRect()
+          const x = rect.left + window.scrollX
+          const y = rect.top + window.scrollY
+          return { el, x, y }
+        }
+        const { x, y } = getRect(`channel-${index}`)
+
+        if (event.key === "ArrowDown") {
+          // select the first element that is below the current element with same x coordinate
+          for (let i = index + 1; i < Universes.data.length; i++) {
+            const { el, x: tx, y: ty } = getRect(`channel-${i}`)
+
+            if (x === tx && y < ty) {
+              Universes.select_channel(i)
+              el.focus()
+              break
+            }
+          }
+        }
+        else if (event.key === "ArrowUp") {
+          // select the first element that is above the current element with same x coordinate
+          for (let i = index; i >= 0; i--) {
+            const { el, x: tx, y: ty } = getRect(`channel-${i}`)
+
+            if (x === tx && y > ty) {
+              Universes.select_channel(i)
+              el.focus()
+              break
+            }
+          }
+        }
+      }
+    }
+
     return m("div", { class: theme.base },
       Universes.data.map((value, index) => {
         const selected = Universes.selected_channel == index;
@@ -170,8 +234,12 @@ const Channels = {
         const height = "height: "+(value * 100 / 255)+"%";
         const box_value = (Settings.view === "channels") ? (index + 1) : value;
 
-        return m("div", { id: index, class: twMerge("relative w-10 h-8 flex justify-center items-center", highlight),
-              onclick: () => { Universes.select_channel(index) } },
+        return m("div", { id: index, class: twMerge("relative w-10 h-8 flex justify-center items-center focus:outline-none", highlight),
+              id: `channel-${index}`,
+              tabindex: -1,
+              onclick: () => { Universes.select_channel(index) },
+              onkeydown: (event) => { navigate(event, index) },
+          },
           m("div", { class: twMerge("absolute border-box self-end w-full", theme.background), style: height} ), 
           m("div", { class: twMerge("text-xs", active) }, box_value),
         )
