@@ -41,12 +41,23 @@ export const Universes = {
     console.log(uni)
     JoinUniverse(uni)
   },
+  clear_universes: function() {
+    this.list = []
+    this.get_universes()
+    this.data = []
+    this.get_data()
+    this.selected = null
+  },
 
   callback_fn: null,
   on_change: function(callback) {
     window.runtime.EventsOn("universes.new", () => {
       // console.log("Event: universes.new")
       this.get_universes()
+    });
+    window.runtime.EventsOn("universes.clear", () => {
+      // console.log("Event: universes.clear")
+      this.clear_universes()
     });
     this.callback_fn = callback
   },

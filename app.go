@@ -6,7 +6,7 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"log"
 
-	dmx "dmx-monitor/backend"
+	dmx "sacn-monitor/backend"
 )
 
 // App struct
@@ -80,6 +80,12 @@ func (a *App) GetUniverseData(id string) [512]byte {
 func (a *App) JoinUniverse(universe uint16) {
 	log.Printf("Joining universe %d\n", universe)
 	dmx.JoinSACNUniverse(universe)
+}
+
+func (a *App) ClearUniverses() {
+	log.Println("Clearing universes")
+	dmx.Universes = nil
+	runtime.EventsEmit(a.ctx, "universes.clear")
 }
 
 func (a *App) newUniverseEvent(id uuid.UUID) {

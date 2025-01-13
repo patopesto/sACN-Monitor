@@ -69,11 +69,11 @@ func dataPacketCallback(p packet.SACNPacket, source string) {
 	log.Printf("Received Data Packet for universe %d from %s\n", d.Universe, source)
 
 	uni := Universe{
-		Protocol: 	"sacn",
-		Num:      	d.Universe,
-		Source:   	source,
-		SourceName: string(d.SourceName[:]),
-		Priority: 	d.Priority,
+		Protocol:    "sacn",
+		Num:         d.Universe,
+		Source:      source,
+		SourceName:  string(d.SourceName[:]),
+		Priority:    d.Priority,
 		SyncAddress: d.SyncAddress,
 	}
 	copy(uni.data[:], d.Data[1:]) // skip zero-start value

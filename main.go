@@ -4,9 +4,12 @@ import (
 	"embed"
 	"fmt"
 	"log"
+	"runtime"
 
 	"github.com/tidwall/gjson"
 	"github.com/wailsapp/wails/v2"
+	"github.com/wailsapp/wails/v2/pkg/menu"
+	"github.com/wailsapp/wails/v2/pkg/menu/keys"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 	"github.com/wailsapp/wails/v2/pkg/options/linux"
@@ -23,6 +26,20 @@ var configWails string
 func main() {
 	// Create an instance of the app structure
 	app := NewApp()
+
+	// Menus
+	AppMenu := menu.NewMenu()
+	if runtime.GOOS == "darwin" {
+		AppMenu.Append(menu.AppMenu())
+	}
+	OptionsMenu := AppMenu.AddSubmenu("Options")
+	OptionsMenu.AddSeparator()
+	// OptionsMenu.AddRadio("Radio", false, nil, nil)
+	// OptionsMenu.AddCheckbox("Checkbox", false, keys.CmdOrCtrl("c"), nil)
+	OptionsMenu.AddText("Clear Universe list", keys.CmdOrCtrl("r"), func(_ *menu.CallbackData) {
+		app.ClearUniverses()
+	})
+
 	// Load variables from embedded wails config file
 	name := gjson.Get(configWails, "name")
 	version := gjson.Get(configWails, "info.productVersion")
@@ -33,6 +50,7 @@ func main() {
 		Title:  fmt.Sprintf("%s", name),
 		Width:  1280,
 		Height: 720,
+		Menu:   AppMenu,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
