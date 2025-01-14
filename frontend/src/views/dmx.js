@@ -126,6 +126,7 @@ const AddUniverseModal = {
         const uni = Number(state.universe)
         Universes.join_universe(uni)
         state.universe = null
+        document.getElementById("add-model-input").value = null
       }
     }
 
@@ -141,8 +142,10 @@ const AddUniverseModal = {
               "Manually add a sACN universe to listen to",
             ),
             m("div",
-              m(Input, { type: "number", id: "universe", placeholder: "123",
-                oninput: (e) => { state.universe = e.target.value } }),
+              m(Input, { id: "add-model-input", type: "number", placeholder: "123",
+                oninput: (e) => { state.universe = e.target.value },
+                onkeydown: (e) => { if (e.code === "Enter") join_universe() },
+              }),
             ),
             m("div", { class: "flex justify-end" },
               m(Button, { color: color, onclick: join_universe },
