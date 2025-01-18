@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/jsimonetti/go-artnet/packet"
@@ -13,6 +14,8 @@ import (
 
 var server *net.UDPConn
 var artnetCallbacks map[string]func(uuid.UUID)
+
+var artnetNodes map[string]string
 
 func InitArtnetReceiver() {
 	log.Println("Init ArtNet receiver")
@@ -25,6 +28,7 @@ func InitArtnetReceiver() {
 	server = listener.(*net.UDPConn)
 
 	artnetCallbacks = make(map[string]func(uuid.UUID))
+	artnetNodes = make(map[string]string)
 
 	go recvPackets()
 }
@@ -41,41 +45,63 @@ func recvPackets() {
 		}
 
 		p, err := packet.Unmarshal(buf)
-		if p.GetOpCode() != code.OpDMX {
-			continue
-		}
-		packet := p.(*packet.ArtDMXPacket)
-		// fmt.Println("received universe :", packet.SubUni, packet.Net)
-
-		uni := Universe{
-			Protocol:     "artnet",
-			Num:          uint16(packet.Net<<16 | packet.SubUni),
-			Source:       source.IP.String(),
-			Data:         packet.Data,
-		}
-
-		exist := false
-		for i, u := range Universes {
-			if u.Protocol == "artnet" && u.Num == uni.Num && u.Source == uni.Source {
-				exist = true
-				Universes[i].Update(uni)
-				Universes[i].UpdateFPS()
-				callback := artnetCallbacks["data"]
-				if callback != nil {
-					callback(u.Id)
-				}
-				break
-			}
-		}
-		if exist == false {
-			uni.Id = uuid.New()
-			Universes = append(Universes, uni)
-			callback := artnetCallbacks["universe"]
-			if callback != nil {
-				callback(uni.Id)
-			}
+		switch p.GetOpCode(){
+			case code.OpDMX:
+				pkt := p.(*packet.ArtDMXPacket)
+				handleArtDMX(pkt, source)
+			case code.OpPollReply:
+				pkt := p.(*packet.ArtPollReplyPacket)
+				handleArtPollReply(pkt, source)
 		}
 	}
+}
+
+func handleArtDMX(p *packet.ArtDMXPacket, addr *net.UDPAddr) {
+	// fmt.Println("received universe :", packet.SubUni, packet.Net)
+
+	sourceIP := addr.IP.String()
+	uni := Universe{
+		Protocol:     "artnet",
+		Num:          uint16(p.Net<<16 | p.SubUni),
+		Source:       sourceIP,
+		Data:         p.Data,
+	}
+
+	sourceName, ok := artnetNodes[sourceIP]
+	if ok {
+	    uni.SourceName = sourceName
+	}
+
+	exist := false
+	for i, u := range Universes {
+		if u.Protocol == "artnet" && u.Num == uni.Num && u.Source == uni.Source {
+			exist = true
+			Universes[i].Update(uni)
+			Universes[i].UpdateFPS()
+			callback := artnetCallbacks["data"]
+			if callback != nil {
+				callback(u.Id)
+			}
+			break
+		}
+	}
+	if exist == false {
+		uni.Id = uuid.New()
+		Universes = append(Universes, uni)
+		callback := artnetCallbacks["universe"]
+		if callback != nil {
+			callback(uni.Id)
+		}
+	}
+}
+
+func handleArtPollReply(p *packet.ArtPollReplyPacket, addr *net.UDPAddr) {
+	// log.Println("Received ArtPollReply from %v", addr)
+	sourceName := string(p.LongName[:])
+	sourceName = strings.Trim(sourceName, "\x00") // remove trailing zeros from array
+
+	sourceIP := addr.IP.String()
+	artnetNodes[sourceIP] = sourceName
 }
 
 func RegisterArtnetCallback(name string, fn func(uuid.UUID)) {

@@ -277,12 +277,13 @@ const Stats = {
       m(StatsBox, { name: "Universe", value: universe?.num } ),
       m(StatsBox, { name: "Universe Hex", value: universe_hex } ),
       m(StatsBox, { name: "Sender", value: universe?.source } ),
+      universe?.source_name != "" &&
+        m(StatsBox, { name: "Source Name", value: universe?.source_name } ),
       universe?.protocol === "sacn" && [
-      m(StatsBox, { name: "Source Name", value: universe?.source_name } ),
-      m(StatsBox, { name: "Priority", value: universe?.priority } ),
-      universe?.sync_address > 0 &&
-        m(StatsBox, { name: "Sync Address", value: universe?.sync_address } ),
-      ],
+        m(StatsBox, { name: "Priority", value: universe?.priority } ),
+        universe?.sync_address > 0 &&
+          m(StatsBox, { name: "Sync Address", value: universe?.sync_address } ),
+        ],
       m(StatsBox, { name: "Status", value: last_heard } ),
       m(StatsBox, { name: "FPS", value: universe?.fps } ),
       m(StatsBox, { name: "Selected Channel", value: channel_str } ),
@@ -297,7 +298,7 @@ const StatsBox = {
 
     return m("div", { class: "flex flex-row justify-between items-center mx-3.5 my-1 text-slate-300 text-xs" },
       m("div", { class: "" }, name),
-      m("div", { class: "" }, value),
+      m("div", { class: "text-right" }, value),
     );
   }
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"strings"
 
 	"github.com/google/uuid"
 	"gitlab.com/patopest/go-sacn"
@@ -68,11 +69,14 @@ func dataPacketCallback(p packet.SACNPacket, source string) {
 	}
 	log.Printf("Received Data Packet for universe %d from %s\n", d.Universe, source)
 
+	sourceName := string(d.SourceName[:])
+	sourceName = strings.Trim(sourceName, "\x00") // remove trailing zeros from array
+	
 	uni := Universe{
 		Protocol:     "sacn",
 		Num:          d.Universe,
 		Source:       source,
-		SourceName:   string(d.SourceName[:]),
+		SourceName:   sourceName,
 		Priority:     d.Priority,
 		SyncAddress:  d.SyncAddress,
 	}

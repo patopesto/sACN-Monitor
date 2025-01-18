@@ -28,7 +28,6 @@ export const Universes = {
       this.list = unis.sort((a, b) => {
           return a.num - b.num
       })
-      // console.log(this.list)
 
       if (diff.length > 0) {
         if (this.callback_fn) {
@@ -74,9 +73,10 @@ export const Universes = {
     return this.list.find(u => u.id === this.selected)
   },
   get_data: function() {
-    GetUniverse(this.selected).then((universe) => {
+    const selected = this.selected
+    GetUniverse(selected).then((universe) => {
       this.data = universe.data
-      const index = this.list.findIndex(u => u.id === this.selected)
+      const index = this.list.findIndex(u => u.id === selected)
       if (index >= 0) {
         this.list[index] = universe
       }
