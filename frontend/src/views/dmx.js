@@ -279,13 +279,13 @@ const Stats = {
       m(StatsBox, { name: "Sender", value: universe?.source } ),
       universe?.source_name != "" &&
         m(StatsBox, { name: "Source Name", value: universe?.source_name } ),
+      m(StatsBox, { name: "Status", value: last_heard } ),
+      m(StatsBox, { name: "FPS", value: universe?.fps } ),
       universe?.protocol === "sacn" && [
         m(StatsBox, { name: "Priority", value: universe?.priority } ),
         universe?.sync_address > 0 &&
           m(StatsBox, { name: "Sync Address", value: universe?.sync_address } ),
         ],
-      m(StatsBox, { name: "Status", value: last_heard } ),
-      m(StatsBox, { name: "FPS", value: universe?.fps } ),
       m(StatsBox, { name: "Selected Channel", value: channel_str } ),
       m(StatsBox, { name: "Selected Value", value: channel_value } ),
     );

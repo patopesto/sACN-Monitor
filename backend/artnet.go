@@ -13,24 +13,31 @@ import (
 )
 
 var server *net.UDPConn
-var artnetCallbacks map[string]func(uuid.UUID)
+var currentAddr net.IPNet
 
+var artnetCallbacks map[string]func(uuid.UUID)
 var artnetNodes map[string]string
 
-func InitArtnetReceiver() {
+func InitArtnetReceiver(iface NetInterface) {
 	log.Println("Init ArtNet receiver")
 
-	addr := fmt.Sprintf(":%d", packet.ArtNetPort)
-	listener, err := reuseport.ListenPacket("udp4", addr)
-	if err != nil {
-		log.Panic(err)
+	if artnetCallbacks == nil {
+		artnetCallbacks = make(map[string]func(uuid.UUID))
+		artnetNodes = make(map[string]string)
 	}
-	server = listener.(*net.UDPConn)
 
-	artnetCallbacks = make(map[string]func(uuid.UUID))
-	artnetNodes = make(map[string]string)
+	currentAddr = iface.addr
 
-	go recvPackets()
+	if server == nil {
+		addr := fmt.Sprintf(":%d", packet.ArtNetPort)
+		listener, err := reuseport.ListenPacket("udp4", addr)
+		if err != nil {
+			log.Panic(err)
+		}
+		server = listener.(*net.UDPConn)
+
+		go recvPackets()
+	}
 }
 
 func recvPackets() {
@@ -38,13 +45,18 @@ func recvPackets() {
 
 	for {
 		buf := make([]byte, 1024)
-		_, source, err := server.ReadFromUDP(buf)
+		n, source, err := server.ReadFromUDP(buf)
 		if err != nil {
 			log.Panicln(err)
 			continue
 		}
 
-		p, err := packet.Unmarshal(buf)
+		// Filter packets based on currently selected interface's network addr
+		if currentAddr.Contains(source.IP) == false {
+			continue
+		}
+
+		p, err := packet.Unmarshal(buf[:n])
 		switch p.GetOpCode(){
 			case code.OpDMX:
 				pkt := p.(*packet.ArtDMXPacket)

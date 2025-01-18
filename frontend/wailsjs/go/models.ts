@@ -1,12 +1,12 @@
 export namespace dmx {
 	
-	export class Interface {
+	export class NetInterface {
 	    name: string;
 	    ip: string;
 	    active: boolean;
 	
 	    static createFrom(source: any = {}) {
-	        return new Interface(source);
+	        return new NetInterface(source);
 	    }
 	
 	    constructor(source: any = {}) {

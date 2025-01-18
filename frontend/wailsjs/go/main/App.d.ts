@@ -4,7 +4,7 @@ import {dmx} from '../models';
 
 export function ClearUniverses():Promise<void>;
 
-export function GetInterfaces():Promise<Array<dmx.Interface>>;
+export function GetInterfaces():Promise<Array<dmx.NetInterface>>;
 
 export function GetUniverse(arg1:string):Promise<dmx.Universe>;
 
@@ -12,4 +12,4 @@ export function GetUniverses():Promise<Array<dmx.Universe>>;
 
 export function JoinUniverse(arg1:number):Promise<void>;
 
-export function SetInterface(arg1:dmx.Interface):Promise<void>;
+export function SetInterface(arg1:dmx.NetInterface):Promise<void>;

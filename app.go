@@ -29,11 +29,9 @@ func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 
 	ifaces := dmx.GetInterfaces()
-	dmx.InitArtnetReceiver()
+	a.SetInterface(ifaces[0]) // also inits receivers
 	dmx.RegisterArtnetCallback("universe", a.newUniverseEvent)
 	dmx.RegisterArtnetCallback("data", a.newDataEvent)
-	a.SetInterface(ifaces[0])
-	dmx.InitSACNReceiver(ifaces[0])
 	dmx.RegisterSACNCallback("universe", a.newUniverseEvent)
 	dmx.RegisterSACNCallback("data", a.newDataEvent)
 }
@@ -42,19 +40,20 @@ func (b *App) shutdown(ctx context.Context) {
 	log.Println("Shutting down")
 }
 
-func (a *App) GetInterfaces() []dmx.Interface {
+func (a *App) GetInterfaces() []dmx.NetInterface {
 	return dmx.GetInterfaces()
 }
 
-func (a *App) SetInterface(iface dmx.Interface) {
+func (a *App) SetInterface(iface dmx.NetInterface) {
 	log.Println("Setting interface to", iface)
 	for idx, itf := range dmx.Interfaces {
-		if iface.Name == itf.Name && iface.Name == itf.Name {
+		if iface.Name == itf.Name && iface.IP == itf.IP {
 			dmx.Interfaces[idx].Active = true
 		} else {
 			dmx.Interfaces[idx].Active = false
 		}
 	}
+	dmx.InitArtnetReceiver(iface)
 	dmx.InitSACNReceiver(iface)
 }
 

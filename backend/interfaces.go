@@ -6,22 +6,23 @@ import (
 	"net"
 )
 
-type Interface struct {
+type NetInterface struct {
 	Name   string `json:"name"`
 	IP     string `json:"ip"`
 	Active bool   `json:"active"`
 	itf    net.Interface
+	addr   net.IPNet
 }
 
-func (i Interface) String() string {
+func (i NetInterface) String() string {
 	return fmt.Sprintf("%v : %s", i.Name, i.IP)
 }
 
-var Interfaces []Interface
+var Interfaces []NetInterface
 
-func GetInterfaces() []Interface {
+func GetInterfaces() []NetInterface {
 	if Interfaces == nil { // Init master list the first time
-		Interfaces = make([]Interface, 0)
+		Interfaces = make([]NetInterface, 0)
 	}
 
 	ifaces, err := net.Interfaces()
@@ -32,13 +33,13 @@ func GetInterfaces() []Interface {
 	for _, iface := range ifaces {
 		switch {
 		case iface.Flags&net.FlagUp == 0:
-			continue // Ignore interfaces that are down
+			continue // Ignore NetInterfaces that are down
 		case iface.Flags&net.FlagLoopback != 0:
-			continue // Ignore loopback interfaces
+			continue // Ignore loopback NetInterfaces
 		case iface.Flags&net.FlagMulticast == 0:
-			continue // Ignore non-multicast interfaces
+			continue // Ignore non-multicast NetInterfaces
 		case iface.Flags&net.FlagPointToPoint != 0:
-			continue // Ignore point-to-point interfaces
+			continue // Ignore point-to-point NetInterfaces
 		}
 
 		addrs, err := iface.Addrs()
@@ -50,10 +51,11 @@ func GetInterfaces() []Interface {
 			switch v := a.(type) {
 			case *net.IPNet:
 				if v.IP.To4() != nil { // Only IPv4 for now
-					itf := Interface{
+					itf := NetInterface{
 						Name: iface.Name,
 						IP:   v.IP.String(),
 						itf:  iface,
+						addr: *v,
 					}
 					// fmt.Printf("%v : %s\n", itf.Name, itf.IP)
 					found := false

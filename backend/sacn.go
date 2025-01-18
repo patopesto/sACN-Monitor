@@ -15,7 +15,7 @@ var receiver *sacn.Receiver
 var sacnCallbacks map[string]func(uuid.UUID)
 var discoveredUniverses map[uint16]bool
 
-func InitSACNReceiver(iface Interface) {
+func InitSACNReceiver(iface NetInterface) {
 	log.Println("Init sACN receiver")
 
 	if iface.Name == "" {
@@ -71,7 +71,7 @@ func dataPacketCallback(p packet.SACNPacket, source string) {
 
 	sourceName := string(d.SourceName[:])
 	sourceName = strings.Trim(sourceName, "\x00") // remove trailing zeros from array
-	
+
 	uni := Universe{
 		Protocol:     "sacn",
 		Num:          d.Universe,
