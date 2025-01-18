@@ -69,20 +69,21 @@ func dataPacketCallback(p packet.SACNPacket, source string) {
 	log.Printf("Received Data Packet for universe %d from %s\n", d.Universe, source)
 
 	uni := Universe{
-		Protocol:    "sacn",
-		Num:         d.Universe,
-		Source:      source,
-		SourceName:  string(d.SourceName[:]),
-		Priority:    d.Priority,
-		SyncAddress: d.SyncAddress,
+		Protocol:     "sacn",
+		Num:          d.Universe,
+		Source:       source,
+		SourceName:   string(d.SourceName[:]),
+		Priority:     d.Priority,
+		SyncAddress:  d.SyncAddress,
 	}
-	copy(uni.data[:], d.Data[1:]) // skip zero-start value
+	copy(uni.Data[:], d.Data[1:]) // skip zero-start value
 
 	exist := false
 	for i, u := range Universes {
 		if u.Protocol == "sacn" && u.Num == uni.Num && u.Source == uni.Source {
 			exist = true
-			Universes[i].data = uni.data // copy array in original struct
+			Universes[i].Update(uni)
+			Universes[i].UpdateFPS()
 			callback := sacnCallbacks["data"]
 			if callback != nil {
 				callback(u.Id)

@@ -1,4 +1,4 @@
-import { GetUniverses, GetUniverseData, JoinUniverse } from '../../wailsjs/go/main/App'
+import { GetUniverses, GetUniverse, JoinUniverse } from '../../wailsjs/go/main/App'
 // import { EventsOn } from '../../wailsjs/runtime/runtime'
 import { Settings } from './settings.js'
 
@@ -74,8 +74,12 @@ export const Universes = {
     return this.list.find(u => u.id === this.selected)
   },
   get_data: function() {
-    GetUniverseData(this.selected).then((data) => {
-      this.data = data
+    GetUniverse(this.selected).then((universe) => {
+      this.data = universe.data
+      const index = this.list.findIndex(u => u.id === this.selected)
+      if (index >= 0) {
+        this.list[index] = universe
+      }
       if (this.data_callback_fn) {
         this.data_callback_fn()
       }

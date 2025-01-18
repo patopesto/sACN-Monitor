@@ -8,6 +8,8 @@ import { Universes } from '../models/universes'
 import { Settings } from '../models/settings'
 
 
+const UNIVERSE_TIMEOUT = 2500 // in milliseconds (sACN defines 2.5s for timeout and ArtNet is 3 seconds)
+
 export const DMX = {
   view: function(vnode) {
 
@@ -131,7 +133,7 @@ const AddUniverseModal = {
     }
 
     return [
-      m("button", { 'data-modal-target': 'add-modal', 'data-modal-toggle': 'add-modal',class: twMerge("fixed bottom-0 self-end m-2 rounded-md bg-blue-600", appTheme[Settings.theme].primary) },
+      m("button", { 'data-modal-target': 'add-modal', 'data-modal-toggle': 'add-modal', class: twMerge("fixed bottom-0 self-end m-2 rounded-md bg-blue-600", appTheme[Settings.theme].primary) },
         m(PlusIcon, { class: "w-3 h-3 m-1 text-slate-300" }),
       ),
       m(Modal, { id: "add-modal", popup: true, size: "md", theme: modalTheme, class: modalTheme.background },
@@ -256,10 +258,14 @@ const Channels = {
 const Stats = {
   view: function(vnode) {
     const universe = Universes.get_selected()
+    // console.log(universe)
     const channel = Universes.selected_channel
-    var universe_hex, channel_str, channel_value = ""
+    var universe_hex, channel_str, channel_value, last_heard = ""
     if (universe) {
       universe_hex = Number(universe.num).toString(16).toUpperCase()
+      const diff = Date.now() - Date.parse(universe.last_received)
+      if (diff < UNIVERSE_TIMEOUT) last_heard = "Receiving"
+      else last_heard = "Timeout"
     }
     if (channel !== null) {
       const value = Universes.data[channel]
@@ -277,6 +283,8 @@ const Stats = {
       universe?.sync_address > 0 &&
         m(StatsBox, { name: "Sync Address", value: universe?.sync_address } ),
       ],
+      m(StatsBox, { name: "Status", value: last_heard } ),
+      m(StatsBox, { name: "FPS", value: universe?.fps } ),
       m(StatsBox, { name: "Selected Channel", value: channel_str } ),
       m(StatsBox, { name: "Selected Value", value: channel_value } ),
     );

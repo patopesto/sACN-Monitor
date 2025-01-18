@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"log"
+	// "time"
+
 	"github.com/google/uuid"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
-	"log"
 
 	dmx "sacn-monitor/backend"
 )
@@ -60,7 +62,7 @@ func (a *App) GetUniverses() []dmx.Universe {
 	return dmx.Universes
 }
 
-func (a *App) GetUniverseData(id string) [512]byte {
+func (a *App) GetUniverse(id string) dmx.Universe {
 
 	for _, u := range dmx.Universes {
 		if u.Id.String() == id {
@@ -69,16 +71,14 @@ func (a *App) GetUniverseData(id string) [512]byte {
 			if a.selected_universe.String() != id {
 				a.selected_universe, _ = uuid.Parse(id)
 			}
-			return u.GetData()
+			return u
 		}
 	}
-	// log.Println("NOT FOUND",id)
-	var empty [512]byte
-	return empty
+
+	return dmx.Universe{}
 }
 
 func (a *App) JoinUniverse(universe uint16) {
-	log.Printf("Joining universe %d\n", universe)
 	dmx.JoinSACNUniverse(universe)
 }
 

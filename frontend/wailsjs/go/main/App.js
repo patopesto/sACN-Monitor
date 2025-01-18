@@ -10,8 +10,8 @@ export function GetInterfaces() {
   return window['go']['main']['App']['GetInterfaces']();
 }
 
-export function GetUniverseData(arg1) {
-  return window['go']['main']['App']['GetUniverseData'](arg1);
+export function GetUniverse(arg1) {
+  return window['go']['main']['App']['GetUniverse'](arg1);
 }
 
 export function GetUniverses() {

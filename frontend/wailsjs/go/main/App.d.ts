@@ -6,7 +6,7 @@ export function ClearUniverses():Promise<void>;
 
 export function GetInterfaces():Promise<Array<dmx.Interface>>;
 
-export function GetUniverseData(arg1:string):Promise<any>;
+export function GetUniverse(arg1:string):Promise<dmx.Universe>;
 
 export function GetUniverses():Promise<Array<dmx.Universe>>;
 

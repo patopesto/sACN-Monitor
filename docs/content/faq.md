@@ -14,7 +14,7 @@ DMX512-A (DMX) is defined by the ANSI E1.11 standard which can be found [here](h
 ## What is ArtNet?
 
 ArtNet is a royalty-free protocol designed and copyright by Artistic Licence Holdings Ltd. It also carries DMX512-A packets using UDP over an IP network.  
-It used IP broadcast to send universes between the sender and the receivers.
+It uses IP broadcast to send universes between the sender and the receivers.
 
 ArtNet v4 specification can be found [here](https://artisticlicence.com/WebSiteMaster/User%20Guides/art-net.pdf)
 

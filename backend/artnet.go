@@ -48,17 +48,18 @@ func recvPackets() {
 		// fmt.Println("received universe :", packet.SubUni, packet.Net)
 
 		uni := Universe{
-			Protocol: "artnet",
-			Num:      uint16(packet.Net<<16 | packet.SubUni),
-			Source:   source.IP.String(),
-			data:     packet.Data,
+			Protocol:     "artnet",
+			Num:          uint16(packet.Net<<16 | packet.SubUni),
+			Source:       source.IP.String(),
+			Data:         packet.Data,
 		}
 
 		exist := false
 		for i, u := range Universes {
 			if u.Protocol == "artnet" && u.Num == uni.Num && u.Source == uni.Source {
 				exist = true
-				Universes[i].data = uni.data // copy array in original struct
+				Universes[i].Update(uni)
+				Universes[i].UpdateFPS()
 				callback := artnetCallbacks["data"]
 				if callback != nil {
 					callback(u.Id)
