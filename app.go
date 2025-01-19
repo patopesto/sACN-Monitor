@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"fmt"
 	// "time"
 
 	"github.com/google/uuid"
@@ -53,8 +54,15 @@ func (a *App) SetInterface(iface dmx.NetInterface) {
 			dmx.Interfaces[idx].Active = false
 		}
 	}
-	dmx.InitArtnetReceiver(iface)
-	dmx.InitSACNReceiver(iface)
+	var err error
+	err = dmx.InitArtnetReceiver(iface)
+	if err != nil {
+		a.showMessage(fmt.Sprintf("Error initialising ArtNet interface \n%v", err.Error()))
+	}
+	err = dmx.InitSACNReceiver(iface)
+	if err != nil {
+		a.showMessage(fmt.Sprintf("Error initialising sACN interface \n%v", err.Error()))
+	}
 }
 
 func (a *App) GetUniverses() []dmx.Universe {
@@ -98,3 +106,14 @@ func (a *App) newDataEvent(id uuid.UUID) {
 		runtime.EventsEmit(a.ctx, "universe.data")
 	}
 }
+
+func (a *App) showMessage(msg string) {
+
+	runtime.MessageDialog(a.ctx, runtime.MessageDialogOptions{
+        Type:          runtime.WarningDialog,
+        Title:         "Interface error",
+        Message:       msg,
+        DefaultButton: "Ok",
+    })
+}
+

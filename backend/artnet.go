@@ -18,7 +18,7 @@ var currentAddr net.IPNet
 var artnetCallbacks map[string]func(uuid.UUID)
 var artnetNodes map[string]string
 
-func InitArtnetReceiver(iface NetInterface) {
+func InitArtnetReceiver(iface NetInterface) error {
 	log.Println("Init ArtNet receiver")
 
 	if artnetCallbacks == nil {
@@ -32,12 +32,13 @@ func InitArtnetReceiver(iface NetInterface) {
 		addr := fmt.Sprintf(":%d", packet.ArtNetPort)
 		listener, err := reuseport.ListenPacket("udp4", addr)
 		if err != nil {
-			log.Panic(err)
+			return err
 		}
 		server = listener.(*net.UDPConn)
 
 		go recvPackets()
 	}
+	return nil
 }
 
 func recvPackets() {

@@ -86,8 +86,8 @@ github.com/wailsapp/mimetype v1.4.1 h1:pQN9ycO7uo4vsUUuPeHEYoUkLVkaRntMnHJxVwYhw
 github.com/wailsapp/mimetype v1.4.1/go.mod h1:9aV5k31bBOv5z6u+QP8TltzvNGJPmNJD4XlAL3U+j3o=
 github.com/wailsapp/wails/v2 v2.9.2 h1:Xb5YRTos1w5N7DTMyYegWaGukCP2fIaX9WF21kPPF2k=
 github.com/wailsapp/wails/v2 v2.9.2/go.mod h1:uehvlCwJSFcBq7rMCGfk4rxca67QQGsbg5Nm4m9UnBs=
-gitlab.com/patopest/go-sacn v0.2.1 h1:GbZAH0RjodEbocnHXZm/GCA/TXoB+VjmcPYoBHp7ZAc=
-gitlab.com/patopest/go-sacn v0.2.1/go.mod h1:dEUY8cLzjGcquY0xHGItPQYVYfm7jgCThtJ0SYzTJd4=
+gitlab.com/patopest/go-sacn v0.3.1 h1:0E33bQmM7zCDlpXtBU4CZbslj7qYE/WhEl9t5Xvuswc=
+gitlab.com/patopest/go-sacn v0.3.1/go.mod h1:dEUY8cLzjGcquY0xHGItPQYVYfm7jgCThtJ0SYzTJd4=
 golang.org/x/crypto v0.23.0 h1:dIJU/v2J8Mdglj/8rJ6UUOM3Zc9zLZxVZwwxMooUSAI=
 golang.org/x/crypto v0.23.0/go.mod h1:CKFgDieR+mRhux2Lsu27y0fO304Db0wZe70UKqHu0v8=
 golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1 h1:k/i9J1pBpvlfR+9QsetwPyERsqu1GIbi967PQMq3Ivc=
