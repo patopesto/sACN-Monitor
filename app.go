@@ -45,15 +45,23 @@ func (a *App) GetInterfaces() []dmx.NetInterface {
 	return dmx.GetInterfaces()
 }
 
-func (a *App) SetInterface(iface dmx.NetInterface) {
-	log.Println("Setting interface to", iface)
+func (a *App) SetInterface(wanted dmx.NetInterface) {
+	var iface dmx.NetInterface
+	found := false
 	for idx, itf := range dmx.Interfaces {
-		if iface.Name == itf.Name && iface.IP == itf.IP {
+		if wanted.Name == itf.Name && wanted.IP == itf.IP {
+			iface = dmx.Interfaces[idx]
 			dmx.Interfaces[idx].Active = true
+			found = true
 		} else {
 			dmx.Interfaces[idx].Active = false
 		}
 	}
+	if found == false {
+		a.showMessage("Interface not found")
+	}
+
+	log.Println("Setting interface to", wanted)
 	var err error
 	err = dmx.InitArtnetReceiver(iface)
 	if err != nil {
@@ -111,7 +119,7 @@ func (a *App) showMessage(msg string) {
 
 	runtime.MessageDialog(a.ctx, runtime.MessageDialogOptions{
         Type:          runtime.WarningDialog,
-        Title:         "Interface error",
+        Title:         "Interface Error",
         Message:       msg,
         DefaultButton: "Ok",
     })
