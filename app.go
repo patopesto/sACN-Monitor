@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"log"
 	"fmt"
+	"log"
 	// "time"
 
 	"github.com/google/uuid"
@@ -62,6 +62,8 @@ func (a *App) SetInterface(wanted dmx.NetInterface) {
 	}
 
 	log.Println("Setting interface to", wanted)
+	a.ClearUniverses()
+
 	var err error
 	err = dmx.InitArtnetReceiver(iface)
 	if err != nil {
@@ -118,10 +120,9 @@ func (a *App) newDataEvent(id uuid.UUID) {
 func (a *App) showMessage(msg string) {
 
 	runtime.MessageDialog(a.ctx, runtime.MessageDialogOptions{
-        Type:          runtime.WarningDialog,
-        Title:         "Interface Error",
-        Message:       msg,
-        DefaultButton: "Ok",
-    })
+		Type:          runtime.WarningDialog,
+		Title:         "Interface Error",
+		Message:       msg,
+		DefaultButton: "Ok",
+	})
 }
-

@@ -1,11 +1,11 @@
 package dmx
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net"
 	"strings"
-	"errors"
 
 	"github.com/google/uuid"
 	"gitlab.com/patopest/go-sacn"
@@ -52,7 +52,7 @@ func InitSACNReceiver(iface NetInterface) error {
 	return nil
 }
 
-func discoveryPacketCallback(p packet.SACNPacket, source string) {
+func discoveryPacketCallback(p packet.SACNPacket, info sacn.PacketInfo) {
 	d, ok := p.(*packet.DiscoveryPacket)
 	if ok == false {
 		return
@@ -68,23 +68,27 @@ func discoveryPacketCallback(p packet.SACNPacket, source string) {
 	}
 }
 
-func dataPacketCallback(p packet.SACNPacket, source string) {
+func dataPacketCallback(p packet.SACNPacket, info sacn.PacketInfo) {
 	d, ok := p.(*packet.DataPacket)
 	if ok == false {
 		return
 	}
-	log.Printf("Received Data Packet for universe %d from %s\n", d.Universe, source)
+	log.Printf("Received Data Packet for universe %d from %s\n", d.Universe, info.Source.IP.String())
 
 	sourceName := string(d.SourceName[:])
 	sourceName = strings.Trim(sourceName, "\x00") // remove trailing zeros from array
+	sourceIP := info.Source.IP.String()
+	mode := string(info.Mode)
+	mode = strings.ToUpper(mode[:1]) + mode[1:] // Capitalise first letter
 
 	uni := Universe{
-		Protocol:     "sacn",
-		Num:          d.Universe,
-		Source:       source,
-		SourceName:   sourceName,
-		Priority:     d.Priority,
-		SyncAddress:  d.SyncAddress,
+		Protocol:    "sacn",
+		Num:         d.Universe,
+		Source:      sourceIP,
+		SourceName:  sourceName,
+		Priority:    d.Priority,
+		SyncAddress: d.SyncAddress,
+		Destination: mode,
 	}
 	copy(uni.Data[:], d.Data[1:]) // skip zero-start value
 

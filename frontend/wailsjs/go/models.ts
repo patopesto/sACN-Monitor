@@ -25,6 +25,7 @@ export namespace dmx {
 	    // Go type: time
 	    last_received: any;
 	    fps: number;
+	    destination: string;
 	    source_name: string;
 	    priority: number;
 	    sync_address: number;
@@ -42,6 +43,7 @@ export namespace dmx {
 	        this.data = source["data"];
 	        this.last_received = this.convertValues(source["last_received"], null);
 	        this.fps = source["fps"];
+	        this.destination = source["destination"];
 	        this.source_name = source["source_name"];
 	        this.priority = source["priority"];
 	        this.sync_address = source["sync_address"];

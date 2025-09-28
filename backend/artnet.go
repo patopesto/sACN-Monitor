@@ -10,10 +10,12 @@ import (
 	"github.com/jsimonetti/go-artnet/packet"
 	"github.com/jsimonetti/go-artnet/packet/code"
 	"github.com/libp2p/go-reuseport"
+	"golang.org/x/net/ipv4"
 )
 
-var server *net.UDPConn
+var server *ipv4.PacketConn
 var currentAddr net.IPNet
+var currentBcastAddr net.IP
 
 var artnetCallbacks map[string]func(uuid.UUID)
 var artnetNodes map[string]string
@@ -27,6 +29,7 @@ func InitArtnetReceiver(iface NetInterface) error {
 	}
 
 	currentAddr = iface.addr
+	currentBcastAddr = GetBroadcastIP(currentAddr.IP, currentAddr.Mask)
 
 	if server == nil {
 		addr := fmt.Sprintf(":%d", packet.ArtNetPort)
@@ -34,7 +37,11 @@ func InitArtnetReceiver(iface NetInterface) error {
 		if err != nil {
 			return err
 		}
-		server = listener.(*net.UDPConn)
+
+		server = ipv4.NewPacketConn(listener)
+		if err := server.SetControlMessage(ipv4.FlagDst, true); err != nil { // Enable receiving of destination address info
+			log.Printf("Error set ctrl msg: %v", err)
+		}
 
 		go recvPackets()
 	}
@@ -46,43 +53,54 @@ func recvPackets() {
 
 	for {
 		buf := make([]byte, 1024)
-		n, source, err := server.ReadFromUDP(buf)
+		n, cm, src, err := server.ReadFrom(buf)
 		if err != nil {
 			log.Panicln(err)
 			continue
 		}
 
 		// Filter packets based on currently selected interface's network addr
+		source := src.(*net.UDPAddr)
 		if currentAddr.Contains(source.IP) == false {
 			continue
 		}
 
 		p, err := packet.Unmarshal(buf[:n])
-		switch p.GetOpCode(){
-			case code.OpDMX:
-				pkt := p.(*packet.ArtDMXPacket)
-				handleArtDMX(pkt, source)
-			case code.OpPollReply:
-				pkt := p.(*packet.ArtPollReplyPacket)
-				handleArtPollReply(pkt, source)
+		switch p.GetOpCode() {
+		case code.OpDMX:
+			pkt := p.(*packet.ArtDMXPacket)
+			handleArtDMX(pkt, source, &cm.Dst)
+		case code.OpPollReply:
+			pkt := p.(*packet.ArtPollReplyPacket)
+			handleArtPollReply(pkt, source)
 		}
 	}
 }
 
-func handleArtDMX(p *packet.ArtDMXPacket, addr *net.UDPAddr) {
+func handleArtDMX(p *packet.ArtDMXPacket, source *net.UDPAddr, dest *net.IP) {
 	// fmt.Println("received universe :", packet.SubUni, packet.Net)
 
-	sourceIP := addr.IP.String()
+	var destination string
+	if dest.Equal(net.IPv4bcast) || dest.Equal(currentBcastAddr) {
+		destination = "Broadcast"
+	} else if dest.IsMulticast() {
+		destination = "Multicast"
+	} else {
+		destination = "Unicast"
+	}
+	sourceIP := source.IP.String()
+
 	uni := Universe{
-		Protocol:     "artnet",
-		Num:          uint16(p.Net<<16 | p.SubUni),
-		Source:       sourceIP,
-		Data:         p.Data,
+		Protocol:    "artnet",
+		Num:         uint16(p.Net<<16 | p.SubUni),
+		Source:      sourceIP,
+		Data:        p.Data,
+		Destination: destination,
 	}
 
 	sourceName, ok := artnetNodes[sourceIP]
 	if ok {
-	    uni.SourceName = sourceName
+		uni.SourceName = sourceName
 	}
 
 	exist := false

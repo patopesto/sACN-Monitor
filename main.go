@@ -72,6 +72,7 @@ func main() {
 		Windows: &windows.Options{
 			WebviewIsTransparent: true,
 			WindowIsTranslucent:  true,
+			BackdropType:         windows.Mica,
 			Theme:                windows.Dark,
 		},
 		Linux: &linux.Options{

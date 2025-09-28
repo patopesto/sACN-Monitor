@@ -280,6 +280,7 @@ const Stats = {
       universe?.source_name != "" &&
         m(StatsBox, { name: "Source Name", value: universe?.source_name } ),
       m(StatsBox, { name: "Status", value: last_heard } ),
+      m(StatsBox, { name: "Mode", value: universe?.destination } ),
       m(StatsBox, { name: "FPS", value: universe?.fps } ),
       universe?.protocol === "sacn" && [
         m(StatsBox, { name: "Priority", value: universe?.priority } ),

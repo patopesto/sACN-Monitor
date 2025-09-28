@@ -1,8 +1,8 @@
 package dmx
 
 import (
-	"time"
 	"math"
+	"time"
 	// "fmt"
 
 	"github.com/google/uuid"
@@ -19,8 +19,9 @@ type Universe struct {
 	Source       string    `json:"source"` // string of the sender's IP address
 	Data         [512]byte `json:"data"`
 	LastReceived time.Time `json:"last_received"`
-	FPS 		 uint8     `json:"fps"`
-	period 		 uint  
+	FPS          uint8     `json:"fps"`
+	Destination  string    `json:"destination"` // Unicast | Broadcast | Multicast
+	period       uint
 
 	// sACN specific
 	SourceName  string `json:"source_name"`
@@ -47,6 +48,7 @@ func (u *Universe) Update(new Universe) {
 	u.SourceName = new.SourceName
 	u.Priority = new.Priority
 	u.SyncAddress = new.SyncAddress
+	u.Destination = new.Destination
 }
 
 // List of all currently received universes

@@ -1,6 +1,7 @@
 package dmx
 
 import (
+	"encoding/binary"
 	"fmt"
 	"log"
 	"net"
@@ -78,4 +79,21 @@ func GetInterfaces() []NetInterface {
 	}
 
 	return Interfaces
+}
+
+// IP utility functions
+func GetBroadcastIP(ip net.IP, mask net.IPMask) net.IP {
+	ip4 := ip.To4()
+	if ip4 == nil || len(mask) != net.IPv4len {
+		return nil
+	}
+
+	ipInt := binary.BigEndian.Uint32(ip4)
+	maskInt := binary.BigEndian.Uint32(mask)
+
+	broadcastInt := ipInt | ^maskInt
+
+	bcstIP := make(net.IP, net.IPv4len)
+	binary.BigEndian.PutUint32(bcstIP, broadcastInt)
+	return bcstIP
 }
