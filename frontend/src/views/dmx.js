@@ -88,7 +88,7 @@ const UniverseList = {
         const value = theme.value[selected ? "on" : "off"]
         const label = universe.protocol === "sacn" ? "sACN" : "ArtNet"
 
-        return m("div", { class: twMerge("flex flex-row min-h-8 items-center focus:outline-none", theme.base.root, highlight),
+        return m("div", { class: twMerge("flex flex-row min-h-8 h-8 items-center focus:outline-none", theme.base.root, highlight),
             id: universe.id,
             tabindex: -1,
             onclick: () => { Universes.select(universe.id) },
