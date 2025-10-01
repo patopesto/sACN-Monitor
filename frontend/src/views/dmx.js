@@ -13,7 +13,7 @@ const UNIVERSE_TIMEOUT = 2500 // in milliseconds (sACN defines 2.5s for timeout 
 export const DMX = {
   view: function(vnode) {
 
-    return m("div", { class: "flex flex-row justify-items-center h-screen overflow-hidden bg-zinc-900 bg-opacity-60" }, // min-h-screen
+    return m("div", { class: "flex flex-row justify-items-center h-screen overflow-hidden bg-zinc-900 bg-opacity-60 select-none cursor-default" }, // min-h-screen
       m(Column, { title: "UNIVERSES", class: "basis-1/5" },
         m(UniverseList),
       ),
@@ -81,14 +81,14 @@ const UniverseList = {
       }
     }
 
-    return m("div", { class: "flex flex-col py-2 overflow-auto overscroll-none" },
+    return m("div", { class: "flex flex-col pt-2 pb-9 overflow-auto overscroll-none" },
       universes.map((universe, index) => {
         const selected = Universes.selected === universe.id
         const highlight = theme.base[selected ? "on" : "off"]
         const value = theme.value[selected ? "on" : "off"]
         const label = universe.protocol === "sacn" ? "sACN" : "ArtNet"
 
-        return m("div", { class: twMerge("flex flex-row h-8 items-center focus:outline-none", theme.base.root, highlight),
+        return m("div", { class: twMerge("flex flex-row min-h-8 items-center focus:outline-none", theme.base.root, highlight),
             id: universe.id,
             tabindex: -1,
             onclick: () => { Universes.select(universe.id) },
@@ -119,8 +119,8 @@ const AddUniverseModal = {
     const modalTheme = {
       background: "dark:bg-neutral-900 dark:bg-opacity-10",
       content: {
-        inner: "dark:bg-zinc-800",
-      }
+        inner: "rounded-xl dark:bg-zinc-800",
+      },
     }
 
     const join_universe = () => {
@@ -133,7 +133,7 @@ const AddUniverseModal = {
     }
 
     return [
-      m("button", { 'data-modal-target': 'add-modal', 'data-modal-toggle': 'add-modal', class: twMerge("fixed bottom-0 self-end m-2 rounded-md bg-blue-600", appTheme[Settings.theme].primary) },
+      m("button", { 'data-modal-target': 'add-modal', 'data-modal-toggle': 'add-modal', class: twMerge("fixed bottom-0 self-end m-3 rounded-md bg-blue-600", appTheme[Settings.theme].primary) },
         m(PlusIcon, { class: "w-3 h-3 m-1 text-slate-300" }),
       ),
       m(Modal, { id: "add-modal", popup: true, size: "md", theme: modalTheme, class: modalTheme.background },
@@ -295,6 +295,7 @@ const Stats = {
         universe?.sync_address > 0 &&
           m(StatsBox, { name: "Sync Address", value: universe?.sync_address } ),
         ],
+      m("div", { class: "mx-6 my-2 border-t border-zinc-700" }),
       m(StatsBox, { name: "Selected Channel", value: channel_str } ),
       m(StatsBox, { name: "Selected Value", value: channel_value } ),
     );
@@ -307,7 +308,7 @@ const StatsBox = {
 
     return m("div", { class: "flex flex-row justify-between items-center mx-3.5 my-1 text-slate-300 text-xs" },
       m("div", { class: "" }, name),
-      m("div", { class: "text-right" }, value),
+      m("div", { class: "text-right select-all" }, value),
     );
   }
 }
@@ -377,8 +378,8 @@ const SettingsPane = {
       m("div", { class: "pt-3" },
         m(Button.Group, { outline: true }, [
           m(Button, { theme: view === "channels" ? themeOn : themeOff, color: color, onclick: () => {set_view_mode("channels")} }, "Channels"),
-          m(Button, { theme: view === "values" ? themeOn : themeOff,   color: color, onclick: () => {set_view_mode("values")} },   "\u00A0Values\u00A0"),
-          m(Button, { theme: view === "both" ? themeOn : themeOff,     color: color, onclick: () => {set_view_mode("both")} },     "\u00A0Both\u00A0"),
+          m(Button, { theme: view === "values" ? themeOn : themeOff,   color: color, onclick: () => {set_view_mode("values")} },   "Values"),
+          m(Button, { theme: view === "both" ? themeOn : themeOff,     color: color, onclick: () => {set_view_mode("both")} },     "Both"),
         ]),
       ),
       m("div", { class: "pt-3" },
