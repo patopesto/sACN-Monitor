@@ -40,7 +40,7 @@ func InitArtnetReceiver(iface NetInterface) error {
 
 		server = ipv4.NewPacketConn(listener)
 		if err := server.SetControlMessage(ipv4.FlagDst, true); err != nil { // Enable receiving of destination address info
-			log.Printf("Error set ctrl msg: %v", err)
+			log.Printf("Error SetControlMessage: %v", err)
 		}
 
 		go recvPackets()
@@ -64,12 +64,16 @@ func recvPackets() {
 		if currentAddr.Contains(source.IP) == false {
 			continue
 		}
+		var dest *net.IP = nil
+		if cm != nil && cm.Dst != nil {
+			dest = &cm.Dst
+		}
 
 		p, err := packet.Unmarshal(buf[:n])
 		switch p.GetOpCode() {
 		case code.OpDMX:
 			pkt := p.(*packet.ArtDMXPacket)
-			handleArtDMX(pkt, source, &cm.Dst)
+			handleArtDMX(pkt, source, dest)
 		case code.OpPollReply:
 			pkt := p.(*packet.ArtPollReplyPacket)
 			handleArtPollReply(pkt, source)
@@ -80,13 +84,15 @@ func recvPackets() {
 func handleArtDMX(p *packet.ArtDMXPacket, source *net.UDPAddr, dest *net.IP) {
 	// fmt.Println("received universe :", packet.SubUni, packet.Net)
 
-	var destination string
-	if dest.Equal(net.IPv4bcast) || dest.Equal(currentBcastAddr) {
-		destination = "Broadcast"
-	} else if dest.IsMulticast() {
-		destination = "Multicast"
-	} else {
-		destination = "Unicast"
+	destination := ""
+	if dest != nil {
+		if dest.Equal(net.IPv4bcast) || dest.Equal(currentBcastAddr) {
+			destination = "Broadcast"
+		} else if dest.IsMulticast() {
+			destination = "Multicast"
+		} else {
+			destination = "Unicast"
+		}
 	}
 	sourceIP := source.IP.String()
 

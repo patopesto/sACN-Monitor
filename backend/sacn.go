@@ -73,7 +73,7 @@ func dataPacketCallback(p packet.SACNPacket, info sacn.PacketInfo) {
 	if ok == false {
 		return
 	}
-	log.Printf("Received Data Packet for universe %d from %s\n", d.Universe, info.Source.IP.String())
+	// log.Printf("Received Data Packet for universe %d from %s\n", d.Universe, info.Source.IP.String())
 
 	sourceName := string(d.SourceName[:])
 	sourceName = strings.Trim(sourceName, "\x00") // remove trailing zeros from array
