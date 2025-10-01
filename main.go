@@ -29,8 +29,8 @@ func main() {
 
 	// Menus
 	AppMenu := menu.NewMenu()
-	if runtime.GOOS == "darwin" {
-		AppMenu.Append(menu.AppMenu())
+	if runtime.GOOS == "darwin" { 
+		AppMenu.Append(menu.AppMenu()) // on macOS, needs to be done right after menu.NewMenu()
 	}
 	OptionsMenu := AppMenu.AddSubmenu("Options")
 	OptionsMenu.AddSeparator()
@@ -39,6 +39,9 @@ func main() {
 	OptionsMenu.AddText("Clear Universe list", keys.CmdOrCtrl("r"), func(_ *menu.CallbackData) {
 		app.ClearUniverses()
 	})
+	if runtime.GOOS == "windows" { // Disable menu on Windows for now. It looks terrible with dark theme...
+		AppMenu = nil
+	}
 
 	// Load variables from embedded wails config file
 	name := gjson.Get(configWails, "name")
