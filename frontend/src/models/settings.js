@@ -10,7 +10,7 @@ export const Settings = {
   },
 
   // View mode
-  view: 'channels', // channels or values
+  view: 'channels', // channels | values | both
   set_view: function(view) {
     console.log("Setting view:", view)
     this.view = view

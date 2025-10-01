@@ -236,8 +236,7 @@ const Channels = {
         const selected = Universes.selected_channel == index
         const highlight = theme.selected[selected ? "on" : "off"]
         const active = theme.active[value > 0 ? "on" : "off"]
-        const height = "height: "+(value * 100 / 255)+"%"
-        const box_value = (Settings.view === "channels") ? (index + 1) : value
+        const height = `height: ${value * 100 / 255}%`
 
         return m("div", { id: index, class: twMerge("relative w-10 h-8 flex justify-center items-center focus:outline-none", highlight),
               id: `channel-${index}`,
@@ -245,8 +244,16 @@ const Channels = {
               onclick: () => { Universes.select_channel(index) },
               onkeydown: (event) => { navigate(event, index) },
           },
-          m("div", { class: twMerge("absolute border-box self-end w-full", theme.background), style: height} ), 
-          m("div", { class: twMerge("text-xs", active) }, box_value),
+          m("div", { class: twMerge("absolute border-box self-end w-full", theme.background), style: height} ),
+          Settings.view === "channels" && 
+            m("div", { class: twMerge("text-xs", active) }, `${index + 1}`),
+          Settings.view === "values" && 
+            m("div", { class: twMerge("text-xs", active) }, value),
+          Settings.view === "both" &&
+            m("div", { class: "flex flex-col items-center" }, 
+              m("div", { class: twMerge("text-xs", theme.active.off) }, index + 1),
+              m("div", { class: twMerge("text-xs", active) }, value),
+            ),
         )
       })
     );
@@ -370,7 +377,8 @@ const SettingsPane = {
       m("div", { class: "pt-3" },
         m(Button.Group, { outline: true }, [
           m(Button, { theme: view === "channels" ? themeOn : themeOff, color: color, onclick: () => {set_view_mode("channels")} }, "Channels"),
-          m(Button, { theme: view === "values" ? themeOn : themeOff,   color: color, onclick: () => {set_view_mode("values")} },   "\u00A0\u00A0Values\u00A0\u00A0"),
+          m(Button, { theme: view === "values" ? themeOn : themeOff,   color: color, onclick: () => {set_view_mode("values")} },   "\u00A0Values\u00A0"),
+          m(Button, { theme: view === "both" ? themeOn : themeOff,     color: color, onclick: () => {set_view_mode("both")} },     "\u00A0Both\u00A0"),
         ]),
       ),
       m("div", { class: "pt-3" },
