@@ -12,6 +12,7 @@ vars:
   VITE_PORT: '{{.WAILS_VITE_PORT | default 9245}}'
 
 tasks:
+  # Wails tasks
   build:
     summary: Builds the application
     cmds:
@@ -56,3 +57,26 @@ tasks:
     summary: Builds and runs the Docker image
     cmds:
       - task: common:run:docker
+
+  # Custom tasks
+  check:
+    desc: Clean, tidy and audit
+    cmds:
+      - task: fmt
+      - task: vet
+      - task: common:go:mod:tidy
+      - go run golang.org/x/vuln/cmd/govulncheck@latest -show verbose ./...
+
+  fmt:
+    desc: Run Formatting
+    cmd: go fmt ./...
+
+  vet:
+    desc: Run linting
+    cmd: go vet ./...
+
+  update:
+    desc: Update dependencies
+    cmds:
+      - task: common:go:mod:tidy
+      - go get -u ./...  
