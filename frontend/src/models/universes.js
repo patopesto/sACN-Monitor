@@ -1,5 +1,5 @@
-import { GetUniverses, GetUniverse, JoinUniverse } from '../../wailsjs/go/main/App'
-// import { EventsOn } from '../../wailsjs/runtime/runtime'
+import { GetUniverses, GetUniverse, JoinUniverse } from '../../bindings/sacn-monitor/dmxservice'
+import { Events } from '@wailsio/runtime'
 import { Settings } from './settings.js'
 
 export const Universes = {
@@ -50,11 +50,11 @@ export const Universes = {
 
   callback_fn: null,
   on_change: function(callback) {
-    window.runtime.EventsOn("universes.new", () => {
+    Events.On("universes.new", () => {
       // console.log("Event: universes.new")
       this.get_universes()
     })
-    window.runtime.EventsOn("universes.clear", () => {
+    Events.On("universes.clear", () => {
       // console.log("Event: universes.clear")
       this.clear_universes()
     })
@@ -87,7 +87,7 @@ export const Universes = {
   },
   data_callback_fn: null,
   on_data_change: function(callback) {
-    window.runtime.EventsOn("universe.data", () => {
+    Events.On("universe.data", () => {
       // console.log("Event: universe.data")
       this.get_data()
     })

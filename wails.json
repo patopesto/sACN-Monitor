@@ -1,20 +1,11 @@
 {
-  "$schema": "https://wails.io/schemas/config.v2.json",
+  "$schema": "https://v3alpha.wails.io/schemas/config.v3.json",
   "name": "sACN Monitor",
-  "version": "1.5.0",
-  "outputfilename": "sACN Monitor",
-  "frontend:install": "npm install",
-  "frontend:build": "npm run build",
-  "frontend:dev:watcher": "npm run dev",
-  "frontend:dev:serverUrl": "auto",
-  "author": {
-    "name": "Alban Moreon",
-    "email": "developer@bambinito.net"
-  },
-  "info": {
-    "productName": "sACN Monitor",
-    "productVersion": "1.5.0",
-    "copyright": "Copyright © 2025 Alban Moreon",
-    "comments": "An App to view sACN (ANSI E1.31) DMX data"
+  "frontend": {
+    "dir": "./frontend",
+    "install": "npm install",
+    "build": "npm run build",
+    "dev": "npm run dev",
+    "devServerUrl": "http://localhost:5173"
   }
 }

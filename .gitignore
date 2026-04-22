@@ -1,10 +1,18 @@
 # macOS
 .DS_Store
 
-# Wails specifics
+# Wails v2 specifics
 build/bin
 node_modules
 frontend/dist
+
+# Wails v3 specifics
+.task
+bin
+frontend/dist
+frontend/node_modules
+build/linux/appimage/build
+build/windows/nsis/MicrosoftEdgeWebview2Setup.exe
 
 # NodeJS
 npm-debug.log*

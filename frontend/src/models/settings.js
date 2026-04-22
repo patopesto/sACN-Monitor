@@ -1,4 +1,4 @@
-import { GetInterfaces, SetInterface } from '../../wailsjs/go/main/App'
+import { GetInterfaces, SetInterface } from '../../bindings/sacn-monitor/dmxservice'
 
 export const Settings = {
 
