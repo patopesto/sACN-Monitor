@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"sync"
 
 	"github.com/google/uuid"
 	"github.com/wailsapp/wails/v3/pkg/application"
@@ -11,8 +12,10 @@ import (
 
 type DMXService struct {
 	app               *application.App
+
 	universes         []Universe
 	selected_universe uuid.UUID
+	mu        		  sync.RWMutex
 
 	sacn   *sACNReceiver
 	artnet *artNetReceiver
@@ -72,13 +75,15 @@ func (s *DMXService) SetInterface(iface NetInterface) {
 	}
 }
 
-// GetUniverses returns all discovered universes
 func (s *DMXService) GetUniverses() []Universe {
 	return s.universes
 }
 
 // GetUniverse returns a specific universe by ID
 func (s *DMXService) GetUniverse(id string) Universe {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	for _, u := range s.universes {
 		if u.Id.String() == id {
 			if s.selected_universe.String() != id {
@@ -98,19 +103,25 @@ func (s *DMXService) JoinUniverse(universe uint16) {
 // ClearUniverses clears all universe data
 func (s *DMXService) ClearUniverses() {
 	log.Println("Clearing universes")
+	s.mu.Lock()
 	s.universes = nil
-	s.app.Event.Emit("universes.clear", nil)
+	s.mu.Unlock()
+	s.app.Event.Emit("universes.clear")
 }
 
 // newUniverseEvent is called when a new universe is discovered
 func (s *DMXService) newUniverseEvent(id uuid.UUID) {
-	s.app.Event.Emit("universes.new", nil)
+	s.app.Event.Emit("universes.new")
 }
 
 // newDataEvent is called when new DMX data is received
 func (s *DMXService) newDataEvent(id uuid.UUID) {
-	if s.selected_universe == id {
-		s.app.Event.Emit("universe.data", nil)
+	s.mu.RLock()
+	selected := s.selected_universe
+	s.mu.RUnlock()
+
+	if selected == id {
+		s.app.Event.Emit("universe.data")
 	}
 }
 
@@ -124,10 +135,13 @@ func (s *DMXService) showMessage(msg string) {
 }
 
 func (s *DMXService) updateUniverse(uni Universe) {
+	s.mu.Lock()
+	
 	for i, u := range s.universes {
 		if u.Protocol == uni.Protocol && u.Num == uni.Num && u.Source == uni.Source {
 			s.universes[i].Update(uni)
 			s.universes[i].UpdateFPS()
+			s.mu.Unlock()
 			s.newDataEvent(u.Id)
 			return
 		}
@@ -136,5 +150,6 @@ func (s *DMXService) updateUniverse(uni Universe) {
 	// universe does not exist, add to list
 	uni.Id = uuid.New()
 	s.universes = append(s.universes, uni)
+	s.mu.Unlock()
 	s.newUniverseEvent(uni.Id)
 }

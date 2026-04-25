@@ -16,7 +16,7 @@ var artnetNodes map[string]string
 
 type artNetReceiver struct {
 	service        *DMXService
-	server         *ipv4.PacketConn
+	conn         *ipv4.PacketConn
 	localAddr      net.IPNet
 	localBcastAddr net.IP
 	stop           chan bool
@@ -35,8 +35,8 @@ func NewArtnetReceiver(iface NetInterface, service *DMXService) (*artNetReceiver
 		return nil, err
 	}
 
-	server := ipv4.NewPacketConn(listener)
-	if err := server.SetControlMessage(ipv4.FlagDst, true); err != nil { // Enable receiving of destination address info
+	conn := ipv4.NewPacketConn(listener)
+	if err := conn.SetControlMessage(ipv4.FlagDst, true); err != nil { // Enable receiving of destination address info
 		log.Printf("Error SetControlMessage: %v", err)
 	}
 
@@ -45,7 +45,7 @@ func NewArtnetReceiver(iface NetInterface, service *DMXService) (*artNetReceiver
 
 	r := &artNetReceiver{
 		service:        service,
-		server:         server,
+		conn:         conn,
 		localAddr:      localAddr,
 		localBcastAddr: GetBroadcastIP(localAddr.IP, localAddr.Mask),
 		stop:           make(chan bool),
@@ -63,7 +63,7 @@ func (r *artNetReceiver) Stop() {
 }
 
 func (r *artNetReceiver) recvPackets() {
-	defer r.server.Close()
+	defer r.conn.Close()
 
 	for {
 		select {
@@ -71,7 +71,7 @@ func (r *artNetReceiver) recvPackets() {
 			return
 		default:
 			buf := make([]byte, 1024)
-			n, cm, src, err := r.server.ReadFrom(buf)
+			n, cm, src, err := r.conn.ReadFrom(buf)
 			if err != nil {
 				log.Panicln(err)
 				continue

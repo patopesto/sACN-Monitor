@@ -30,7 +30,6 @@ export function GetUniverse(id) {
 }
 
 /**
- * GetUniverses returns all discovered universes
  * @returns {$CancellablePromise<$models.Universe[]>}
  */
 export function GetUniverses() {
