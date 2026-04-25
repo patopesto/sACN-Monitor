@@ -79,4 +79,9 @@ tasks:
     desc: Update dependencies
     cmds:
       - task: common:go:mod:tidy
-      - go get -u ./...  
+      - go get -u ./...
+
+  clean:
+    desc: Clean build directoy
+    cmds:
+      - rm -rf {{.BIN_DIR}}

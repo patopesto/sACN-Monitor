@@ -1,4 +1,4 @@
-import { GetInterfaces, SetInterface } from '../../bindings/sacn-monitor/dmxservice'
+import { GetInterfaces, SetInterface } from '../../bindings/sacn-monitor/backend/networkservice'
 
 export const Settings = {
 

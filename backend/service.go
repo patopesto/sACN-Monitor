@@ -1,4 +1,4 @@
-package main
+package dmx
 
 import (
 	"context"
@@ -7,84 +7,79 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/wailsapp/wails/v3/pkg/application"
-
-	dmx "sacn-monitor/backend"
 )
 
-// DMXService struct replaces the v2 App struct
 type DMXService struct {
 	app               *application.App
+	universes         []Universe
 	selected_universe uuid.UUID
+
+	sacn   *sACNReceiver
+	artnet *artNetReceiver
 }
 
-// NewDMXService creates a new DMXService application struct
 func NewDMXService(app *application.App) *DMXService {
 	return &DMXService{
-		app: app,
+		app:       app,
+		universes: make([]Universe, 0),
 	}
 }
 
 // ServiceStartup is called when the app starts. This replaces v2's startup method.
 func (s *DMXService) ServiceStartup(ctx context.Context, options application.ServiceOptions) error {
-	ifaces := dmx.GetInterfaces()
-	s.SetInterface(ifaces[0]) // also inits receivers
-	dmx.RegisterArtnetCallback("universe", s.newUniverseEvent)
-	dmx.RegisterArtnetCallback("data", s.newDataEvent)
-	dmx.RegisterSACNCallback("universe", s.newUniverseEvent)
-	dmx.RegisterSACNCallback("data", s.newDataEvent)
+	s.app.Event.On("interface.selected", func(e *application.CustomEvent) {
+		itf, _ := e.Data.(NetInterface)
+		s.SetInterface(itf)
+	})
 	return nil
 }
 
 // ServiceShutdown is called when the app shuts down
 func (s *DMXService) ServiceShutdown() error {
-	log.Println("Shutting down")
+	log.Println("Shutting down, DMXService")
+	if s.sacn != nil {
+		s.sacn.Stop()
+	}
+	if s.artnet != nil {
+		s.artnet.Stop()
+	}
 	return nil
 }
 
-// GetInterfaces returns available network interfaces
-func (s *DMXService) GetInterfaces() []dmx.NetInterface {
-	return dmx.GetInterfaces()
-}
-
 // SetInterface sets the active network interface
-func (s *DMXService) SetInterface(wanted dmx.NetInterface) {
-	var iface dmx.NetInterface
-	found := false
-	for idx, itf := range dmx.Interfaces {
-		if wanted.Name == itf.Name && wanted.IP == itf.IP {
-			iface = dmx.Interfaces[idx]
-			dmx.Interfaces[idx].Active = true
-			found = true
-		} else {
-			dmx.Interfaces[idx].Active = false
-		}
+func (s *DMXService) SetInterface(iface NetInterface) {
+	log.Println("Setting interface to", iface)
+	if s.sacn != nil {
+		s.sacn.Stop()
 	}
-	if found == false {
-		s.showMessage("Interface not found")
+	if s.artnet != nil {
+		s.artnet.Stop()
 	}
-
-	log.Println("Setting interface to", wanted)
 	s.ClearUniverses()
 
-	var err error
-	err = dmx.InitArtnetReceiver(iface)
+	artnetReceiver, err := NewArtnetReceiver(iface, s)
 	if err != nil {
 		s.showMessage(fmt.Sprintf("Error initialising ArtNet interface \n%v", err.Error()))
+	} else {
+		s.artnet = artnetReceiver
 	}
-	err = dmx.InitSACNReceiver(iface)
+
+	sacnReceiver, err := NewSACNReceiver(iface, s)
 	if err != nil {
 		s.showMessage(fmt.Sprintf("Error initialising sACN interface \n%v", err.Error()))
+	} else {
+		s.sacn = sacnReceiver
 	}
 }
 
 // GetUniverses returns all discovered universes
-func (s *DMXService) GetUniverses() []dmx.Universe {
-	return dmx.Universes
+func (s *DMXService) GetUniverses() []Universe {
+	return s.universes
 }
 
 // GetUniverse returns a specific universe by ID
-func (s *DMXService) GetUniverse(id string) dmx.Universe {
-	for _, u := range dmx.Universes {
+func (s *DMXService) GetUniverse(id string) Universe {
+	for _, u := range s.universes {
 		if u.Id.String() == id {
 			if s.selected_universe.String() != id {
 				s.selected_universe, _ = uuid.Parse(id)
@@ -92,18 +87,18 @@ func (s *DMXService) GetUniverse(id string) dmx.Universe {
 			return u
 		}
 	}
-	return dmx.Universe{}
+	return Universe{}
 }
 
 // JoinUniverse joins an sACN universe manually
 func (s *DMXService) JoinUniverse(universe uint16) {
-	dmx.JoinSACNUniverse(universe)
+	s.sacn.JoinUniverse(universe)
 }
 
 // ClearUniverses clears all universe data
 func (s *DMXService) ClearUniverses() {
 	log.Println("Clearing universes")
-	dmx.Universes = nil
+	s.universes = nil
 	s.app.Event.Emit("universes.clear", nil)
 }
 
@@ -126,4 +121,20 @@ func (s *DMXService) showMessage(msg string) {
 		SetMessage(msg)
 	dialog.AddButton("OK")
 	dialog.Show()
+}
+
+func (s *DMXService) updateUniverse(uni Universe) {
+	for i, u := range s.universes {
+		if u.Protocol == uni.Protocol && u.Num == uni.Num && u.Source == uni.Source {
+			s.universes[i].Update(uni)
+			s.universes[i].UpdateFPS()
+			s.newDataEvent(u.Id)
+			return
+		}
+	}
+
+	// universe does not exist, add to list
+	uni.Id = uuid.New()
+	s.universes = append(s.universes, uni)
+	s.newUniverseEvent(uni.Id)
 }

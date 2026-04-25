@@ -50,6 +50,3 @@ func (u *Universe) Update(new Universe) {
 	u.SyncAddress = new.SyncAddress
 	u.Destination = new.Destination
 }
-
-// List of all currently received universes
-var Universes []Universe

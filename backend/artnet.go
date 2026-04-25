@@ -6,87 +6,106 @@ import (
 	"net"
 	"strings"
 
-	"github.com/google/uuid"
 	"github.com/jsimonetti/go-artnet/packet"
 	"github.com/jsimonetti/go-artnet/packet/code"
 	"github.com/libp2p/go-reuseport"
 	"golang.org/x/net/ipv4"
 )
 
-var server *ipv4.PacketConn
-var currentAddr net.IPNet
-var currentBcastAddr net.IP
-
-var artnetCallbacks map[string]func(uuid.UUID)
 var artnetNodes map[string]string
 
-func InitArtnetReceiver(iface NetInterface) error {
+type artNetReceiver struct {
+	service        *DMXService
+	server         *ipv4.PacketConn
+	localAddr      net.IPNet
+	localBcastAddr net.IP
+	stop           chan bool
+}
+
+func NewArtnetReceiver(iface NetInterface, service *DMXService) (*artNetReceiver, error) {
 	log.Println("Init ArtNet receiver")
 
-	if artnetCallbacks == nil {
-		artnetCallbacks = make(map[string]func(uuid.UUID))
+	if artnetNodes == nil {
 		artnetNodes = make(map[string]string)
 	}
 
-	currentAddr = iface.addr
-	currentBcastAddr = GetBroadcastIP(currentAddr.IP, currentAddr.Mask)
-
-	if server == nil {
-		addr := fmt.Sprintf(":%d", packet.ArtNetPort)
-		listener, err := reuseport.ListenPacket("udp4", addr)
-		if err != nil {
-			return err
-		}
-
-		server = ipv4.NewPacketConn(listener)
-		if err := server.SetControlMessage(ipv4.FlagDst, true); err != nil { // Enable receiving of destination address info
-			log.Printf("Error SetControlMessage: %v", err)
-		}
-
-		go recvPackets()
+	addr := fmt.Sprintf(":%d", packet.ArtNetPort)
+	listener, err := reuseport.ListenPacket("udp4", addr)
+	if err != nil {
+		return nil, err
 	}
-	return nil
+
+	server := ipv4.NewPacketConn(listener)
+	if err := server.SetControlMessage(ipv4.FlagDst, true); err != nil { // Enable receiving of destination address info
+		log.Printf("Error SetControlMessage: %v", err)
+	}
+
+	_, ipNet, _ := net.ParseCIDR(iface.IPNet)
+	localAddr := *ipNet
+
+	r := &artNetReceiver{
+		service:        service,
+		server:         server,
+		localAddr:      localAddr,
+		localBcastAddr: GetBroadcastIP(localAddr.IP, localAddr.Mask),
+		stop:           make(chan bool),
+	}
+
+	go r.recvPackets()
+
+	return r, nil
 }
 
-func recvPackets() {
-	defer server.Close()
+func (r *artNetReceiver) Stop() {
+	if r.stop != nil {
+		close(r.stop)
+	}
+}
+
+func (r *artNetReceiver) recvPackets() {
+	defer r.server.Close()
 
 	for {
-		buf := make([]byte, 1024)
-		n, cm, src, err := server.ReadFrom(buf)
-		if err != nil {
-			log.Panicln(err)
-			continue
-		}
+		select {
+		case <-r.stop:
+			return
+		default:
+			buf := make([]byte, 1024)
+			n, cm, src, err := r.server.ReadFrom(buf)
+			if err != nil {
+				log.Panicln(err)
+				continue
+			}
 
-		// Filter packets based on currently selected interface's network addr
-		source := src.(*net.UDPAddr)
-		if currentAddr.Contains(source.IP) == false {
-			continue
-		}
-		var dest *net.IP = nil
-		if cm != nil && cm.Dst != nil {
-			dest = &cm.Dst
-		}
+			// Filter packets based on currently selected interface's network addr
+			source := src.(*net.UDPAddr)
+			if r.localAddr.Contains(source.IP) == false {
+				continue
+			}
+			var dest *net.IP = nil
+			if cm != nil && cm.Dst != nil {
+				dest = &cm.Dst
+			}
 
-		p, err := packet.Unmarshal(buf[:n])
-		switch p.GetOpCode() {
-		case code.OpDMX:
-			pkt := p.(*packet.ArtDMXPacket)
-			handleArtDMX(pkt, source, dest)
-		case code.OpPollReply:
-			pkt := p.(*packet.ArtPollReplyPacket)
-			handleArtPollReply(pkt, source)
+			p, err := packet.Unmarshal(buf[:n])
+			switch p.GetOpCode() {
+			case code.OpDMX:
+				pkt := p.(*packet.ArtDMXPacket)
+				r.handleArtDMX(pkt, source, dest)
+			case code.OpPollReply:
+				pkt := p.(*packet.ArtPollReplyPacket)
+				r.handleArtPollReply(pkt, source)
+			}
 		}
 	}
 }
 
-func handleArtDMX(p *packet.ArtDMXPacket, source *net.UDPAddr, dest *net.IP) {
+func (r *artNetReceiver) handleArtDMX(p *packet.ArtDMXPacket, source *net.UDPAddr, dest *net.IP) {
 	// fmt.Println("received universe :", packet.SubUni, packet.Net)
 
 	destination := ""
 	if dest != nil {
-		if dest.Equal(net.IPv4bcast) || dest.Equal(currentBcastAddr) {
+		if dest.Equal(net.IPv4bcast) || dest.Equal(r.localBcastAddr) {
 			destination = "Broadcast"
 		} else if dest.IsMulticast() {
 			destination = "Multicast"
@@ -98,7 +117,7 @@ func handleArtDMX(p *packet.ArtDMXPacket, source *net.UDPAddr, dest *net.IP) {
 
 	uni := Universe{
 		Protocol:    "artnet",
-		Num:         uint16(p.Net<<16 | p.SubUni),
+		Num:         uint16(p.Net)<<8 | uint16(p.SubUni),
 		Source:      sourceIP,
 		Data:        p.Data,
 		Destination: destination,
@@ -109,38 +128,14 @@ func handleArtDMX(p *packet.ArtDMXPacket, source *net.UDPAddr, dest *net.IP) {
 		uni.SourceName = sourceName
 	}
 
-	exist := false
-	for i, u := range Universes {
-		if u.Protocol == "artnet" && u.Num == uni.Num && u.Source == uni.Source {
-			exist = true
-			Universes[i].Update(uni)
-			Universes[i].UpdateFPS()
-			callback := artnetCallbacks["data"]
-			if callback != nil {
-				callback(u.Id)
-			}
-			break
-		}
-	}
-	if exist == false {
-		uni.Id = uuid.New()
-		Universes = append(Universes, uni)
-		callback := artnetCallbacks["universe"]
-		if callback != nil {
-			callback(uni.Id)
-		}
-	}
+	r.service.updateUniverse(uni)
 }
 
-func handleArtPollReply(p *packet.ArtPollReplyPacket, addr *net.UDPAddr) {
+func (r *artNetReceiver) handleArtPollReply(p *packet.ArtPollReplyPacket, addr *net.UDPAddr) {
 	// log.Println("Received ArtPollReply from %v", addr)
 	sourceName := string(p.LongName[:])
 	sourceName = strings.Trim(sourceName, "\x00") // remove trailing zeros from array
 
 	sourceIP := addr.IP.String()
 	artnetNodes[sourceIP] = sourceName
-}
-
-func RegisterArtnetCallback(name string, fn func(uuid.UUID)) {
-	artnetCallbacks[name] = fn
 }

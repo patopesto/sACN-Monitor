@@ -1,4 +1,4 @@
-import { GetUniverses, GetUniverse, JoinUniverse } from '../../bindings/sacn-monitor/dmxservice'
+import { GetUniverses, GetUniverse, JoinUniverse } from '../../bindings/sacn-monitor/backend/dmxservice'
 import { Events } from '@wailsio/runtime'
 import { Settings } from './settings.js'
 

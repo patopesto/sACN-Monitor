@@ -1,36 +1,62 @@
 package dmx
 
 import (
+	"context"
 	"encoding/binary"
 	"fmt"
 	"log"
 	"net"
+
+	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
 type NetInterface struct {
 	Name   string `json:"name"`
 	IP     string `json:"ip"`
+	IPNet  string `json:"ipnet"`
 	Active bool   `json:"active"`
-	itf    net.Interface
-	addr   net.IPNet
 }
 
 func (i NetInterface) String() string {
-	return fmt.Sprintf("%v : %s", i.Name, i.IP)
+	return fmt.Sprintf("%v : %s", i.Name, i.IPNet)
 }
 
-var Interfaces []NetInterface
+type NetworkService struct {
+	app        *application.App
+	interfaces []NetInterface
+}
 
-func GetInterfaces() []NetInterface {
-	if Interfaces == nil { // Init master list the first time
-		Interfaces = make([]NetInterface, 0)
+func NewNetworkService(app *application.App) *NetworkService {
+	return &NetworkService{
+		app:        app,
+		interfaces: make([]NetInterface, 0),
 	}
+}
 
+func (n *NetworkService) ServiceStartup(ctx context.Context, options application.ServiceOptions) error {
+	n.updateInterfaces()
+	if len(n.interfaces) > 0 {
+		n.SetInterface(n.interfaces[0])
+	}
+	return nil
+}
+
+func (n *NetworkService) GetInterfaces() []NetInterface {
+	n.updateInterfaces()
+	return n.interfaces
+}
+
+func (n *NetworkService) SetInterface(itf NetInterface) {
+	n.app.Event.Emit("interface.selected", itf)
+}
+
+func (n *NetworkService) updateInterfaces() {
 	ifaces, err := net.Interfaces()
 	if err != nil {
 		log.Println(err)
-		return nil
+		return
 	}
+
 	for _, iface := range ifaces {
 		switch {
 		case iface.Flags&net.FlagUp == 0:
@@ -53,20 +79,19 @@ func GetInterfaces() []NetInterface {
 			case *net.IPNet:
 				if v.IP.To4() != nil { // Only IPv4 for now
 					itf := NetInterface{
-						Name: iface.Name,
-						IP:   v.IP.String(),
-						itf:  iface,
-						addr: *v,
+						Name:  iface.Name,
+						IP:    v.IP.String(),
+						IPNet: v.String(),
 					}
 					// fmt.Printf("%v : %s\n", itf.Name, itf.IP)
 					found := false
-					for _, i := range Interfaces {
+					for _, i := range n.interfaces {
 						if i.Name == itf.Name && i.IP == itf.IP {
 							found = true
 						}
 					}
 					if found == false {
-						Interfaces = append(Interfaces, itf)
+						n.interfaces = append(n.interfaces, itf)
 					}
 				}
 			}
@@ -74,11 +99,9 @@ func GetInterfaces() []NetInterface {
 	}
 
 	log.Println("Interfaces found:")
-	for _, itf := range Interfaces {
+	for _, itf := range n.interfaces {
 		log.Println(itf)
 	}
-
-	return Interfaces
 }
 
 // IP utility functions

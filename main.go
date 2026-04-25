@@ -8,6 +8,8 @@ import (
 
 	"github.com/tidwall/gjson"
 	"github.com/wailsapp/wails/v3/pkg/application"
+
+	dmx "sacn-monitor/backend"
 )
 
 //go:embed frontend/dist
@@ -28,8 +30,9 @@ func main() {
 		},
 	})
 
-	// Create service instance and register it
-	dmxService := NewDMXService(app)
+	networkService := dmx.NewNetworkService(app)
+	app.RegisterService(application.NewService(networkService))
+	dmxService := dmx.NewDMXService(app)
 	app.RegisterService(application.NewService(dmxService))
 
 	// Create main window
@@ -59,7 +62,7 @@ func main() {
 	}
 }
 
-func setupMenu(app *application.App, window *application.WebviewWindow, dmxService *DMXService) {
+func setupMenu(app *application.App, window *application.WebviewWindow, dmxService *dmx.DMXService) {
 	appMenu := app.NewMenu()
 
 	// Options Menu

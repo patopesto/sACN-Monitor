@@ -7,39 +7,41 @@ import (
 	"net"
 	"strings"
 
-	"github.com/google/uuid"
 	"gitlab.com/patopest/go-sacn"
 	"gitlab.com/patopest/go-sacn/packet"
 )
 
-var receiver *sacn.Receiver
-var sacnCallbacks map[string]func(uuid.UUID)
 var discoveredUniverses map[uint16]bool
 
-func InitSACNReceiver(iface NetInterface) error {
+type sACNReceiver struct {
+	service  *DMXService
+	receiver *sacn.Receiver
+}
+
+func NewSACNReceiver(iface NetInterface, service *DMXService) (*sACNReceiver, error) {
 	log.Println("Init sACN receiver")
 
-	if sacnCallbacks == nil {
-		sacnCallbacks = make(map[string]func(uuid.UUID))
+	if discoveredUniverses == nil {
 		discoveredUniverses = make(map[uint16]bool)
 	}
 
 	if iface.Name == "" {
-		return errors.New(fmt.Sprintf("No interface specified for sACN receiver"))
+		return nil, errors.New(fmt.Sprintf("No interface specified for sACN receiver"))
 	}
 	itf, _ := net.InterfaceByName(iface.Name)
 
-	if receiver != nil {
-		receiver.Stop()
-	}
-	var err error
-	receiver, err = sacn.NewReceiver(itf)
+	receiver, err := sacn.NewReceiver(itf)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	receiver.RegisterPacketCallback(packet.PacketTypeDiscovery, discoveryPacketCallback)
-	receiver.RegisterPacketCallback(packet.PacketTypeData, dataPacketCallback)
+	r := &sACNReceiver{
+		service:  service,
+		receiver: receiver,
+	}
+
+	receiver.RegisterPacketCallback(packet.PacketTypeDiscovery, r.discoveryPacketCallback)
+	receiver.RegisterPacketCallback(packet.PacketTypeData, r.dataPacketCallback)
 
 	receiver.JoinUniverse(sacn.DISCOVERY_UNIVERSE)
 	// Join already discovered universes
@@ -49,10 +51,17 @@ func InitSACNReceiver(iface NetInterface) error {
 	}
 
 	receiver.Start()
-	return nil
+
+	return r, nil
 }
 
-func discoveryPacketCallback(p packet.SACNPacket, info sacn.PacketInfo) {
+func (r *sACNReceiver) Stop() {
+	if r.receiver != nil {
+		r.receiver.Stop()
+	}
+}
+
+func (r *sACNReceiver) discoveryPacketCallback(p packet.SACNPacket, info sacn.PacketInfo) {
 	d, ok := p.(*packet.DiscoveryPacket)
 	if ok == false {
 		return
@@ -63,12 +72,12 @@ func discoveryPacketCallback(p packet.SACNPacket, info sacn.PacketInfo) {
 		var universe = d.Universes[i]
 		_, exists := discoveredUniverses[universe]
 		if !exists {
-			JoinSACNUniverse(universe)
+			r.JoinUniverse(universe)
 		}
 	}
 }
 
-func dataPacketCallback(p packet.SACNPacket, info sacn.PacketInfo) {
+func (r *sACNReceiver) dataPacketCallback(p packet.SACNPacket, info sacn.PacketInfo) {
 	d, ok := p.(*packet.DataPacket)
 	if ok == false {
 		return
@@ -92,40 +101,16 @@ func dataPacketCallback(p packet.SACNPacket, info sacn.PacketInfo) {
 	}
 	copy(uni.Data[:], d.Data[1:]) // skip zero-start value
 
-	exist := false
-	for i, u := range Universes {
-		if u.Protocol == "sacn" && u.Num == uni.Num && u.Source == uni.Source {
-			exist = true
-			Universes[i].Update(uni)
-			Universes[i].UpdateFPS()
-			callback := sacnCallbacks["data"]
-			if callback != nil {
-				callback(u.Id)
-			}
-			break
-		}
-	}
-	if exist == false {
-		uni.Id = uuid.New()
-		Universes = append(Universes, uni)
-		callback := sacnCallbacks["universe"]
-		if callback != nil {
-			callback(uni.Id)
-		}
-	}
+	r.service.updateUniverse(uni)
 }
 
-func JoinSACNUniverse(universe uint16) {
+func (r *sACNReceiver) JoinUniverse(universe uint16) {
 	log.Printf("Joining universe: %d\n", universe)
-	if receiver != nil {
-		err := receiver.JoinUniverse(universe)
+	if r.receiver != nil {
+		err := r.receiver.JoinUniverse(universe)
 		if err != nil {
 			log.Println(err)
 		}
 		discoveredUniverses[universe] = true
 	}
-}
-
-func RegisterSACNCallback(name string, fn func(uuid.UUID)) {
-	sacnCallbacks[name] = fn
 }

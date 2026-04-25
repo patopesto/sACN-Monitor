@@ -33,6 +33,13 @@ export class NetInterface {
              */
             this["ip"] = "";
         }
+        if (!("ipnet" in $$source)) {
+            /**
+             * @member
+             * @type {string}
+             */
+            this["ipnet"] = "";
+        }
         if (!("active" in $$source)) {
             /**
              * @member
