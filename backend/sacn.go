@@ -67,7 +67,7 @@ func (r *sACNReceiver) discoveryPacketCallback(p packet.SACNPacket, info sacn.Pa
 		return
 	}
 
-	log.Printf("Discovered universes from %s:\n", string(d.SourceName[:]))
+	log.Printf("Discovered universes from: %s\n", string(d.SourceName[:]))
 	for i := 0; i < d.GetNumUniverses(); i++ {
 		var universe = d.Universes[i]
 		_, exists := discoveredUniverses[universe]

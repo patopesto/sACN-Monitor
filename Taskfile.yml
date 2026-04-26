@@ -59,6 +59,19 @@ tasks:
       - task: common:run:docker
 
   # Custom tasks
+  build:generator:
+    summary: Build the generate_dmx script
+    sources:
+      - ./scripts/**/*.go
+    cmd: go build -o {{.BIN_DIR}}/generate_dmx scripts/generate_dmx.go
+
+  run:generator:
+    summary: Run the generate_dmx script
+    watch: true
+    cmds:
+      - task: build:generator
+      - ./{{.BIN_DIR}}/generate_dmx {{.CLI_ARGS}}
+
   check:
     desc: Clean, tidy and audit
     cmds:
