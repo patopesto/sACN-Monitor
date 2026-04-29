@@ -11,5 +11,6 @@ export {
 
 export {
     NetInterface,
-    Universe
+    Universe,
+    UniverseKey
 } from "./models.js";

@@ -19,22 +19,22 @@ export function ClearUniverses() {
 }
 
 /**
- * GetUniverse returns a specific universe by ID
- * @param {string} id
+ * GetUniverse returns a specific universe by key
+ * @param {$models.UniverseKey} key
  * @returns {$CancellablePromise<$models.Universe>}
  */
-export function GetUniverse(id) {
-    return $Call.ByID(3700383707, id).then(/** @type {($result: any) => any} */(($result) => {
+export function GetUniverse(key) {
+    return $Call.ByID(3700383707, key).then(/** @type {($result: any) => any} */(($result) => {
         return $$createType0($result);
     }));
 }
 
 /**
- * @returns {$CancellablePromise<$models.Universe[]>}
+ * @returns {$CancellablePromise<$models.UniverseKey[]>}
  */
 export function GetUniverses() {
     return $Call.ByID(3719533944).then(/** @type {($result: any) => any} */(($result) => {
-        return $$createType1($result);
+        return $$createType2($result);
     }));
 }
 
@@ -58,4 +58,5 @@ export function SetInterface(iface) {
 
 // Private type creation functions
 const $$createType0 = $models.Universe.createFrom;
-const $$createType1 = $Create.Array($$createType0);
+const $$createType1 = $models.UniverseKey.createFrom;
+const $$createType2 = $Create.Array($$createType1);

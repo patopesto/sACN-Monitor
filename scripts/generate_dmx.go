@@ -7,55 +7,55 @@ import (
 	"net"
 	"time"
 
+	artnetpacket "github.com/jsimonetti/go-artnet/packet"
 	"gitlab.com/patopest/go-sacn"
 	sacnpacket "gitlab.com/patopest/go-sacn/packet"
-	artnetpacket "github.com/jsimonetti/go-artnet/packet"
 )
 
 var universes = []struct {
-	num uint16
-	mode string
+	num      uint16
+	mode     string
 	priority uint8
 }{
 	{
-		num: 0, // available in artnet, not in sacn
+		num:  0, // available in artnet, not in sacn
 		mode: "broadcast",
 	},
 	{
-		num: 1,
+		num:  1,
 		mode: "unicast",
 	},
 	{
-		num: 2,
+		num:  2,
 		mode: "broadcast",
 	},
 	{
-		num: 3,
+		num:  3,
 		mode: "unicast",
 	},
 	{
-		num: 10,
-		mode: "broadcast",
+		num:      10,
+		mode:     "broadcast",
 		priority: 200,
 	},
 	{
-		num: 223,
+		num:  223,
 		mode: "unicast",
 	},
 	{
-		num: 256,
+		num:  256,
 		mode: "broadcast",
 	},
 	{
-		num: 3047,
+		num:  3047,
 		mode: "unicast",
 	},
 	{
-		num: 32767, // max artnet universe nunber
+		num:  32767, // max artnet universe nunber
 		mode: "broadcast",
 	},
 	{
-		num: 63999, // max sacn universe number
+		num:  63999, // max sacn universe number
 		mode: "broadcast",
 	},
 }

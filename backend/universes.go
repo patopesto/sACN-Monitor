@@ -4,16 +4,20 @@ import (
 	"math"
 	"time"
 	// "fmt"
-
-	"github.com/google/uuid"
 )
 
 const smoothing float32 = 0.9
 
+// A Custom struct to use as key to store universes for easy differentiation
+type UniverseKey struct {
+	Protocol string `json:"protocol"`
+	Num      uint16 `json:"num"`
+	Source   string `json:"source"`
+}
+
 // Common struct to store universe data received by Receivers
 type Universe struct {
 	// Common data
-	Id           uuid.UUID `json:"id"`
 	Protocol     string    `json:"protocol"`
 	Num          uint16    `json:"num"`
 	Source       string    `json:"source"` // string of the sender's IP address
@@ -27,6 +31,14 @@ type Universe struct {
 	SourceName  string `json:"source_name"`
 	Priority    uint8  `json:"priority"`
 	SyncAddress uint16 `json:"sync_address"`
+}
+
+func (u *Universe) GetKey() UniverseKey {
+	return UniverseKey{
+		Protocol: u.Protocol,
+		Num:      u.Num,
+		Source:   u.Source,
+	}
 }
 
 func (u *Universe) GetData() [512]byte {

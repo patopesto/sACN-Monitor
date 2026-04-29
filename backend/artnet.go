@@ -16,7 +16,7 @@ var artnetNodes map[string]string
 
 type artNetReceiver struct {
 	service        *DMXService
-	conn         *ipv4.PacketConn
+	conn           *ipv4.PacketConn
 	localAddr      net.IPNet
 	localBcastAddr net.IP
 	stop           chan bool
@@ -45,7 +45,7 @@ func NewArtnetReceiver(iface NetInterface, service *DMXService) (*artNetReceiver
 
 	r := &artNetReceiver{
 		service:        service,
-		conn:         conn,
+		conn:           conn,
 		localAddr:      localAddr,
 		localBcastAddr: GetBroadcastIP(localAddr.IP, localAddr.Mask),
 		stop:           make(chan bool),

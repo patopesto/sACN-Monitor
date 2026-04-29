@@ -8,9 +8,6 @@ import { Create as $Create } from "@wailsio/runtime";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
-import * as uuid$0 from "../../github.com/google/uuid/models.js";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore: Unused imports
 import * as time$0 from "../../time/models.js";
 
 export class NetInterface {
@@ -71,16 +68,9 @@ export class Universe {
      * @param {Partial<Universe>} [$$source = {}] - The source object to create the Universe.
      */
     constructor($$source = {}) {
-        if (!("id" in $$source)) {
-            /**
-             * Common data
-             * @member
-             * @type {uuid$0.UUID}
-             */
-            this["id"] = "";
-        }
         if (!("protocol" in $$source)) {
             /**
+             * Common data
              * @member
              * @type {string}
              */
@@ -164,5 +154,50 @@ export class Universe {
     static createFrom($$source = {}) {
         let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
         return new Universe(/** @type {Partial<Universe>} */($$parsedSource));
+    }
+}
+
+/**
+ * A Custom struct to use as key to store universes for easy differentiation
+ */
+export class UniverseKey {
+    /**
+     * Creates a new UniverseKey instance.
+     * @param {Partial<UniverseKey>} [$$source = {}] - The source object to create the UniverseKey.
+     */
+    constructor($$source = {}) {
+        if (!("protocol" in $$source)) {
+            /**
+             * @member
+             * @type {string}
+             */
+            this["protocol"] = "";
+        }
+        if (!("num" in $$source)) {
+            /**
+             * @member
+             * @type {number}
+             */
+            this["num"] = 0;
+        }
+        if (!("source" in $$source)) {
+            /**
+             * @member
+             * @type {string}
+             */
+            this["source"] = "";
+        }
+
+        Object.assign(this, $$source);
+    }
+
+    /**
+     * Creates a new UniverseKey instance from a string or object.
+     * @param {any} [$$source = {}]
+     * @returns {UniverseKey}
+     */
+    static createFrom($$source = {}) {
+        let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
+        return new UniverseKey(/** @type {Partial<UniverseKey>} */($$parsedSource));
     }
 }

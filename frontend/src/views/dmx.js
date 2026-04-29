@@ -69,30 +69,35 @@ const UniverseList = {
     const universes = Universes.get_list()
     const protocol = Settings.protocol
 
-    const navigate = (event, index, id) => {
+    const isSelected = (key) => {
+      return Universes.selected_key == key
+    }
+
+    const navigate = (event, index, key) => {
       event.preventDefault() // Avoid weird "ding" noise happenning on webkit but not browsers
       if (event.key === "ArrowUp" && index - 1 >= 0) {
-        Universes.select(universes[index - 1].id)
-        document.getElementById(universes[index-1].id).focus()
+        Universes.select(universes[index - 1])
+        document.getElementById(JSON.stringify(universes[index-1])).focus()
       }
       else if (event.key === "ArrowDown" && index + 1 < universes.length) {
-        Universes.select(universes[index + 1].id)
-        document.getElementById(universes[index+1].id).focus()
+        Universes.select(universes[index + 1])
+        document.getElementById(JSON.stringify(universes[index+1])).focus()
       }
     }
 
     return m("div", { class: "flex flex-col pt-2 pb-9 overflow-auto overscroll-none" },
       universes.map((universe, index) => {
-        const selected = Universes.selected === universe.id
+        const selected = isSelected(universe)
         const highlight = theme.base[selected ? "on" : "off"]
         const value = theme.value[selected ? "on" : "off"]
         const label = universe.protocol === "sacn" ? "sACN" : "ArtNet"
+        const keyStr = JSON.stringify(universe)
 
         return m("div", { class: twMerge("flex flex-row min-h-8 h-8 items-center focus:outline-none", theme.base.root, highlight),
-            id: universe.id,
+            id: keyStr,
             tabindex: -1,
-            onclick: () => { Universes.select(universe.id) },
-            onkeydown: (event) => { navigate(event, index, universe.id) },
+            onclick: () => { Universes.select(universe) },
+            onkeydown: (event) => { navigate(event, index, universe) },
           },
           m("div", { class: twMerge("basis-14 text-xs font-bold flex h-full items-center justify-center shrink-0", value) }, 
             universe.num
@@ -264,8 +269,7 @@ const Channels = {
 
 const Stats = {
   view: function(vnode) {
-    const universe = Universes.get_selected()
-    // console.log(universe)
+    const universe = Universes.selected
     const channel = Universes.selected_channel
     var universe_hex, channel_str, channel_value, last_heard = ""
     if (universe) {

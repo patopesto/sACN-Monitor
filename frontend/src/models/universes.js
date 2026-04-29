@@ -1,4 +1,5 @@
 import { GetUniverses, GetUniverse, JoinUniverse } from '../../bindings/sacn-monitor/backend/dmxservice'
+import { Universe, UniverseKey } from '../../bindings/sacn-monitor/backend/models'
 import { Events } from '@wailsio/runtime'
 import { Settings } from './settings.js'
 
@@ -50,7 +51,7 @@ export const Universes = {
 
   callback_fn: null,
   on_change: function(callback) {
-    Events.On("universes.new", () => {
+    Events.On("universes.new", (event) => {
       // console.log("Event: universes.new")
       this.get_universes()
     })
@@ -62,24 +63,21 @@ export const Universes = {
   },
 
   // Universe of interest
+  selected_key: null,
   selected: null,
   data: [],
-  select: function(id) {
-    console.log("selecting ", id)
-    this.selected = id
+  select: function(key) {
+    console.log("selecting ", key)
+    this.selected_key = key
     this.get_data()
   },
-  get_selected: function() {
-    return this.list.find(u => u.id === this.selected)
-  },
   get_data: function() {
-    const selected = this.selected
-    GetUniverse(selected).then((universe) => {
+    const selected_key = this.selected_key
+    if (!selected_key) return
+
+    GetUniverse(selected_key).then((universe) => {
+      this.selected = universe
       this.data = universe.data
-      const index = this.list.findIndex(u => u.id === selected)
-      if (index >= 0) {
-        this.list[index] = universe
-      }
       if (this.data_callback_fn) {
         this.data_callback_fn()
       }
@@ -87,9 +85,10 @@ export const Universes = {
   },
   data_callback_fn: null,
   on_data_change: function(callback) {
-    Events.On("universe.data", () => {
-      // console.log("Event: universe.data")
-      this.get_data()
+    Events.On("universe.data", (event) => {
+      if (JSON.stringify(event.data) === JSON.stringify(this.selected_key)) {
+        this.get_data()
+      }
     })
     this.data_callback_fn = callback
   },
