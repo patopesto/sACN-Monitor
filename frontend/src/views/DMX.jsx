@@ -206,40 +206,49 @@ function Channels() {
     },
   });
 
-  const navigate = (event, index) => {
+  const navigate = (event) => {
     event.preventDefault();
+    const index = universes.selected_channel;
+    
     if (event.key === "ArrowRight" && index + 1 < universes.data.length) {
-      UniversesActions.select_channel(index + 1);
-      document.getElementById(`channel-${index + 1}`)?.focus();
-    } else if (event.key === "ArrowLeft" && index - 1 >= 0) {
-      UniversesActions.select_channel(index - 1);
-      document.getElementById(`channel-${index - 1}`)?.focus();
-    } else {
-      // Vertical navigation logic (simplified for snippet)
+      UniversesActions.select_channel(index + 1)
+      document.getElementById(`channel-${index + 1}`).focus()
+    }
+    else if (event.key === "ArrowLeft" && index - 1 >= 0) {
+      UniversesActions.select_channel(index - 1)
+      document.getElementById(`channel-${index - 1}`).focus()
+    }
+    else {
       const getRect = (id) => {
-        const el = document.getElementById(id);
-        if (!el) return { x: 0, y: 0 };
-        const rect = el.getBoundingClientRect();
-        return { x: rect.left, y: rect.top };
-      };
-      const { x, y } = getRect(`channel-${index}`);
+        const el = document.getElementById(id)
+        const rect = el.getBoundingClientRect()
+        const x = rect.left + window.scrollX
+        const y = rect.top + window.scrollY
+        return { el, x, y }
+      }
+      const { x, y } = getRect(`channel-${index}`)
 
       if (event.key === "ArrowDown") {
+        // select the first element that is below the current element with same x coordinate
         for (let i = index + 1; i < universes.data.length; i++) {
-          const { x: tx, y: ty } = getRect(`channel-${i}`);
+          const { el, x: tx, y: ty } = getRect(`channel-${i}`)
+
           if (x === tx && y < ty) {
-            UniversesActions.select_channel(i);
-            document.getElementById(`channel-${i}`)?.focus();
-            break;
+            UniversesActions.select_channel(i)
+            el.focus()
+            break
           }
         }
-      } else if (event.key === "ArrowUp") {
+      }
+      else if (event.key === "ArrowUp") {
+        // select the first element that is above the current element with same x coordinate
         for (let i = index; i >= 0; i--) {
-          const { x: tx, y: ty } = getRect(`channel-${i}`);
+          const { el, x: tx, y: ty } = getRect(`channel-${i}`)
+
           if (x === tx && y > ty) {
-            UniversesActions.select_channel(i);
-            document.getElementById(`channel-${i}`)?.focus();
-            break;
+            UniversesActions.select_channel(i)
+            el.focus()
+            break
           }
         }
       }
@@ -261,11 +270,15 @@ function Channels() {
               tabindex="-1"
               class={twMerge("relative w-10 h-8 flex justify-center items-center focus:outline-none", highlight())}
               onClick={() => UniversesActions.select_channel(index())}
-              onKeyDown={(e) => navigate(e, index())}
+              onKeyDown={navigate}
             >
               <div class={twMerge("absolute border-box self-end w-full", theme().background)} style={height} />
-              {settings.view === "channels" && <div class={twMerge("text-xs", active())}>{index() + 1}</div>}
-              {settings.view === "values" && <div class={twMerge("text-xs", active())}>{value}</div>}
+              {settings.view === "channels" &&
+                <div class={twMerge("text-xs", active())}>{index() + 1}</div>
+              }
+              {settings.view === "values" &&
+                <div class={twMerge("text-xs", active())}>{value}</div>
+              }
               {settings.view === "both" && (
                 <div class="flex flex-col items-center">
                   <div class={twMerge("text-xs", theme().active.off)}>{index() + 1}</div>
