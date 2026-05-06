@@ -3,7 +3,7 @@
 #
 # The lines below are called `modelines`. See `:help modeline`
 
-name: "sACN Monitor"
+name: ""
 arch: ${GOARCH}
 platform: "linux"
 version: "1.5.0"
@@ -17,12 +17,12 @@ license: "MIT"
 release: "1"
 
 contents:
-  - src: "./bin/sACN Monitor"
-    dst: "/usr/local/bin/sACN Monitor"
+  - src: "./bin/"
+    dst: "/usr/local/bin/"
   - src: "./build/appicon.png"
-    dst: "/usr/share/icons/hicolor/128x128/apps/sACN Monitor.png"
-  - src: "./build/linux/sACN Monitor.desktop"
-    dst: "/usr/share/applications/sACN Monitor.desktop"
+    dst: "/usr/share/icons/hicolor/128x128/apps/.png"
+  - src: "./build/linux/.desktop"
+    dst: "/usr/share/applications/.desktop"
 
 # Default dependencies for Debian 12/Ubuntu 22.04+ with WebKit 4.1
 depends:

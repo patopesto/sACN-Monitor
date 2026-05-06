@@ -22,9 +22,9 @@ func (i NetInterface) String() string {
 }
 
 type NetworkService struct {
-	app             *application.App
-	interfaces      []NetInterface
-	selectedItf     NetInterface
+	app         *application.App
+	interfaces  []NetInterface
+	selectedItf NetInterface
 }
 
 func NewNetworkService(app *application.App) *NetworkService {
@@ -91,9 +91,9 @@ func (n *NetworkService) updateInterfaces() {
 			case *net.IPNet:
 				if v.IP.To4() != nil { // Only IPv4 for now
 					itf := NetInterface{
-						Name:  iface.Name,
-						IP:    v.IP.String(),
-						IPNet: v.String(),
+						Name:   iface.Name,
+						IP:     v.IP.String(),
+						IPNet:  v.String(),
 						Active: n.selectedItf.IP == v.IP.String(),
 					}
 					newInterfaces = append(newInterfaces, itf)
