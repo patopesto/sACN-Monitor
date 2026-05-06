@@ -30,8 +30,9 @@ func NewDMXService(app *application.App) *DMXService {
 // ServiceStartup is called when the app starts. This replaces v2's startup method.
 func (s *DMXService) ServiceStartup(ctx context.Context, options application.ServiceOptions) error {
 	s.app.Event.On("interface.selected", func(e *application.CustomEvent) {
-		itf, _ := e.Data.(NetInterface)
-		s.SetInterface(itf)
+		if itf, ok := e.Data.(NetInterface); ok {
+			s.setInterface(itf)
+		}
 	})
 	return nil
 }
@@ -48,8 +49,8 @@ func (s *DMXService) ServiceShutdown() error {
 	return nil
 }
 
-// SetInterface sets the active network interface
-func (s *DMXService) SetInterface(iface NetInterface) {
+// setInterface sets the active network interface (called via event from NetworkService)
+func (s *DMXService) setInterface(iface NetInterface) {
 	log.Println("Setting interface to", iface)
 	if s.sacn != nil {
 		s.sacn.Stop()
@@ -101,7 +102,9 @@ func (s *DMXService) GetUniverse(key UniverseKey) Universe {
 
 // JoinUniverse joins an sACN universe manually
 func (s *DMXService) JoinUniverse(universe uint16) {
-	s.sacn.JoinUniverse(universe)
+	if s.sacn != nil {
+		s.sacn.JoinUniverse(universe)
+	}
 }
 
 // ClearUniverses clears all universe data

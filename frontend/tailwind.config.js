@@ -2,12 +2,11 @@
 module.exports = {
   content: [
     "./src/**/*.js",
-    "./node_modules/flowbite-mithril/**/*.js"
+    "./src/**/*.jsx",
   ],
   theme: {},
   darkMode: 'class',
   plugins: [
-    require("flowbite/plugin")
   ],
 }
 

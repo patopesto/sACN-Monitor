@@ -22,8 +22,9 @@ func (i NetInterface) String() string {
 }
 
 type NetworkService struct {
-	app        *application.App
-	interfaces []NetInterface
+	app             *application.App
+	interfaces      []NetInterface
+	selectedItf     NetInterface
 }
 
 func NewNetworkService(app *application.App) *NetworkService {
@@ -35,9 +36,9 @@ func NewNetworkService(app *application.App) *NetworkService {
 
 func (n *NetworkService) ServiceStartup(ctx context.Context, options application.ServiceOptions) error {
 	n.updateInterfaces()
-	if len(n.interfaces) > 0 {
-		n.SetInterface(n.interfaces[0])
-	}
+	// if len(n.interfaces) > 0 {
+	// 	n.SetInterface(n.interfaces[0])
+	// }
 	return nil
 }
 
@@ -47,7 +48,15 @@ func (n *NetworkService) GetInterfaces() []NetInterface {
 }
 
 func (n *NetworkService) SetInterface(itf NetInterface) {
-	n.app.Event.Emit("interface.selected", itf)
+	// Update the active state in our list
+	for i := range n.interfaces {
+		n.interfaces[i].Active = (n.interfaces[i].IP == itf.IP)
+	}
+	n.selectedItf = itf
+	n.selectedItf.Active = true
+
+	// Emit event with the full interface object
+	n.app.Event.Emit("interface.selected", n.selectedItf)
 }
 
 func (n *NetworkService) updateInterfaces() {
@@ -56,6 +65,9 @@ func (n *NetworkService) updateInterfaces() {
 		log.Println(err)
 		return
 	}
+
+	// Create a new list to detect removed interfaces
+	newInterfaces := make([]NetInterface, 0)
 
 	for _, iface := range ifaces {
 		switch {
@@ -82,21 +94,15 @@ func (n *NetworkService) updateInterfaces() {
 						Name:  iface.Name,
 						IP:    v.IP.String(),
 						IPNet: v.String(),
+						Active: n.selectedItf.IP == v.IP.String(),
 					}
-					// fmt.Printf("%v : %s\n", itf.Name, itf.IP)
-					found := false
-					for _, i := range n.interfaces {
-						if i.Name == itf.Name && i.IP == itf.IP {
-							found = true
-						}
-					}
-					if found == false {
-						n.interfaces = append(n.interfaces, itf)
-					}
+					newInterfaces = append(newInterfaces, itf)
 				}
 			}
 		}
 	}
+
+	n.interfaces = newInterfaces
 
 	log.Println("Interfaces found:")
 	for _, itf := range n.interfaces {

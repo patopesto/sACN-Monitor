@@ -1,14 +1,14 @@
 module sacn-monitor
 
-go 1.25
+go 1.25.0
 
 require (
 	github.com/jsimonetti/go-artnet v0.0.0-20240201124026-e4f1b1b169f4
 	github.com/libp2p/go-reuseport v0.4.0
 	github.com/tidwall/gjson v1.14.2
 	github.com/wailsapp/wails/v3 v3.0.0-alpha.78
-	gitlab.com/patopest/go-sacn v0.4.1
-	golang.org/x/net v0.49.0
+	gitlab.com/patopest/go-sacn v1.1.0
+	golang.org/x/net v0.53.0
 )
 
 require (
@@ -49,8 +49,8 @@ require (
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/wailsapp/go-webview2 v1.0.23 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
-	golang.org/x/crypto v0.47.0 // indirect
-	golang.org/x/sys v0.40.0 // indirect
-	golang.org/x/text v0.33.0 // indirect
+	golang.org/x/crypto v0.50.0 // indirect
+	golang.org/x/sys v0.43.0 // indirect
+	golang.org/x/text v0.36.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )

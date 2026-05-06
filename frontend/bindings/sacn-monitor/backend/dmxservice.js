@@ -47,15 +47,6 @@ export function JoinUniverse(universe) {
     return $Call.ByID(1459441495, universe);
 }
 
-/**
- * SetInterface sets the active network interface
- * @param {$models.NetInterface} iface
- * @returns {$CancellablePromise<void>}
- */
-export function SetInterface(iface) {
-    return $Call.ByID(1780866055, iface);
-}
-
 // Private type creation functions
 const $$createType0 = $models.Universe.createFrom;
 const $$createType1 = $models.UniverseKey.createFrom;
