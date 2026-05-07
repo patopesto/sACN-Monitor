@@ -76,9 +76,9 @@ function UniverseList() {
     <div class="flex flex-col pt-2 pb-9 overflow-auto overscroll-none">
       <For each={list()}>
         {(universe, index) => {
-          const selected = () => universes.selected_key === universe;
           const highlight = () => theme().base[selected() ? "on" : "off"];
           const valueClass = () => theme().value[selected() ? "on" : "off"];
+          const selected = () => JSON.stringify(universes.selected_key) === JSON.stringify(universe);
           const label = universe.protocol === "sacn" ? "sACN" : "ArtNet";
           const keyStr = JSON.stringify(universe);
 

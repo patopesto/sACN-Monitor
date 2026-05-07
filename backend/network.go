@@ -36,9 +36,9 @@ func NewNetworkService(app *application.App) *NetworkService {
 
 func (n *NetworkService) ServiceStartup(ctx context.Context, options application.ServiceOptions) error {
 	n.updateInterfaces()
-	// if len(n.interfaces) > 0 {
-	// 	n.SetInterface(n.interfaces[0])
-	// }
+	if len(n.interfaces) > 0 {
+		n.SetInterface(n.interfaces[0])
+	}
 	return nil
 }
 
