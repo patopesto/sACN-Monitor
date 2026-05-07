@@ -1,8 +1,8 @@
 export const appTheme = {
-  sky: {
-    primary: "bg-sky-500",
-    secondary: "bg-sky-800",
-  },
+  // sky: {
+  //   primary: "bg-sky-500",
+  //   secondary: "bg-sky-800",
+  // },
   cyan: {
     primary: "bg-cyan-500",
     secondary: "bg-cyan-800",

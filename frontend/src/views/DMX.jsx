@@ -13,7 +13,7 @@ const UNIVERSE_TIMEOUT = 2500;
 
 export function DMX() {
   return (
-    <div class="flex flex-row justify-items-center h-screen overflow-hidden bg-zinc-900 bg-opacity-60 select-none cursor-default">
+    <div class="flex flex-row justify-items-center h-screen overflow-hidden bg-zinc-900/60 select-none cursor-default">
       <Column title="UNIVERSES" class="basis-1/5">
         <UniverseList />
       </Column>
@@ -33,7 +33,7 @@ export function DMX() {
 function Column(props) {
   return (
     <div class={twMerge(props.class, "flex flex-col")}>
-      <header class="flex justify-center bg-zinc-800 text-neutral-300 bg-opacity-60 p-1">
+      <header class="flex justify-center bg-zinc-800/60 text-neutral-300 p-1">
         <h2>{props.title}</h2>
       </header>
       {props.children}
@@ -47,16 +47,19 @@ function UniverseList() {
 
   const color = () => appTheme[settings.theme];
   const theme = () => ({
-    base: {
-      root: "hover:" + color().secondary,
+    base: "flex flex-col pt-2 pb-9 overflow-auto overscroll-none",
+    row: {
+      base: twMerge("flex flex-row min-h-8 h-8 items-center focus:outline-none", "hover:" + color().secondary),
       off: "",
       on: color().secondary,
     },
     value: {
+      base: "basis-14 flex shrink-0 h-full items-center justify-center text-xs font-bold",
       off: "text-slate-100",
       on: twMerge("text-black", color().primary),
     },
-    badge: "font-medium dark:bg-opacity-15 dark:text-slate-300",
+    source: "pl-1 w-full shrink text-xs text-slate-300",
+    badge: "justify-end shrink-0 m-3 px-2 py-0.5 rounded bg-zinc-700/80 text-slate-300 text-xs font-medium",
   });
 
   const list = () => UniversesActions.get_list();
@@ -73,12 +76,12 @@ function UniverseList() {
   };
 
   return (
-    <div class="flex flex-col pt-2 pb-9 overflow-auto overscroll-none">
+    <div class={theme().base}>
       <For each={list()}>
         {(universe, index) => {
-          const highlight = () => theme().base[selected() ? "on" : "off"];
-          const valueClass = () => theme().value[selected() ? "on" : "off"];
           const selected = () => JSON.stringify(universes.selected_key) === JSON.stringify(universe);
+          const rowSelected = () => theme().row[selected() ? "on" : "off"];
+          const valueSelected = () => theme().value[selected() ? "on" : "off"];
           const label = universe.protocol === "sacn" ? "sACN" : "ArtNet";
           const keyStr = JSON.stringify(universe);
 
@@ -86,18 +89,18 @@ function UniverseList() {
             <div 
               id={keyStr}
               tabindex="-1"
-              class={twMerge("flex flex-row min-h-8 h-8 items-center focus:outline-none", theme().base.root, highlight())}
+              class={twMerge(theme().row.base, rowSelected())}
               onClick={() => UniversesActions.select_universe(universe)}
               onKeyDown={(e) => navigate(e, index(), universe)}
             >
-              <div class={twMerge("basis-14 text-xs font-bold flex h-full items-center justify-center shrink-0", valueClass())}>
+              <div class={twMerge(theme().value.base, valueSelected())}>
                 {universe.num}
               </div>
-              <div class="shrink w-full text-xs text-slate-300 pl-1">
+              <div class={theme().source}>
                 {universe.source}
               </div>
               {settings.protocol === "mixed" && (
-                <div class={twMerge("justify-end shrink-0 m-3 px-2 py-0.5 rounded bg-zinc-700 text-xs", theme().badge)}>
+                <div class={theme().badge}>
                   {label}
                 </div>
               )}
@@ -125,19 +128,19 @@ function AddUniverseModal() {
   const theme = () => ({
     trigger: twMerge("fixed bottom-0 self-end m-3 rounded-md bg-blue-600 p-1", color().primary),
     dialog: {
-      overlay: "fixed inset-0 bg-black bg-opacity-50 z-50",
-      root: "fixed inset-0 flex items-center justify-center z-50 outline-none",
+      base: "fixed inset-0 flex items-center justify-center z-50 outline-none",
+      overlay: "fixed inset-0 bg-black/50 z-50",
       content: "p-6 mx-4 w-full max-w-md rounded-xl bg-zinc-800 shadow-xl",
       header: {
-        root: "flex justify-between items-start mb-4",
+        base: "flex justify-between items-start mb-4",
         title: "text-lg font-medium text-slate-300",
         close: "text-slate-300"
       },
-      input: "w-full p-2 bg-zinc-900 text-white border border-zinc-700 rounded outline-none hover:border-zinc-500 focus:border-zinc-500",
+      input: "w-full p-2 bg-zinc-900 text-white border border-zinc-700 rounded outline-none hover:border-zinc-500 focus:border-zinc-500 transition-[border]",
       footer: {
-        root: "mt-2 flex justify-end gap-2",
+        base: "mt-2 flex justify-end gap-2",
         close: "px-4 py-2 rounded-lg text-white bg-zinc-700 hover:bg-zinc-600 transition-colors",
-        join: twMerge("px-4 py-2 rounded-lg text-white transition-opacity hover:opacity-90", color().primary),
+        join: twMerge("px-4 py-2 rounded-lg text-white transition-opacity hover:opacity-80", color().primary),
       }
 
     }
@@ -150,9 +153,9 @@ function AddUniverseModal() {
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay class={theme().dialog.overlay} />
-        <div class={theme().dialog.root}>
+        <div class={theme().dialog.base}>
           <Dialog.Content class={theme().dialog.content}>
-            <div class={theme().dialog.header.root}>
+            <div class={theme().dialog.header.base}>
               <Dialog.Title class={theme().dialog.header.title}>
                 Manually add a sACN universe to listen to
               </Dialog.Title>
@@ -172,7 +175,7 @@ function AddUniverseModal() {
                 onKeyDown={(e) => e.code === "Enter" && join_universe()}
                 autoFocus
               />
-              <div class={theme().dialog.footer.root}>
+              <div class={theme().dialog.footer.base}>
                 <Dialog.CloseButton class={theme().dialog.footer.close}>
                   Cancel
                 </Dialog.CloseButton>
@@ -191,20 +194,6 @@ function AddUniverseModal() {
 
 function Channels() {
   UniversesActions.get_data();
-
-  const color = () => appTheme[settings.theme];
-  const theme = () => ({
-    base: "flex flex-row flex-wrap overflow-auto overscroll-none",
-    background: color().primary,
-    active: {
-      off: "text-white opacity-50",
-      on: "text-white opacity-90",
-    },
-    selected: {
-      off: "",
-      on: "border-2 border-slate-300",
-    },
-  });
 
   const navigate = (event) => {
     event.preventDefault();
@@ -255,6 +244,21 @@ function Channels() {
     }
   };
 
+  const color = () => appTheme[settings.theme];
+  const theme = () => ({
+    base: "flex flex-row flex-wrap overflow-auto overscroll-none",
+    item: "relative w-10 h-8 flex justify-center items-center focus:outline-none",
+    content: twMerge("absolute border-box self-end w-full", color().primary),
+    active: {
+      off: "text-xs text-white opacity-50",
+      on: "text-xs text-white opacity-90",
+    },
+    selected: {
+      off: "",
+      on: "border-2 border-slate-300",
+    },
+  });
+
   return (
     <div class={theme().base}>
       <For each={universes.data}>
@@ -268,21 +272,21 @@ function Channels() {
             <div 
               id={`channel-${index()}`}
               tabindex="-1"
-              class={twMerge("relative w-10 h-8 flex justify-center items-center focus:outline-none", highlight())}
+              class={twMerge(theme().item, highlight())}
               onClick={() => UniversesActions.select_channel(index())}
               onKeyDown={navigate}
             >
-              <div class={twMerge("absolute border-box self-end w-full", theme().background)} style={height} />
+              <div class={theme().content} style={height} />
               {settings.view === "channels" &&
-                <div class={twMerge("text-xs", active())}>{index() + 1}</div>
+                <div class={active()}>{index() + 1}</div>
               }
               {settings.view === "values" &&
-                <div class={twMerge("text-xs", active())}>{value}</div>
+                <div class={active()}>{value}</div>
               }
               {settings.view === "both" && (
                 <div class="flex flex-col items-center">
-                  <div class={twMerge("text-xs", theme().active.off)}>{index() + 1}</div>
-                  <div class={twMerge("text-xs", active())}>{value}</div>
+                  <div class={theme().active.off}>{index() + 1}</div>
+                  <div class={active()}>{value}</div>
                 </div>
               )}
             </div>
@@ -348,24 +352,24 @@ function SettingsPane() {
 
   const color = () => appTheme[settings.theme];
   const theme = () => ({
-    label: "text-sm text-slate-300 mb-1",
+    label: "text-sm text-slate-300 mb-2",
     toggle: {
-      root: "bg-zinc-800 m-1 rounded-lg relative",
+      base: "bg-zinc-800 m-1 rounded-lg relative",
       indicator: twMerge("absolute rounded-lg transition-all duration-200 ease-in-out shadow-sm", color().primary),
       items: "flex",
       item: {
-        root: twMerge("relative after:absolute after:right-0 after:top-1/4 after:bottom-1/4 after:w-px after:bg-zinc-700 last:after:hidden", "hover:" + color().secondary),
+        base: twMerge("relative after:absolute after:right-0 after:top-1/4 after:bottom-1/4 after:w-px after:bg-zinc-700 last:after:hidden", "hover:" + color().secondary),
         control: "flex text-xs transition-colors duration-200",
         label: "px-4 py-2",
       },
     },
     select: {
-      root: "w-full",
-      trigger: "mt-1 px-2 py-1 w-full rounded bg-zinc-800 border border-zinc-700 outline-none hover:border-zinc-500 text-xs text-left text-slate-300",
+      base: "w-full",
+      trigger: "mt-1 px-2 py-1 w-full rounded bg-zinc-800 border border-zinc-700 outline-none hover:border-zinc-500 transition-[border] text-xs text-left text-slate-300",
       content: "bg-zinc-800 border border-zinc-700 rounded-lg shadow-lg outline-none",
       items: "p-2 overflow-y-auto",
       item: {
-        root: "flex justify-between items-baseline text-left px-3 py-2 text-xs rounded-md cursor-pointer outline-none hover:bg-zinc-700 text-slate-300 hover:text-white",
+        base: "flex justify-between items-baseline text-left px-3 py-2 text-xs rounded-md cursor-pointer outline-none hover:bg-zinc-700 text-slate-300 hover:text-white",
         active: "bg-gray-600",
       }
     }
@@ -374,23 +378,23 @@ function SettingsPane() {
   return (
     <div class="flex flex-col items-center gap-3 px-5 py-3">
       {/* Protocol */}
-      <SegmentedControl class={theme().toggle.root} value={settings.protocol} onChange={(v) => SettingsActions.set_protocol(v)}>
+      <SegmentedControl class={theme().toggle.base} value={settings.protocol} onChange={(v) => SettingsActions.set_protocol(v)}>
         <div role="presentation" class="relative flex">
           <SegmentedControl.Indicator class={theme().toggle.indicator} />
           <div role="presentation" class={theme().toggle.items}>
-            <SegmentedControl.Item class={theme().toggle.item.root} value="sacn">
+            <SegmentedControl.Item class={theme().toggle.item.base} value="sacn">
               <SegmentedControl.ItemInput />
               <SegmentedControl.ItemControl class={theme().toggle.item.control}>
                 <SegmentedControl.ItemLabel class={theme().toggle.item.label}>sACN</SegmentedControl.ItemLabel>
               </SegmentedControl.ItemControl>
             </SegmentedControl.Item>
-            <SegmentedControl.Item class={theme().toggle.item.root} value="artnet">
+            <SegmentedControl.Item class={theme().toggle.item.base} value="artnet">
               <SegmentedControl.ItemInput />
               <SegmentedControl.ItemControl class={theme().toggle.item.control}>
                 <SegmentedControl.ItemLabel class={theme().toggle.item.label}>ArtNet</SegmentedControl.ItemLabel>
               </SegmentedControl.ItemControl>
             </SegmentedControl.Item >
-            <SegmentedControl.Item class={theme().toggle.item.root} value="mixed">
+            <SegmentedControl.Item class={theme().toggle.item.base} value="mixed">
               <SegmentedControl.ItemInput />
               <SegmentedControl.ItemControl class={theme().toggle.item.control}>
                 <SegmentedControl.ItemLabel class={theme().toggle.item.label}>Both</SegmentedControl.ItemLabel>
@@ -401,23 +405,23 @@ function SettingsPane() {
       </SegmentedControl>
       
       {/* Channel views */}
-      <SegmentedControl class={theme().toggle.root} value={settings.view} onChange={(v) => SettingsActions.set_view(v)}>
+      <SegmentedControl class={theme().toggle.base} value={settings.view} onChange={(v) => SettingsActions.set_view(v)}>
         <div role="presentation" class="relative flex">
           <SegmentedControl.Indicator class={theme().toggle.indicator} />
           <div role="presentation" class={theme().toggle.items}>
-            <SegmentedControl.Item class={theme().toggle.item.root} value="channels">
+            <SegmentedControl.Item class={theme().toggle.item.base} value="channels">
               <SegmentedControl.ItemInput />
               <SegmentedControl.ItemControl class={theme().toggle.item.control}>
                 <SegmentedControl.ItemLabel class={theme().toggle.item.label}>Channels</SegmentedControl.ItemLabel>
               </SegmentedControl.ItemControl>
             </SegmentedControl.Item>
-            <SegmentedControl.Item class={theme().toggle.item.root} value="values">
+            <SegmentedControl.Item class={theme().toggle.item.base} value="values">
               <SegmentedControl.ItemInput />
               <SegmentedControl.ItemControl class={theme().toggle.item.control}>
                 <SegmentedControl.ItemLabel class={theme().toggle.item.label}>Values</SegmentedControl.ItemLabel>
               </SegmentedControl.ItemControl>
             </SegmentedControl.Item>
-            <SegmentedControl.Item class={theme().toggle.item.root} value="both">
+            <SegmentedControl.Item class={theme().toggle.item.base} value="both">
               <SegmentedControl.ItemInput />
               <SegmentedControl.ItemControl class={theme().toggle.item.control}>
                 <SegmentedControl.ItemLabel class={theme().toggle.item.label}>Both</SegmentedControl.ItemLabel>
@@ -429,7 +433,7 @@ function SettingsPane() {
 
       {/* Network interface */}
       <Select
-        class={theme().select.root}
+        class={theme().select.base}
         value={settings.selected_interface}
         onChange={SettingsActions.set_interface}
         options={settings.interfaces}
@@ -437,7 +441,7 @@ function SettingsPane() {
         optionTextValue="name"
         placeholder="Select network interface"
         itemComponent={(props) => (
-            <Select.Item item={props.item} class={theme().select.item.root}>
+            <Select.Item item={props.item} class={theme().select.item.base}>
               <Select.ItemLabel>{props.item.rawValue.name} ({props.item.rawValue.ip})</Select.ItemLabel>
               <Select.ItemIndicator>
                 <FaSolidCheck />
