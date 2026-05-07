@@ -7,7 +7,7 @@ export const [universes, setUniverses] = createStore({
   list: [],
   selected_key: null,
   selected: null,
-  data: new Array(512),
+  data: new Array(512).fill(0),
   selected_channel: null,
 });
 
@@ -45,7 +45,7 @@ export const UniversesActions = {
   clear_universes: async function() {
     setUniverses({ 
       list: [], 
-      data: new Array(512), 
+      data: new Array(512).fill(0), 
       selected: null, 
       selected_key: null 
     });
