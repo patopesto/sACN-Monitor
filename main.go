@@ -18,11 +18,11 @@ var assets embed.FS
 //go:embed wails.json
 var configWails string
 
-func main() {
-	// Load variables from embedded wails config file
-	name := gjson.Get(configWails, "name")
+var name string
 
-	// Create application
+func main() {
+	name = fmt.Sprintf("%s", gjson.Get(configWails, "name"))
+
 	app := application.New(application.Options{
 		Name: fmt.Sprintf("%s", name),
 		Assets: application.AssetOptions{
@@ -30,17 +30,51 @@ func main() {
 		},
 	})
 
+	appService := NewAppService(app)
+	app.RegisterService(application.NewService(appService))
 	networkService := dmx.NewNetworkService(app)
 	app.RegisterService(application.NewService(networkService))
 	dmxService := dmx.NewDMXService(app)
 	app.RegisterService(application.NewService(dmxService))
 
 	// Create main window
-	window := app.Window.NewWithOptions(application.WebviewWindowOptions{
-		Title:  fmt.Sprintf("%s", name),
+	window := createWindow(app)
+	window.Show()
+
+	// Setup menu (disabled on Windows for dark theme compatibility)
+	if runtime.GOOS != "windows" {
+		menu := app.NewMenu()
+
+		// Options Menu
+		optionsMenu := menu.AddSubmenu("Options")
+		optionsMenu.AddSeparator()
+		optionsMenu.Add("Clear Universe list").
+			SetAccelerator("CmdOrCtrl+R").
+			OnClick(func(ctx *application.Context) {
+				dmxService.ClearUniverses()
+			})
+		optionsMenu.Add("Open New Window").
+			SetAccelerator("CmdOrCtrl+N").
+			OnClick(func(ctx *application.Context) {
+				appService.OpenNewWindow()
+			})
+
+		// Set menu on the window
+		// window.SetMenu(menu)
+		app.Menu.Set(menu)
+	}
+
+	err := app.Run()
+	if err != nil {
+		log.Fatalf("Error running application: %v", err)
+	}
+}
+
+func createWindow(app *application.App) *application.WebviewWindow {
+	return app.Window.NewWithOptions(application.WebviewWindowOptions{
+		Title:  name,
 		Width:  1280,
 		Height: 720,
-		// Menu disabled on Windows for dark theme compatibility
 		Mac: application.MacWindow{
 			Appearance: application.NSAppearanceNameDarkAqua,
 		},
@@ -49,32 +83,21 @@ func main() {
 			Theme:        application.Dark,
 		},
 	})
+}
 
-	// Setup menu (except on Windows)
-	if runtime.GOOS != "windows" {
-		setupMenu(app, window, dmxService)
-	}
+type AppService struct {
+	app         *application.App
+}
 
-	// Run application
-	err := app.Run()
-	if err != nil {
-		log.Fatalf("Error running application: %v", err)
+func NewAppService(app *application.App) *AppService {
+	return &AppService{
+		app: app,
 	}
 }
 
-func setupMenu(app *application.App, window *application.WebviewWindow, dmxService *dmx.DMXService) {
-	appMenu := app.NewMenu()
-
-	// Options Menu
-	optionsMenu := appMenu.AddSubmenu("Options")
-	optionsMenu.AddSeparator()
-	optionsMenu.Add("Clear Universe list").
-		SetAccelerator("CmdOrCtrl+R").
-		OnClick(func(ctx *application.Context) {
-			// Call method directly on service instance
-			dmxService.ClearUniverses()
-		})
-
-	// Set menu on the window
-	window.SetMenu(appMenu)
+func (a *AppService) OpenNewWindow() {
+	window := createWindow(a.app)
+	window.Show()
 }
+
+

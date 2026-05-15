@@ -2,11 +2,13 @@ import { For, createSignal } from "solid-js";
 import { SegmentedControl } from "@kobalte/core/segmented-control";
 import { Select } from "@kobalte/core/select";
 import { Dialog } from "@kobalte/core/dialog";
+import { ContextMenu } from "@kobalte/core/context-menu";
 import { twMerge } from "tailwind-merge";
-import { FaSolidPlus, FaSolidCheck, FaSolidClose } from 'solid-icons/fa'
+import { FaSolidPlus, FaSolidCheck, FaSolidClose, FaSolidMousePointer, FaSolidExternalLinkAlt } from 'solid-icons/fa'
 import { appTheme } from "../theme.js";
 import { universes, UniversesActions } from '../models/universes';
 import { settings, SettingsActions } from '../models/settings';
+import { OpenNewWindow } from '../../bindings/sacn-monitor/appservice.js';
 
 
 const UNIVERSE_TIMEOUT = 2500;
@@ -14,7 +16,7 @@ const UNIVERSE_TIMEOUT = 2500;
 export function DMX() {
   return (
     <div class="flex flex-row justify-items-center h-screen overflow-hidden bg-zinc-900/60 select-none cursor-default">
-      <Column title="UNIVERSES" class="basis-1/5">
+      <Column title="UNIVERSES" class="basis-1/5 shrink-0">
         <UniverseList />
       </Column>
       <Column title="DMX" class="basis-3/5 border-x border-zinc-700">
@@ -44,6 +46,8 @@ function Column(props) {
 
 function UniverseList() {
   UniversesActions.get_universes();
+  const list = () => UniversesActions.get_list();
+  const [modalOpen, setModalOpen] = createSignal(false);
 
   const color = () => appTheme[settings.theme];
   const theme = () => ({
@@ -59,10 +63,13 @@ function UniverseList() {
       on: twMerge("text-black", color().primary),
     },
     source: "pl-1 w-full shrink text-xs text-slate-300",
-    badge: "justify-end shrink-0 m-3 px-2 py-0.5 rounded bg-zinc-700/80 text-slate-300 text-xs font-medium",
+    badge: "justify-end m-3 px-2 py-0.5 rounded bg-zinc-700/80 text-slate-300 text-xs font-medium",
+    menu: {
+      content: "min-w-[180px] p-1.5 bg-zinc-800 border border-zinc-700 rounded-lg shadow-lg outline-none z-50",
+      item: "flex items-center justify-between px-3 py-2 rounded-md text-[13px] text-slate-300 cursor-pointer outline-none transition-colors duration-150 hover:bg-zinc-700 hover:text-white data-[highlighted]:bg-zinc-700 data-[highlighted]:text-white data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed",
+      separator: "h-px my-1.5 bg-zinc-700",
+    },
   });
-
-  const list = () => UniversesActions.get_list();
 
   const navigate = (event, index, universe) => {
     event.preventDefault();
@@ -76,51 +83,81 @@ function UniverseList() {
   };
 
   return (
-    <div class={theme().base}>
-      <For each={list()}>
-        {(universe, index) => {
-          const selected = () => JSON.stringify(universes.selected_key) === JSON.stringify(universe);
-          const rowSelected = () => theme().row[selected() ? "on" : "off"];
-          const valueSelected = () => theme().value[selected() ? "on" : "off"];
-          const label = universe.protocol === "sacn" ? "sACN" : "ArtNet";
-          const keyStr = JSON.stringify(universe);
+    <>
+      <div class={theme().base}>
+        <For each={list()}>
+          {(universe, index) => {
+            const selected = () => JSON.stringify(universes.selected_key) === JSON.stringify(universe);
+            const rowSelected = () => theme().row[selected() ? "on" : "off"];
+            const valueSelected = () => theme().value[selected() ? "on" : "off"];
+            const label = universe.protocol === "sacn" ? "sACN" : "ArtNet";
+            const keyStr = JSON.stringify(universe);
 
-          return (
-            <div 
-              id={keyStr}
-              tabindex="-1"
-              class={twMerge(theme().row.base, rowSelected())}
-              onClick={() => UniversesActions.select_universe(universe)}
-              onKeyDown={(e) => navigate(e, index(), universe)}
-            >
-              <div class={twMerge(theme().value.base, valueSelected())}>
-                {universe.num}
-              </div>
-              <div class={theme().source}>
-                {universe.source}
-              </div>
-              {settings.protocol === "mixed" && (
-                <div class={theme().badge}>
-                  {label}
-                </div>
-              )}
-            </div>
-          );
-        }}
-      </For>
-      <AddUniverseModal />
-    </div>
+            return (
+              <ContextMenu>
+                <ContextMenu.Trigger class="w-full">
+                  <div 
+                    id={keyStr}
+                    tabindex="-1"
+                    class={twMerge(theme().row.base, rowSelected())}
+                    onClick={() => UniversesActions.select_universe(universe)}
+                    onKeyDown={(e) => navigate(e, index(), universe)}
+                  >
+                    <div class={twMerge(theme().value.base, valueSelected())}>
+                      {universe.num}
+                    </div>
+                    <div class={theme().source}>
+                      {universe.source}
+                    </div>
+                    {settings.protocol === "mixed" && (
+                      <div class={theme().badge}>
+                        {label}
+                      </div>
+                    )}
+                  </div>
+                </ContextMenu.Trigger>
+                <ContextMenu.Portal>
+                  <ContextMenu.Content class={theme().menu.content}>
+                    <ContextMenu.Item 
+                      class={theme().menu.item}
+                      onSelect={() => UniversesActions.select_universe(universe)}
+                    >
+                      <div class="flex items-center gap-2">
+                        <FaSolidMousePointer size="12" />
+                        <span>Select Universe</span>
+                      </div>
+                    </ContextMenu.Item>
+                    <ContextMenu.Item 
+                      class={theme().menu.item}
+                      onSelect={() => OpenNewWindow()}
+                    >
+                      <div class="flex items-center gap-2">
+                        <FaSolidExternalLinkAlt size="12" />
+                        <span>Open in New Window</span>
+                      </div>
+                    </ContextMenu.Item>
+                  </ContextMenu.Content>
+                </ContextMenu.Portal>
+              </ContextMenu>
+            );
+          }}
+        </For>
+      </div>
+      <AddUniverseModal open={modalOpen} setOpen={setModalOpen} />
+    </>
   );
 }
 
 
-function AddUniverseModal() {
+function AddUniverseModal(props) {
+  const { open, setOpen } = props;
   const [universe, setUniverse] = createSignal("");
 
   const join_universe = () => {
     if (universe()) {
       UniversesActions.join_universe(Number(universe));
       setUniverse("");
+      setOpen(false);
     }
   };
 
@@ -147,7 +184,7 @@ function AddUniverseModal() {
   })
 
   return (
-    <Dialog>
+    <Dialog open={open()} onOpenChange={setOpen}>
       <Dialog.Trigger class={theme().trigger}>
         <FaSolidPlus size="15" class="text-slate-300" />
       </Dialog.Trigger>
@@ -190,7 +227,6 @@ function AddUniverseModal() {
     </Dialog>
   );
 }
-
 
 function Channels() {
   UniversesActions.get_data();
@@ -348,7 +384,6 @@ function StatsBox(props) {
 
 
 function SettingsPane() {
-  SettingsActions.init();
 
   const color = () => appTheme[settings.theme];
   const theme = () => ({

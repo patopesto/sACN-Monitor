@@ -13,7 +13,6 @@ type DMXService struct {
 	app *application.App
 
 	universes         map[UniverseKey]Universe
-	selected_universe UniverseKey
 	mu                sync.RWMutex
 
 	sacn   *sACNReceiver
@@ -92,9 +91,6 @@ func (s *DMXService) GetUniverse(key UniverseKey) Universe {
 	defer s.mu.Unlock()
 
 	if u, ok := s.universes[key]; ok {
-		if s.selected_universe != key {
-			s.selected_universe = key
-		}
 		return u
 	}
 	return Universe{}
@@ -123,13 +119,7 @@ func (s *DMXService) newUniverseEvent(key UniverseKey) {
 
 // newDataEvent is called when new DMX data is received
 func (s *DMXService) newDataEvent(uni Universe) {
-	s.mu.RLock()
-	selected := s.selected_universe
-	s.mu.RUnlock()
-
-	if selected == uni.GetKey() {
-		s.app.Event.Emit("universe.data", uni.GetKey())
-	}
+	s.app.Event.Emit("universe.data", uni.GetKey())
 }
 
 // showMessage displays a message dialog
