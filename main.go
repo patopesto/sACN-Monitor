@@ -32,10 +32,10 @@ func main() {
 
 	appService := NewAppService(app)
 	app.RegisterService(application.NewService(appService))
-	networkService := dmx.NewNetworkService(app)
-	app.RegisterService(application.NewService(networkService))
 	dmxService := dmx.NewDMXService(app)
 	app.RegisterService(application.NewService(dmxService))
+	networkService := dmx.NewNetworkService(app)
+	app.RegisterService(application.NewService(networkService))
 
 	// Create main window
 	window := createWindow(app)
@@ -59,8 +59,6 @@ func main() {
 				appService.OpenNewWindow()
 			})
 
-		// Set menu on the window
-		// window.SetMenu(menu)
 		app.Menu.Set(menu)
 	}
 
@@ -86,7 +84,8 @@ func createWindow(app *application.App) *application.WebviewWindow {
 }
 
 type AppService struct {
-	app         *application.App
+	app             *application.App
+	pendingUniverse *dmx.UniverseKey
 }
 
 func NewAppService(app *application.App) *AppService {
@@ -100,4 +99,17 @@ func (a *AppService) OpenNewWindow() {
 	window.Show()
 }
 
+func (a *AppService) OpenNewWindowWithUniverse(key dmx.UniverseKey) {
+	a.pendingUniverse = &key
+	window := createWindow(a.app)
+	window.Show()
+}
 
+func (a *AppService) GetPendingUniverse() *dmx.UniverseKey {
+	if a.pendingUniverse != nil {
+		universe := *a.pendingUniverse
+		a.pendingUniverse = nil
+		return &universe
+	}
+	return nil
+}

@@ -6,9 +6,34 @@
 // @ts-ignore: Unused imports
 import { Call as $Call, CancellablePromise as $CancellablePromise, Create as $Create } from "@wailsio/runtime";
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore: Unused imports
+import * as dmx$0 from "./backend/models.js";
+
+/**
+ * @returns {$CancellablePromise<dmx$0.UniverseKey | null>}
+ */
+export function GetPendingUniverse() {
+    return $Call.ByID(2589086226).then(/** @type {($result: any) => any} */(($result) => {
+        return $$createType1($result);
+    }));
+}
+
 /**
  * @returns {$CancellablePromise<void>}
  */
 export function OpenNewWindow() {
     return $Call.ByID(3646411392);
 }
+
+/**
+ * @param {dmx$0.UniverseKey} key
+ * @returns {$CancellablePromise<void>}
+ */
+export function OpenNewWindowWithUniverse(key) {
+    return $Call.ByID(3720421963, key);
+}
+
+// Private type creation functions
+const $$createType0 = dmx$0.UniverseKey.createFrom;
+const $$createType1 = $Create.Nullable($$createType0);

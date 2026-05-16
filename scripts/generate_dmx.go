@@ -44,7 +44,7 @@ var universes = []struct {
 		mode:      "unicast",
 		generator: generateChase,
 	},
-		{
+	{
 		num:       4,
 		mode:      "broadcast",
 		generator: generateFadeAll,

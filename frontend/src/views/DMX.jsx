@@ -8,7 +8,6 @@ import { FaSolidPlus, FaSolidCheck, FaSolidClose, FaSolidMousePointer, FaSolidEx
 import { appTheme } from "../theme.js";
 import { universes, UniversesActions } from '../models/universes';
 import { settings, SettingsActions } from '../models/settings';
-import { OpenNewWindow } from '../../bindings/sacn-monitor/appservice.js';
 
 
 const UNIVERSE_TIMEOUT = 2500;
@@ -127,9 +126,9 @@ function UniverseList() {
                         <span>Select Universe</span>
                       </div>
                     </ContextMenu.Item>
-                    <ContextMenu.Item 
+                    <ContextMenu.Item
                       class={theme().menu.item}
-                      onSelect={() => OpenNewWindow()}
+                      onSelect={() => UniversesActions.open_new_window(universe)}
                     >
                       <div class="flex items-center gap-2">
                         <FaSolidExternalLinkAlt size="12" />

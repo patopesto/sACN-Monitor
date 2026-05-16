@@ -12,8 +12,8 @@ import (
 type DMXService struct {
 	app *application.App
 
-	universes         map[UniverseKey]Universe
-	mu                sync.RWMutex
+	universes map[UniverseKey]Universe
+	mu        sync.RWMutex
 
 	sacn   *sACNReceiver
 	artnet *artNetReceiver

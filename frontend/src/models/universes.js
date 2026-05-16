@@ -1,7 +1,8 @@
 import { createStore } from "solid-js/store";
-import { GetUniverses, GetUniverse, JoinUniverse } from '../../bindings/sacn-monitor/backend/dmxservice'
 import { Events } from '@wailsio/runtime'
-import { settings } from './settings.js'
+import { GetUniverses, GetUniverse, JoinUniverse } from '../../bindings/sacn-monitor/backend/dmxservice'
+import { OpenNewWindowWithUniverse, GetPendingUniverse } from '../../bindings/sacn-monitor/appservice.js';
+import { settings, SettingsActions } from './settings.js'
 
 export const [universes, setUniverses] = createStore({
   list: [],
@@ -12,7 +13,7 @@ export const [universes, setUniverses] = createStore({
 });
 
 export const UniversesActions = {
-  init: function() {
+  init: async function() {
     Events.On("universes.new", () => this.get_universes());
     Events.On("universes.clear", () => this.clear_universes());
     Events.On("universe.data", (event) => {
@@ -20,6 +21,21 @@ export const UniversesActions = {
         this.get_data();
       }
     });
+
+    // Open new window with pending universe
+    setTimeout(async () => {
+      try {
+        const universe = await GetPendingUniverse();
+        if (universe && !universes.selected_key) {
+          console.log("New window: selecting universe", universe);
+          this.select_universe(universe);
+          SettingsActions.set_protocol(universe.protocol);
+        }
+      } 
+      catch (e) {
+        console.error('Failed to get pending universe from backend:', e);
+      }
+    }, 100);
   },
 
   get_list: function() {
@@ -56,6 +72,10 @@ export const UniversesActions = {
   select_universe: async function(key) {
     setUniverses("selected_key", key);
     await this.get_data();
+  },
+
+  open_new_window(key) {
+    OpenNewWindowWithUniverse(key);
   },
 
   get_data: async function() {
