@@ -5,6 +5,7 @@ import { Dialog } from "@kobalte/core/dialog";
 import { ContextMenu } from "@kobalte/core/context-menu";
 import { twMerge } from "tailwind-merge";
 import { FaSolidPlus, FaSolidCheck, FaSolidClose, FaSolidMousePointer, FaSolidExternalLinkAlt } from 'solid-icons/fa'
+import { VsLayoutSidebarLeft, VsLayoutSidebarLeftOff, VsLayoutSidebarRight, VsLayoutSidebarRightOff } from 'solid-icons/vs'
 import { appTheme } from "../theme.js";
 import { universes, UniversesActions } from '../models/universes';
 import { settings, SettingsActions } from '../models/settings';
@@ -13,17 +14,51 @@ import { settings, SettingsActions } from '../models/settings';
 const UNIVERSE_TIMEOUT = 2500;
 
 export function DMX() {
+  const [leftCollapsed, setLeftCollapsed] = createSignal(false);
+  const [rightCollapsed, setRightCollapsed] = createSignal(false);
+
+  const theme = () => ({
+    base: "flex flex-row h-screen overflow-hidden bg-zinc-900/60 select-none cursor-default",
+    column: "h-full",
+    sidebar: {
+      base: "shrink-0 transition-all duration-300 ease-in-out overflow-hidden",
+      visible: "basis-1/5",
+      hidden: "w-0",
+    },
+    center: {
+      base: "flex-grow border-x border-zinc-700",
+    },
+    toggle: "p-1 rounded hover:bg-zinc-700 transition-colors",
+  });
+
   return (
-    <div class="flex flex-row justify-items-center h-screen overflow-hidden bg-zinc-900/60 select-none cursor-default">
-      <Column title="UNIVERSES" class="basis-1/5 shrink-0">
+    <div class={theme().base}>
+      {/* Left Sidebar - UNIVERSES */}
+      <Column class={twMerge(theme().column, theme().sidebar.base, theme().sidebar[leftCollapsed() ? "hidden" : "visible"])}>
+        <Column.Title>UNIVERSES</Column.Title>
         <UniverseList />
       </Column>
-      <Column title="DMX" class="basis-3/5 border-x border-zinc-700">
+
+      {/* Center - DMX Channels */}
+      <Column class={twMerge(theme().column, theme().center.base)}>
+        <Column.Title class={"justify-between items-center"}>
+          <button class={theme().toggle} onClick={() => setLeftCollapsed(!leftCollapsed())}>
+            {leftCollapsed() ? <VsLayoutSidebarLeft size="14" /> : <VsLayoutSidebarLeftOff size="14" />}
+          </button>
+          <h2>DMX</h2>
+          <button class={theme().toggle} onClick={() => setRightCollapsed(!rightCollapsed())}>
+            {rightCollapsed() ? <VsLayoutSidebarRight size="14" /> : <VsLayoutSidebarRightOff size="14" />}
+          </button>
+        </Column.Title>
         <Channels />
       </Column>
-      <Column title="STATISTICS" class="basis-1/5">
+
+      {/* Right Sidebar - STATISTICS + SETTINGS */}
+      <Column class={twMerge(theme().column, theme().sidebar.base, theme().sidebar[rightCollapsed() ? "hidden" : "visible"])}>
+        <Column.Title>STATISTICS</Column.Title>
         <Stats />
-        <Column title="SETTINGS">
+        <Column>
+          <Column.Title>SETTINGS</Column.Title>
           <SettingsPane />
         </Column>
       </Column>
@@ -33,14 +68,20 @@ export function DMX() {
 
 function Column(props) {
   return (
-    <div class={twMerge(props.class, "flex flex-col")}>
-      <header class="flex justify-center bg-zinc-800/60 text-neutral-300 p-1">
-        <h2>{props.title}</h2>
-      </header>
+    <div class={twMerge("flex flex-col", props.class)}>
       {props.children}
     </div>
   );
 }
+
+Column.Title = function ColumnTitle(props) {
+  const isString = typeof props.children === 'string';
+  return (
+    <header class={twMerge("flex p-1 w-full justify-center items-center bg-zinc-800/60 text-neutral-300 text-center", props.class)}>
+      {isString ? <h2>{props.children}</h2> : props.children}
+    </header>
+  );
+};
 
 
 function UniverseList() {
@@ -50,7 +91,7 @@ function UniverseList() {
 
   const color = () => appTheme[settings.theme];
   const theme = () => ({
-    base: "flex flex-col pt-2 pb-9 overflow-auto overscroll-none",
+    base: "flex flex-col pt-2 pb-10 overflow-auto overscroll-none",
     row: {
       base: twMerge("flex flex-row min-h-8 h-8 items-center focus:outline-none", "hover:" + color().secondary),
       off: "",
@@ -178,7 +219,6 @@ function AddUniverseModal(props) {
         close: "px-4 py-2 rounded-lg text-white bg-zinc-700 hover:bg-zinc-600 transition-colors",
         join: twMerge("px-4 py-2 rounded-lg text-white transition-opacity hover:opacity-80", color().primary),
       }
-
     }
   })
 
