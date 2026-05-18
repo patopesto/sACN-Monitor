@@ -9,7 +9,7 @@ includes:
 
 vars:
   APP_NAME: "sACN Monitor"
-  BIN_DIR: "bin"
+  BIN_DIR: "dist"
   VITE_PORT: '{{.WAILS_VITE_PORT | default 9245}}'
 
 tasks:

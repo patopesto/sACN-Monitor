@@ -6,7 +6,6 @@ import (
 	"log"
 	"runtime"
 
-	"github.com/tidwall/gjson"
 	"github.com/wailsapp/wails/v3/pkg/application"
 
 	dmx "sacn-monitor/backend"
@@ -15,14 +14,9 @@ import (
 //go:embed frontend/dist
 var assets embed.FS
 
-//go:embed wails.json
-var configWails string
-
-var name string
+const name = "sACN Monitor"
 
 func main() {
-	name = fmt.Sprintf("%s", gjson.Get(configWails, "name"))
-
 	app := application.New(application.Options{
 		Name: fmt.Sprintf("%s", name),
 		Assets: application.AssetOptions{
