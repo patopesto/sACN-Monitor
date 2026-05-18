@@ -24,6 +24,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libgtk-4-dev libwebkitgtk-6.0-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# Install pnpm globally (security: verify integrity with npm)
+ENV PNPM_HOME="/pnpm"
+ENV PATH="${PNPM_HOME}:${PATH}"
+RUN npm install -g pnpm@latest-11 \
+    && pnpm config set registry https://registry.npmjs.org/ \
+    && pnpm config set strict-ssl true \
+    && pnpm config set ignore-scripts true
+
 # Install Zig - automatically selects correct binary for host architecture
 ARG ZIG_VERSION=0.14.0
 RUN ZIG_ARCH=$(case "${TARGETARCH}" in arm64) echo "aarch64" ;; *) echo "x86_64" ;; esac) && \
@@ -174,7 +182,7 @@ export CGO_CFLAGS="-w"
 
 # Build frontend if exists and not already built (host may have built it)
 if [ -d "frontend" ] && [ -f "frontend/package.json" ] && [ ! -d "frontend/dist" ]; then
-    (cd frontend && npm install --silent && npm run build --silent)
+    (cd frontend && pnpm install --frozen-lockfile && pnpm run build)
 fi
 
 # Build

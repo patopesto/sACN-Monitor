@@ -133,7 +133,9 @@ pages:
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   before_script:
-    - cd ./docs && npm install
+    - corepack enable
+    - corepack prepare pnpm@latest-11 --activate
+    - cd ./docs && pnpm install --frozen-lockfile
   script:
     - hugo
   artifacts:

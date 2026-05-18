@@ -93,7 +93,7 @@ tasks:
     cmds:
       - task: common:go:mod:tidy
       - go get -u ./...
-      - cd frontend && npm update
+      - cd frontend && pnpm update
 
   clean:
     desc: Clean build directoy

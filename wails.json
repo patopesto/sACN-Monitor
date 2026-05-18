@@ -3,9 +3,9 @@
   "name": "sACN Monitor",
   "frontend": {
     "dir": "./frontend",
-    "install": "npm install",
-    "build": "npm run build",
-    "dev": "npm run dev",
+    "install": "pnpm install",
+    "build": "pnpm run build",
+    "dev": "pnpm run dev",
     "devServerUrl": "http://localhost:5173"
   }
 }
