@@ -5,6 +5,7 @@ includes:
   windows: ./build/windows/Taskfile.yml
   darwin: ./build/darwin/Taskfile.yml
   linux: ./build/linux/Taskfile.yml
+  frontend: ./frontend/Taskfile.yml
 
 vars:
   APP_NAME: "sACN Monitor"
@@ -79,6 +80,7 @@ tasks:
       - task: vet
       - task: common:go:mod:tidy
       - go run golang.org/x/vuln/cmd/govulncheck@latest -show verbose ./...
+      - task: frontend:check
 
   fmt:
     desc: Run Formatting
@@ -93,9 +95,10 @@ tasks:
     cmds:
       - task: common:go:mod:tidy
       - go get -u ./...
-      - cd frontend && pnpm update
+      - task: frontend:update
 
   clean:
     desc: Clean build directoy
     cmds:
       - rm -rf {{.BIN_DIR}}
+      - task: frontend:clean

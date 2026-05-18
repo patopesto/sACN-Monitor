@@ -6,7 +6,7 @@ require (
 	github.com/jsimonetti/go-artnet v0.0.0-20260301150816-fe6e46ce079e
 	github.com/libp2p/go-reuseport v0.4.0
 	github.com/tidwall/gjson v1.19.0
-	github.com/wailsapp/wails/v3 v3.0.0-alpha.92
+	github.com/wailsapp/wails/v3 v3.0.0-alpha.93
 	gitlab.com/patopest/go-sacn v1.1.0
 	golang.org/x/net v0.54.0
 )

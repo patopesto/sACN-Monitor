@@ -1,0 +1,28 @@
+version: '3'
+
+vars:
+  BIN_DIR: "dist"
+
+# Custom tasks to integrate in top-level Taskfile architecture
+tasks:
+  check:
+    desc: Clean, tidy and audit
+    dir: frontend
+    cmds:
+      - pnpm audit
+    preconditions:
+      - sh: pnpm --version
+
+  update:
+    desc: Update dependencies
+    dir: frontend
+    cmds:
+      - pnpm update
+    preconditions:
+      - sh: pnpm --version
+
+  clean:
+    desc: Clean build directoy
+    dir: frontend
+    cmds:
+      - rm -rf {{.BIN_DIR}}
