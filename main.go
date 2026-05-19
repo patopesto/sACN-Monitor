@@ -31,30 +31,45 @@ func main() {
 	networkService := dmx.NewNetworkService(app)
 	app.RegisterService(application.NewService(networkService))
 
-	// Create main window
-	window := createWindow(app)
-	window.Show()
-
 	// Setup menu (disabled on Windows for dark theme compatibility)
 	if runtime.GOOS != "windows" {
 		menu := app.NewMenu()
 
-		// Options Menu
-		optionsMenu := menu.AddSubmenu("Options")
-		optionsMenu.AddSeparator()
-		optionsMenu.Add("Clear Universe list").
+		if runtime.GOOS == "darwin" {
+        	menu.AddRole(application.AppMenu)  // macOS only
+    	}
+
+		// Custom File Menu - not using the default wails role
+		fileMenu := menu.AddSubmenu("File")
+		fileMenu.Add("Reload Universes").
 			SetAccelerator("CmdOrCtrl+R").
 			OnClick(func(ctx *application.Context) {
 				dmxService.ClearUniverses()
 			})
-		optionsMenu.Add("Open New Window").
+		fileMenu.AddSeparator()
+		fileMenu.Add("New Window").
 			SetAccelerator("CmdOrCtrl+N").
 			OnClick(func(ctx *application.Context) {
 				appService.OpenNewWindow()
 			})
+		fileMenu.Add("Close Window").
+			SetAccelerator("CmdOrCtrl+W").
+			OnClick(func(ctx *application.Context) {
+				currentWindow := app.Window.Current()
+				if currentWindow != nil {
+					currentWindow.Close()
+				}
+			})
+
+		menu.AddRole(application.WindowMenu)
+    	menu.AddRole(application.HelpMenu)
 
 		app.Menu.Set(menu)
 	}
+
+	// Create main window
+	window := createWindow(app)
+	window.Show()
 
 	err := app.Run()
 	if err != nil {
@@ -67,12 +82,18 @@ func createWindow(app *application.App) *application.WebviewWindow {
 		Title:  name,
 		Width:  1280,
 		Height: 720,
+		UseApplicationMenu: true,
+		BackgroundType: application.BackgroundTypeTranslucent,
 		Mac: application.MacWindow{
+			Backdrop: application.MacBackdropTranslucent,
 			Appearance: application.NSAppearanceNameDarkAqua,
 		},
 		Windows: application.WindowsWindow{
 			BackdropType: application.Mica,
 			Theme:        application.Dark,
+		},
+		Linux: application.LinuxWindow{
+			WindowIsTranslucent: true,
 		},
 	})
 }

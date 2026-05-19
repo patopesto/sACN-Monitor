@@ -1,5 +1,5 @@
 import { createStore } from "solid-js/store";
-import { Events } from '@wailsio/runtime'
+import { Events, Window } from '@wailsio/runtime'
 import { GetUniverses, GetUniverse, JoinUniverse } from '../../bindings/sacn-monitor/backend/dmxservice'
 import { OpenNewWindowWithUniverse, GetPendingUniverse } from '../../bindings/sacn-monitor/appservice.js';
 import { settings, SettingsActions } from './settings.js'
@@ -33,7 +33,7 @@ export const UniversesActions = {
         }
       } 
       catch (e) {
-        console.error('Failed to get pending universe from backend:', e);
+        console.error("Failed to get pending universe from backend:", e);
       }
     }, 100);
   },
@@ -72,6 +72,11 @@ export const UniversesActions = {
   select_universe: async function(key) {
     setUniverses("selected_key", key);
     await this.get_data();
+    let title = "";
+    if (key.protocol == "artnet") title += "ArtNet"; 
+    if (key.protocol == "sacn") title += "sACN"; 
+    title += ` ${key.num}`
+    await Window.SetTitle(title)
   },
 
   open_new_window(key) {
