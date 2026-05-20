@@ -14,8 +14,6 @@ import { settings, SettingsActions } from '../models/settings';
 const UNIVERSE_TIMEOUT = 2500;
 
 export function DMX() {
-  const [leftCollapsed, setLeftCollapsed] = createSignal(false);
-  const [rightCollapsed, setRightCollapsed] = createSignal(false);
 
   const theme = () => ({
     base: "flex flex-row h-screen overflow-hidden bg-zinc-900/60 select-none cursor-default",
@@ -34,7 +32,7 @@ export function DMX() {
   return (
     <div class={theme().base}>
       {/* Left Sidebar - UNIVERSES */}
-      <Column class={twMerge(theme().column, theme().sidebar.base, theme().sidebar[leftCollapsed() ? "hidden" : "visible"])}>
+      <Column class={twMerge(theme().column, theme().sidebar.base, theme().sidebar[settings.sidebar.left ? "visible" : "hidden"])}>
         <Column.Title>UNIVERSES</Column.Title>
         <UniverseList />
       </Column>
@@ -42,19 +40,19 @@ export function DMX() {
       {/* Center - DMX Channels */}
       <Column class={twMerge(theme().column, theme().center.base)}>
         <Column.Title class={"justify-between items-center"}>
-          <button class={theme().toggle} onClick={() => setLeftCollapsed(!leftCollapsed())}>
-            {leftCollapsed() ? <VsLayoutSidebarLeft size="14" /> : <VsLayoutSidebarLeftOff size="14" />}
+          <button class={theme().toggle} onClick={() => SettingsActions.toggle_sidebar("left")}>
+            {settings.sidebar.left ? <VsLayoutSidebarLeftOff size="14" /> : <VsLayoutSidebarLeft size="14" />}
           </button>
           <h2>DMX</h2>
-          <button class={theme().toggle} onClick={() => setRightCollapsed(!rightCollapsed())}>
-            {rightCollapsed() ? <VsLayoutSidebarRight size="14" /> : <VsLayoutSidebarRightOff size="14" />}
+          <button class={theme().toggle} onClick={() => SettingsActions.toggle_sidebar("right")}>
+            {settings.sidebar.right ? <VsLayoutSidebarRightOff size="14" /> : <VsLayoutSidebarRight size="14" />}
           </button>
         </Column.Title>
         <Channels />
       </Column>
 
       {/* Right Sidebar - STATISTICS + SETTINGS */}
-      <Column class={twMerge(theme().column, theme().sidebar.base, theme().sidebar[rightCollapsed() ? "hidden" : "visible"])}>
+      <Column class={twMerge(theme().column, theme().sidebar.base, theme().sidebar[settings.sidebar.right ? "visible" : "hidden"])}>
         <Column.Title>STATISTICS</Column.Title>
         <Stats />
         <Column>

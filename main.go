@@ -39,15 +39,9 @@ func main() {
         	menu.AddRole(application.AppMenu)  // macOS only
     	}
 
-		// Custom File Menu - not using the default wails role
-		fileMenu := menu.AddSubmenu("File")
-		fileMenu.Add("Reload Universes").
-			SetAccelerator("CmdOrCtrl+R").
-			OnClick(func(ctx *application.Context) {
-				dmxService.ClearUniverses()
-			})
-		fileMenu.AddSeparator()
-		fileMenu.Add("New Window").
+    	// File: custom menu
+    	fileMenu := menu.AddSubmenu("File")
+    	fileMenu.Add("New Window").
 			SetAccelerator("CmdOrCtrl+N").
 			OnClick(func(ctx *application.Context) {
 				appService.OpenNewWindow()
@@ -61,6 +55,33 @@ func main() {
 				}
 			})
 
+		// View: custom menu
+		viewMenu := menu.AddSubmenu("View")
+		viewMenu.Add("Reload Universes").
+			SetAccelerator("CmdOrCtrl+R").
+			OnClick(func(ctx *application.Context) {
+				dmxService.ClearUniverses()
+			})
+		viewMenu.AddSeparator()
+		viewMenu.Add("Toggle Left Sidebar").
+			SetAccelerator("CmdOrCtrl+Shift+L").
+			OnClick(func(ctx *application.Context) {
+				currentWindow := app.Window.Current()
+				if currentWindow != nil {
+					currentWindow.EmitEvent("sidebar.left.toggle")
+				}
+			})
+		viewMenu.Add("Toggle Right Sidebar").
+			SetAccelerator("CmdOrCtrl+Shift+R").
+			OnClick(func(ctx *application.Context) {
+				currentWindow := app.Window.Current()
+				if currentWindow != nil {
+					currentWindow.EmitEvent("sidebar.right.toggle")
+				}
+			})
+		viewMenu.AddSeparator()
+		
+		// Add other defaults
 		menu.AddRole(application.WindowMenu)
     	menu.AddRole(application.HelpMenu)
 

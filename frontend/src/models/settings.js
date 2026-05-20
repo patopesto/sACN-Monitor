@@ -1,5 +1,5 @@
 import { createStore } from "solid-js/store";
-import { Events } from '@wailsio/runtime'
+import { Events, Window } from '@wailsio/runtime'
 import { GetInterfaces, SetInterface } from '../../bindings/sacn-monitor/backend/networkservice'
 
 export const [settings, setSettings] = createStore({
@@ -8,14 +8,32 @@ export const [settings, setSettings] = createStore({
   interfaces: [],
   selected_interface: undefined,
   theme: "cyan",
+  sidebar: {
+    left: true,
+    right: true,
+  },
 });
 
 export const SettingsActions = {
-  init: function() {
+  init: async function() {
     this.get_interfaces();
+    const window_name = await Window.Name();
+    console.log("Hello from window:", window_name);
 
     Events.On("interface.selected", (event) => {
       this.on_interface_selected(event.data);
+    });
+
+    Events.On("sidebar.left.toggle", (event) => {
+      if (event.sender == window_name) {
+        this.toggle_sidebar("left");
+      }
+    });
+
+    Events.On("sidebar.right.toggle", (event) => {
+      if (event.sender == window_name) {
+        this.toggle_sidebar("right");
+      }
     });
   },
 
@@ -55,5 +73,13 @@ export const SettingsActions = {
   on_interface_selected: function(itf) {
     console.log("Interface selected event received:", itf);
     setSettings("selected_interface", itf);
+  },
+
+  set_sidebar(side, state) {
+    setSettings("sidebar", { [side]: state });
+  },
+
+  toggle_sidebar(side) {
+    setSettings("sidebar", { [side]: !settings.sidebar[side] })
   },
 };
