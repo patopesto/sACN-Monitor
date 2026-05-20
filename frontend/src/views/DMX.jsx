@@ -7,8 +7,8 @@ import { twMerge } from "tailwind-merge";
 import { FaSolidPlus, FaSolidCheck, FaSolidClose, FaSolidMousePointer, FaSolidExternalLinkAlt } from 'solid-icons/fa'
 import { VsLayoutSidebarLeft, VsLayoutSidebarLeftOff, VsLayoutSidebarRight, VsLayoutSidebarRightOff } from 'solid-icons/vs'
 import { appTheme } from "../theme.js";
-import { universes, UniversesActions } from '../models/universes';
-import { settings, SettingsActions } from '../models/settings';
+import { universes, UniversesActions } from '../stores/universes';
+import { settings, SettingsActions } from '../stores/settings';
 
 
 const UNIVERSE_TIMEOUT = 2500;
