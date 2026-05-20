@@ -110,13 +110,16 @@ function UniverseList() {
   });
 
   const navigate = (event, index, universe) => {
-    event.preventDefault();
     if (event.key === "ArrowUp" && index - 1 >= 0) {
+      event.preventDefault();
       UniversesActions.select_universe(list()[index - 1]);
       document.getElementById(JSON.stringify(list()[index - 1]))?.focus();
     } else if (event.key === "ArrowDown" && index + 1 < list().length) {
+      event.preventDefault();
       UniversesActions.select_universe(list()[index + 1]);
       document.getElementById(JSON.stringify(list()[index + 1]))?.focus();
+    } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+      event.preventDefault(); // Prevent scrolling when at edges
     }
   };
 
@@ -269,9 +272,15 @@ function Channels() {
   UniversesActions.get_data();
 
   const navigate = (event) => {
-    event.preventDefault();
     const index = universes.selected_channel;
-    
+    const arrowKeys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
+
+    if (!arrowKeys.includes(event.key)) {
+      return; // Let other keys pass through
+    }
+
+    event.preventDefault(); // Always prevent scroll for arrow keys
+
     if (event.key === "ArrowRight" && index + 1 < universes.data.length) {
       UniversesActions.select_channel(index + 1)
       document.getElementById(`channel-${index + 1}`).focus()
@@ -280,7 +289,7 @@ function Channels() {
       UniversesActions.select_channel(index - 1)
       document.getElementById(`channel-${index - 1}`).focus()
     }
-    else {
+    else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
       const getRect = (id) => {
         const el = document.getElementById(id)
         const rect = el.getBoundingClientRect()
