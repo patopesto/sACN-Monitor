@@ -19,8 +19,8 @@ export function DMX() {
     base: "flex flex-row h-screen overflow-hidden bg-zinc-900/60 select-none cursor-default",
     column: "h-full",
     sidebar: {
-      base: "shrink-0 transition-all duration-300 ease-in-out overflow-hidden",
-      visible: "basis-1/5",
+      base: "shrink-0 transition-[width] duration-300 ease-in-out overflow-hidden",
+      visible: "w-[20%]",
       hidden: "w-0",
     },
     center: {
