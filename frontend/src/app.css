@@ -2,6 +2,32 @@
 
 @theme {
   /* Custom theme configuration can go here */
+
+  /* Select component animations */
+  --animate-select-content-show: contentShow 250ms ease-out;
+  --animate-select-content-hide: contentHide 250ms ease-in forwards;
+
+  @keyframes contentShow {
+    from {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes contentHide {
+    from {
+      opacity: 1;
+      transform: scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+  }
 }
 
 @layer base {

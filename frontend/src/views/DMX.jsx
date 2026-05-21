@@ -448,6 +448,7 @@ function SettingsPane() {
       base: "w-full",
       trigger: "mt-1 px-2 py-1 w-full rounded bg-zinc-800 border border-zinc-700 outline-none hover:border-zinc-500 transition-[border] text-xs text-left text-slate-300",
       content: "bg-zinc-800 border border-zinc-700 rounded-lg shadow-lg outline-none",
+      animation: "origin-[var(--kb-select-content-transform-origin)] animate-select-content-hide data-[expanded]:animate-select-content-show",
       items: "p-2 overflow-y-auto",
       item: {
         base: "flex justify-between items-baseline text-left px-3 py-2 text-xs rounded-md cursor-pointer outline-none hover:bg-zinc-700 text-slate-300 hover:text-white",
@@ -537,7 +538,7 @@ function SettingsPane() {
           </Select.Value>
         </Select.Trigger>
         <Select.Portal>
-          <Select.Content class={theme().select.content}>
+          <Select.Content class={twMerge(theme().select.content, theme().select.animation)}>
             <Select.Listbox  class={theme().select.items}/>
           </Select.Content>
         </Select.Portal>
