@@ -208,8 +208,14 @@ function AddUniverseModal(props) {
     trigger: twMerge("fixed bottom-0 self-end m-3 rounded-md bg-blue-600 p-1", color().primary),
     dialog: {
       base: "fixed inset-0 flex items-center justify-center z-50 outline-none",
-      overlay: "fixed inset-0 bg-black/50 z-50",
-      content: "p-6 mx-4 w-full max-w-md rounded-xl bg-zinc-800 shadow-xl",
+      overlay: {
+        base: "fixed inset-0 bg-black/50 z-50",
+        animation: "animate-dialog-overlay-hide data-[expanded]:animate-dialog-overlay-show",
+      },
+      content: {
+        base: "p-6 mx-4 w-full max-w-md rounded-xl bg-zinc-800 shadow-xl",
+        animation: "animate-dialog-content-hide data-[expanded]:animate-dialog-content-show",
+      },
       header: {
         base: "flex justify-between items-start mb-4",
         title: "text-lg font-medium text-slate-300",
@@ -230,9 +236,9 @@ function AddUniverseModal(props) {
         <FaSolidPlus size="15" class="text-slate-300" />
       </Dialog.Trigger>
       <Dialog.Portal>
-        <Dialog.Overlay class={theme().dialog.overlay} />
+        <Dialog.Overlay class={twMerge(theme().dialog.overlay.base, theme().dialog.overlay.animation)} />
         <div class={theme().dialog.base}>
-          <Dialog.Content class={theme().dialog.content}>
+          <Dialog.Content class={twMerge(theme().dialog.content.base, theme().dialog.content.animation)}>
             <div class={theme().dialog.header.base}>
               <Dialog.Title class={theme().dialog.header.title}>
                 Manually add a sACN universe to listen to

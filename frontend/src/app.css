@@ -1,13 +1,11 @@
 @import "tailwindcss";
 
 @theme {
-  /* Custom theme configuration can go here */
-
   /* Select component animations */
   --animate-select-content-show: contentShow 250ms ease-out;
   --animate-select-content-hide: contentHide 250ms ease-in forwards;
 
-  /* ContextMenu/DropdownMenu component animations */
+  /* ContextMenu component animations */
   --animate-contextmenu-content-show: contentShow 250ms ease-out;
   --animate-contextmenu-content-hide: contentHide 250ms ease-in forwards;
 
@@ -30,6 +28,52 @@
     to {
       opacity: 0;
       transform: scale(0.96);
+    }
+  }
+
+  /* Dialog component animations */
+  --animate-dialog-overlay-show: dialogOverlayShow 250ms ease-out;
+  --animate-dialog-overlay-hide: dialogOverlayHide 250ms ease-in forwards;
+  --animate-dialog-content-show: dialogContentShow 250ms ease-out;
+  --animate-dialog-content-hide: dialogContentHide 250ms ease-in forwards;
+
+  @keyframes dialogOverlayShow {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes dialogOverlayHide {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+
+  @keyframes dialogContentShow {
+    from {
+      opacity: 0;
+      transform: scale(0.96) translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  @keyframes dialogContentHide {
+    from {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: scale(0.96) translateY(-10px);
     }
   }
 }
