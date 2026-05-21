@@ -7,6 +7,10 @@
   --animate-select-content-show: contentShow 250ms ease-out;
   --animate-select-content-hide: contentHide 250ms ease-in forwards;
 
+  /* ContextMenu/DropdownMenu component animations */
+  --animate-contextmenu-content-show: contentShow 250ms ease-out;
+  --animate-contextmenu-content-hide: contentHide 250ms ease-in forwards;
+
   @keyframes contentShow {
     from {
       opacity: 0;

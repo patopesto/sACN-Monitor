@@ -104,6 +104,7 @@ function UniverseList() {
     badge: "justify-end m-3 px-2 py-0.5 rounded bg-zinc-700/80 text-slate-300 text-xs font-medium",
     menu: {
       content: "min-w-[180px] p-1.5 bg-zinc-800 border border-zinc-700 rounded-lg shadow-lg outline-none z-50",
+      animation: "origin-[var(--kb-menu-content-transform-origin)] animate-contextmenu-content-hide data-[expanded]:animate-contextmenu-content-show",
       item: "flex items-center justify-between px-3 py-2 rounded-md text-[13px] text-slate-300 cursor-pointer outline-none transition-colors duration-150 hover:bg-zinc-700 hover:text-white data-[highlighted]:bg-zinc-700 data-[highlighted]:text-white data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed",
       separator: "h-px my-1.5 bg-zinc-700",
     },
@@ -158,7 +159,7 @@ function UniverseList() {
                   </div>
                 </ContextMenu.Trigger>
                 <ContextMenu.Portal>
-                  <ContextMenu.Content class={theme().menu.content}>
+                  <ContextMenu.Content class={twMerge(theme().menu.content, theme().menu.animation)}>
                     <ContextMenu.Item 
                       class={theme().menu.item}
                       onSelect={() => UniversesActions.select_universe(universe)}
