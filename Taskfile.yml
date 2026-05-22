@@ -10,6 +10,7 @@ includes:
 vars:
   APP_NAME: "sACN Monitor"
   BIN_DIR: "dist"
+  PACKAGE_MANAGER: '{{.PACKAGE_MANAGER | default "pnpm"}}'
   VITE_PORT: '{{.WAILS_VITE_PORT | default 9245}}'
 
 tasks:
