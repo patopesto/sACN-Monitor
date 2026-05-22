@@ -1,7 +1,8 @@
-import { For, createSignal } from "solid-js";
+import { For, createSignal, createMemo, createEffect } from "solid-js";
 import { SegmentedControl } from "@kobalte/core/segmented-control";
 import { Select } from "@kobalte/core/select";
 import { Dialog } from "@kobalte/core/dialog";
+import { TextField } from "@kobalte/core/text-field";
 import { ContextMenu } from "@kobalte/core/context-menu";
 import { twMerge } from "tailwind-merge";
 import { FaSolidPlus, FaSolidCheck, FaSolidClose, FaSolidMousePointer, FaSolidExternalLinkAlt } from 'solid-icons/fa'
@@ -194,10 +195,44 @@ function UniverseList() {
 function AddUniverseModal(props) {
   const { open, setOpen } = props;
   const [universe, setUniverse] = createSignal("");
+  const MIN_UNIVERSE = 1;
+  const MAX_UNIVERSE = 63999;
+
+  createEffect(() => {
+    if (open()) {
+      setUniverse("");
+    }
+  });
+
+  const numValue = createMemo(() => {
+    const val = universe().trim();
+    if (val === "") return undefined;
+    const num = Number(val);
+    return Number.isNaN(num) ? undefined : num;
+  });
+
+  const isValid = createMemo(() => {
+    const val = numValue();
+    return val !== undefined && Number.isInteger(val) && val >= MIN_UNIVERSE && val <= MAX_UNIVERSE;
+  });
+
+  const validationState = createMemo(() => {
+    if (universe() === "") return "valid";
+    return isValid() ? "valid" : "invalid";
+  });
+
+  const errorMessage = createMemo(() => {
+    const val = numValue();
+    if (universe() === "") return "";
+    if (val === undefined) return "Universe number must be a whole number";
+    if (!Number.isInteger(val)) return "Universe number must be a whole number";
+    if (val < MIN_UNIVERSE || val > MAX_UNIVERSE) return `Universe number must be between ${MIN_UNIVERSE} and ${MAX_UNIVERSE}`;
+    return "";
+  });
 
   const join_universe = () => {
-    if (universe()) {
-      UniversesActions.join_universe(Number(universe));
+    if (isValid()) {
+      UniversesActions.join_universe(numValue());
       setUniverse("");
       setOpen(false);
     }
@@ -221,7 +256,8 @@ function AddUniverseModal(props) {
         title: "text-lg font-medium text-slate-300",
         close: "text-slate-300"
       },
-      input: "w-full p-2 bg-zinc-900 text-white border border-zinc-700 rounded outline-none hover:border-zinc-500 focus:border-zinc-500 transition-[border]",
+      input: "w-full p-2 bg-zinc-900 text-white border border-zinc-700 rounded outline-none hover:border-zinc-500 focus:border-zinc-500 transition-[border] data-[invalid]:border-red-500 data-[invalid]:hover:border-red-400 data-[invalid]:focus:border-red-400",
+      error: "text-red-400 text-sm",
       footer: {
         base: "mt-2 flex justify-end gap-2",
         close: "px-4 py-2 rounded-lg text-white bg-zinc-700 hover:bg-zinc-600 transition-colors",
@@ -241,29 +277,40 @@ function AddUniverseModal(props) {
           <Dialog.Content class={twMerge(theme().dialog.content.base, theme().dialog.content.animation)}>
             <div class={theme().dialog.header.base}>
               <Dialog.Title class={theme().dialog.header.title}>
-                Manually add a sACN universe to listen to
+                Join multicast sACN universe
               </Dialog.Title>
               <Dialog.CloseButton class={theme().dialog.header.close}>
                 <FaSolidClose/>
               </Dialog.CloseButton>
             </div>
             <div class="space-y-4">
-              <input 
-                type="number" 
-                placeholder="123"
+              <TextField
                 value={universe()}
-                min="1"
-                max="64000"
-                class={theme().dialog.input}
-                onInput={(e) => setUniverse(e.target.value)}
-                onKeyDown={(e) => e.code === "Enter" && join_universe()}
-                autoFocus
-              />
+                onChange={setUniverse}
+                validationState={validationState()}
+              >
+                <TextField.Input
+                  type="text"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  placeholder="123"
+                  class={theme().dialog.input}
+                  onKeyDown={(e) => e.code === "Enter" && isValid() && join_universe()}
+                  autoFocus
+                />
+                <TextField.ErrorMessage class={theme().dialog.error}>
+                  {errorMessage()}
+                </TextField.ErrorMessage>
+              </TextField>
               <div class={theme().dialog.footer.base}>
                 <Dialog.CloseButton class={theme().dialog.footer.close}>
                   Cancel
                 </Dialog.CloseButton>
-                <button class={theme().dialog.footer.join} onClick={join_universe} >
+                <button
+                  class={twMerge(theme().dialog.footer.join, !isValid() && "opacity-50 cursor-not-allowed")}
+                  onClick={join_universe}
+                  disabled={!isValid()}
+                >
                   Add Universe
                 </button>
               </div>
