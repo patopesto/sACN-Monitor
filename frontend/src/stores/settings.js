@@ -24,6 +24,10 @@ export const SettingsActions = {
       this.set_protocol(event.data);
     });
 
+    Events.On("view.selected", (event) => {
+      this.set_view(event.data);
+    });
+
     Events.On("interface.selected", (event) => {
       this.on_interface_selected(event.data);
     });

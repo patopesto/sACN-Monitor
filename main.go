@@ -39,20 +39,13 @@ func main() {
         	menu.AddRole(application.AppMenu)  // macOS only
     	}
 
-    	// File: custom menu
-    	fileMenu := menu.AddSubmenu("File")
+    	// File: extend default menu
+    	menu.AddRole(application.FileMenu)
+    	fileMenu := menu.FindByRole(application.FileMenu).GetSubmenu()
     	fileMenu.Add("New Window").
 			SetAccelerator("CmdOrCtrl+N").
 			OnClick(func(ctx *application.Context) {
 				appService.OpenNewWindow()
-			})
-		fileMenu.Add("Close Window").
-			SetAccelerator("CmdOrCtrl+W").
-			OnClick(func(ctx *application.Context) {
-				currentWindow := app.Window.Current()
-				if currentWindow != nil {
-					currentWindow.Close()
-				}
 			})
 
 		// View: custom menu
@@ -81,8 +74,26 @@ func main() {
 			OnClick(func(ctx *application.Context) {
 				app.Event.Emit("protocol.selected", "mixed")
 			})
-		viewMenu.AddSeparator()
 
+		// Channel View submenu
+		channelViewMenu := viewMenu.AddSubmenu("Channel View")
+		channelViewMenu.Add("Channels").
+			SetAccelerator("CmdOrCtrl+C").
+			OnClick(func(ctx *application.Context) {
+				app.Event.Emit("view.selected", "channels")
+			})
+		channelViewMenu.Add("Values").
+			SetAccelerator("CmdOrCtrl+V").
+			OnClick(func(ctx *application.Context) {
+				app.Event.Emit("view.selected", "values")
+			})
+		channelViewMenu.Add("Both").
+			SetAccelerator("CmdOrCtrl+B").
+			OnClick(func(ctx *application.Context) {
+				app.Event.Emit("view.selected", "both")
+			})
+
+		viewMenu.AddSeparator()
 		viewMenu.Add("Toggle Left Sidebar").
 			SetAccelerator("CmdOrCtrl+Shift+L").
 			OnClick(func(ctx *application.Context) {
