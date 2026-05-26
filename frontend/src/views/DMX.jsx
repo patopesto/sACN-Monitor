@@ -41,11 +41,19 @@ export function DMX() {
       {/* Center - DMX Channels */}
       <Column class={twMerge(theme().column, theme().center.base)}>
         <Column.Title class={"justify-between items-center"}>
-          <button class={theme().toggle} onClick={() => SettingsActions.toggle_sidebar("left")}>
+          <button
+            title={settings.sidebar.left ? "Hide sidebar" : "Show sidebar"}
+            class={theme().toggle}
+            onClick={() => SettingsActions.toggle_sidebar("left")}
+          >
             {settings.sidebar.left ? <VsLayoutSidebarLeftOff size="14" /> : <VsLayoutSidebarLeft size="14" />}
           </button>
           <h2>DMX</h2>
-          <button class={theme().toggle} onClick={() => SettingsActions.toggle_sidebar("right")}>
+          <button 
+            title={settings.sidebar.right ? "Hide sidebar" : "Show sidebar"}
+            class={theme().toggle}
+            onClick={() => SettingsActions.toggle_sidebar("right")}
+          >
             {settings.sidebar.right ? <VsLayoutSidebarRightOff size="14" /> : <VsLayoutSidebarRight size="14" />}
           </button>
         </Column.Title>
@@ -139,9 +147,10 @@ function UniverseList() {
             return (
               <ContextMenu>
                 <ContextMenu.Trigger class="w-full">
-                  <div 
+                  <div
                     id={keyStr}
                     tabindex="-1"
+                    title={`Select universe ${universe.num}`}
                     class={twMerge(theme().row.base, rowSelected())}
                     onClick={() => UniversesActions.select_universe(universe)}
                     onKeyDown={(e) => navigate(e, index(), universe)}
@@ -268,7 +277,7 @@ function AddUniverseModal(props) {
 
   return (
     <Dialog open={open()} onOpenChange={setOpen}>
-      <Dialog.Trigger class={theme().trigger}>
+      <Dialog.Trigger class={theme().trigger} title="Join multicast universe">
         <FaSolidPlus size="15" class="text-slate-300" />
       </Dialog.Trigger>
       <Dialog.Portal>
@@ -279,7 +288,7 @@ function AddUniverseModal(props) {
               <Dialog.Title class={theme().dialog.header.title}>
                 Join multicast sACN universe
               </Dialog.Title>
-              <Dialog.CloseButton class={theme().dialog.header.close}>
+              <Dialog.CloseButton class={theme().dialog.header.close} title="Close">
                 <FaSolidClose/>
               </Dialog.CloseButton>
             </div>
@@ -405,9 +414,10 @@ function Channels() {
           const height = `height: ${ (value * 100) / 255 }%`;
 
           return (
-            <div 
+            <div
               id={`channel-${index()}`}
               tabindex="-1"
+              title={`Select Channel ${index() + 1}`}
               class={twMerge(theme().item, highlight())}
               onClick={() => UniversesActions.select_channel(index())}
               onKeyDown={navigate}
@@ -514,7 +524,12 @@ function SettingsPane() {
   return (
     <div class="flex flex-col items-center gap-3 px-5 py-3">
       {/* Protocol */}
-      <SegmentedControl class={theme().toggle.base} value={settings.protocol} onChange={(v) => SettingsActions.set_protocol(v)}>
+      <SegmentedControl
+        class={theme().toggle.base}
+        value={settings.protocol}
+        title="Select protocol"
+        onChange={(v) => SettingsActions.set_protocol(v)}
+      >
         <div role="presentation" class="relative flex">
           <SegmentedControl.Indicator class={theme().toggle.indicator} />
           <div role="presentation" class={theme().toggle.items}>
@@ -541,7 +556,12 @@ function SettingsPane() {
       </SegmentedControl>
       
       {/* Channel views */}
-      <SegmentedControl class={theme().toggle.base} value={settings.view} onChange={(v) => SettingsActions.set_view(v)}>
+      <SegmentedControl
+        class={theme().toggle.base}
+        value={settings.view}
+        title="Select channel view mode"
+        onChange={(v) => SettingsActions.set_view(v)}
+      >
         <div role="presentation" class="relative flex">
           <SegmentedControl.Indicator class={theme().toggle.indicator} />
           <div role="presentation" class={theme().toggle.items}>
@@ -576,6 +596,7 @@ function SettingsPane() {
         optionValue="name"
         optionTextValue="name"
         placeholder="Select network interface"
+        title="Select network interface"
         itemComponent={(props) => (
             <Select.Item item={props.item} class={theme().select.item.base}>
               <Select.ItemLabel>{props.item.rawValue.name} ({props.item.rawValue.ip})</Select.ItemLabel>
@@ -605,6 +626,7 @@ function SettingsPane() {
           <For each={Object.keys(appTheme)}>
             {(value, index) => (
               <button
+                title={value.charAt(0).toUpperCase() + value.slice(1)}
                 class={twMerge("flex w-4 h-4 rounded-full", appTheme[value].primary)}
                 onClick={() => SettingsActions.set_theme(value)}
               />
