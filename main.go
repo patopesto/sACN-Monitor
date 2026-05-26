@@ -63,6 +63,26 @@ func main() {
 				dmxService.ClearUniverses()
 			})
 		viewMenu.AddSeparator()
+
+		// Protocol submenu
+		protocolMenu := viewMenu.AddSubmenu("Protocol")
+		protocolMenu.Add("sACN").
+			SetAccelerator("CmdOrCtrl+1").
+			OnClick(func(ctx *application.Context) {
+				app.Event.Emit("protocol.selected", "sacn")
+			})
+		protocolMenu.Add("ArtNet").
+			SetAccelerator("CmdOrCtrl+2").
+			OnClick(func(ctx *application.Context) {
+				app.Event.Emit("protocol.selected", "artnet")
+			})
+		protocolMenu.Add("Both").
+			SetAccelerator("CmdOrCtrl+3").
+			OnClick(func(ctx *application.Context) {
+				app.Event.Emit("protocol.selected", "mixed")
+			})
+		viewMenu.AddSeparator()
+
 		viewMenu.Add("Toggle Left Sidebar").
 			SetAccelerator("CmdOrCtrl+Shift+L").
 			OnClick(func(ctx *application.Context) {

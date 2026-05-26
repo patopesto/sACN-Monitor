@@ -20,6 +20,10 @@ export const SettingsActions = {
     const window_name = await Window.Name();
     console.log("Hello from window:", window_name);
 
+    Events.On("protocol.selected", (event) => {
+      this.set_protocol(event.data);
+    });
+
     Events.On("interface.selected", (event) => {
       this.on_interface_selected(event.data);
     });
