@@ -15,6 +15,7 @@ import (
 var assets embed.FS
 
 const name = "sACN Monitor"
+const url = "https://sacn-monitor.bambinito.net"
 
 func main() {
 	app := application.New(application.Options{
@@ -49,7 +50,7 @@ func main() {
 			})
 		fileMenu.AddSeparator()
 		fileMenu.Add("Add Universe").
-			SetAccelerator("CmdOrCtrl+A").
+			SetAccelerator("CmdOrCtrl+U").
 			OnClick(func(ctx *application.Context) {
 				currentWindow := app.Window.Current()
 				if currentWindow != nil {
@@ -121,7 +122,15 @@ func main() {
 		
 		// Add other defaults
 		menu.AddRole(application.WindowMenu)
-    	menu.AddRole(application.HelpMenu)
+
+    	// Help: custom menu
+		helpMenu := menu.AddSubmenu("Help")
+    	helpMenu.Add("Learn More").OnClick(func(ctx *application.Context) {
+			err := app.Browser.OpenURL(url)
+	        if err != nil {
+	            log.Printf("Failed to open help url %v %v", url, err)
+	        }
+		})
 
 		app.Menu.Set(menu)
 	}

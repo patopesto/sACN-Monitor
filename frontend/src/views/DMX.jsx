@@ -264,7 +264,7 @@ function AddUniverseModal() {
       header: {
         base: "flex justify-between items-start mb-4",
         title: "text-lg font-medium text-slate-300",
-        close: "text-slate-300"
+        close: "text-slate-300 outline-none"
       },
       input: "w-full p-2 bg-zinc-900 text-white border border-zinc-700 rounded outline-none hover:border-zinc-500 focus:border-zinc-500 transition-[border] data-[invalid]:border-red-500 data-[invalid]:hover:border-red-400 data-[invalid]:focus:border-red-400",
       error: "text-red-400 text-sm",
