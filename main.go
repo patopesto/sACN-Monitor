@@ -47,16 +47,23 @@ func main() {
 			OnClick(func(ctx *application.Context) {
 				appService.OpenNewWindow()
 			})
-
-		// View: custom menu
-		viewMenu := menu.AddSubmenu("View")
-		viewMenu.Add("Reload Universes").
+		fileMenu.AddSeparator()
+		fileMenu.Add("Add Universe").
+			SetAccelerator("CmdOrCtrl+A").
+			OnClick(func(ctx *application.Context) {
+				currentWindow := app.Window.Current()
+				if currentWindow != nil {
+					currentWindow.EmitEvent("universe.add")
+				}
+			})
+		fileMenu.Add("Reload Universes").
 			SetAccelerator("CmdOrCtrl+R").
 			OnClick(func(ctx *application.Context) {
 				dmxService.ClearUniverses()
 			})
-		viewMenu.AddSeparator()
 
+		// View: custom menu
+		viewMenu := menu.AddSubmenu("View")
 		// Protocol submenu
 		protocolMenu := viewMenu.AddSubmenu("Protocol")
 		protocolMenu.Add("sACN").

@@ -94,7 +94,6 @@ Column.Title = function ColumnTitle(props) {
 function UniverseList() {
   UniversesActions.get_universes();
   const list = () => UniversesActions.get_list();
-  const [modalOpen, setModalOpen] = createSignal(false);
 
   const color = () => appTheme[settings.theme];
   const theme = () => ({
@@ -195,17 +194,19 @@ function UniverseList() {
           }}
         </For>
       </div>
-      <AddUniverseModal open={modalOpen} setOpen={setModalOpen} />
+      <AddUniverseModal />
     </>
   );
 }
 
 
-function AddUniverseModal(props) {
-  const { open, setOpen } = props;
+function AddUniverseModal() {
   const [universe, setUniverse] = createSignal("");
   const MIN_UNIVERSE = 1;
   const MAX_UNIVERSE = 63999;
+
+  const open = () => settings.modal;
+  const setOpen = (value) => SettingsActions.set_modal(value);
 
   createEffect(() => {
     if (open()) {

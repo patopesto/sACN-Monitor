@@ -8,10 +8,12 @@ export const [settings, setSettings] = createStore({
   interfaces: [],
   selected_interface: undefined,
   theme: "cyan",
+  
   sidebar: {
     left: true,
     right: true,
   },
+  modal: false,
 });
 
 export const SettingsActions = {
@@ -41,6 +43,12 @@ export const SettingsActions = {
     Events.On("sidebar.right.toggle", (event) => {
       if (event.sender == window_name) {
         this.toggle_sidebar("right");
+      }
+    });
+
+    Events.On("universe.add", (event) => {
+      if (event.sender == window_name) {
+        this.set_modal(true);
       }
     });
   },
@@ -90,4 +98,9 @@ export const SettingsActions = {
   toggle_sidebar(side) {
     setSettings("sidebar", { [side]: !settings.sidebar[side] })
   },
+
+  set_modal(state) {
+    console.log("Set modal to ", state);
+    setSettings("modal", state);
+  }
 };
