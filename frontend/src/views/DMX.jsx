@@ -15,6 +15,15 @@ import { settings, SettingsActions } from '../stores/settings';
 const UNIVERSE_TIMEOUT = 2500;
 
 export function DMX() {
+  onMount(() => {
+    SettingsActions.init();
+    UniversesActions.init();
+  });
+
+  onCleanup(() => {
+    SettingsActions.cleanup();
+    UniversesActions.cleanup();
+  });
 
   const theme = () => ({
     base: "flex flex-row h-screen overflow-hidden bg-zinc-900/60 select-none cursor-default",
@@ -92,8 +101,10 @@ Column.Title = function ColumnTitle(props) {
 
 
 function UniverseList() {
-  UniversesActions.get_universes();
   const list = () => UniversesActions.get_list();
+  onMount(() => {
+    UniversesActions.get_universes();
+  });
 
   const color = () => appTheme[settings.theme];
   const theme = () => ({
@@ -333,7 +344,9 @@ function AddUniverseModal() {
 }
 
 function Channels() {
-  UniversesActions.get_data();
+  onMount(() => {
+    UniversesActions.get_data();
+  });
 
   const navigate = (event) => {
     const index = universes.selected_channel;

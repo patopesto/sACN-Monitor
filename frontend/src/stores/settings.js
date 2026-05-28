@@ -5,52 +5,54 @@ import { GetInterfaces, SetInterface } from '../../bindings/sacn-monitor/backend
 export const [settings, setSettings] = createStore({
   protocol: 'sacn',
   view: 'channels',
+  theme: 'cyan',
   interfaces: [],
-  selected_interface: undefined,
-  theme: "cyan",
-  
+  selected_interface: null,
+
   sidebar: {
     left: true,
     right: true,
   },
   modal: false,
-});
+})
+
+let listeners = [];
 
 export const SettingsActions = {
   init: async function() {
-    this.get_interfaces();
-    const window_name = await Window.Name();
-    console.log("Hello from window:", window_name);
+    this.get_interfaces()
+    const window_name = await Window.Name()
+    console.log("Hello from window:", window_name)
 
-    Events.On("protocol.selected", (event) => {
-      this.set_protocol(event.data);
-    });
-
-    Events.On("view.selected", (event) => {
-      this.set_view(event.data);
-    });
-
-    Events.On("interface.selected", (event) => {
-      this.on_interface_selected(event.data);
-    });
-
-    Events.On("sidebar.left.toggle", (event) => {
+    listeners.push(Events.On("protocol.selected", (event) => {
+      this.set_protocol(event.data)
+    }))
+    listeners.push(Events.On("view.selected", (event) => {
+      this.set_view(event.data)
+    }))
+    listeners.push(Events.On("interface.selected", (event) => {
+      this.on_interface_selected(event.data)
+    }))
+    listeners.push(Events.On("sidebar.left.toggle", (event) => {
       if (event.sender == window_name) {
-        this.toggle_sidebar("left");
+        this.toggle_sidebar("left")
       }
-    });
-
-    Events.On("sidebar.right.toggle", (event) => {
+    }))
+    listeners.push(Events.On("sidebar.right.toggle", (event) => {
       if (event.sender == window_name) {
-        this.toggle_sidebar("right");
+        this.toggle_sidebar("right")
       }
-    });
-
-    Events.On("universe.add", (event) => {
+    }))
+    listeners.push(Events.On("universe.add", (event) => {
       if (event.sender == window_name) {
-        this.set_modal(true);
+        this.set_modal(true)
       }
-    });
+    }))
+  },
+
+  cleanup: function() {
+    listeners.forEach(unsub => unsub())
+    listeners = []
   },
 
   set_protocol: function(protocol) {
