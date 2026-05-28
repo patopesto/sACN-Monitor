@@ -369,17 +369,22 @@ function Channels() {
     else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
       const getRect = (id) => {
         const el = document.getElementById(id)
+        if (!el) return null
         const rect = el.getBoundingClientRect()
         const x = rect.left + window.scrollX
         const y = rect.top + window.scrollY
         return { el, x, y }
       }
-      const { x, y } = getRect(`channel-${index}`)
+      const currentRect = getRect(`channel-${index}`)
+      if (!currentRect) return
+      const { x, y } = currentRect
 
       if (event.key === "ArrowDown") {
         // select the first element that is below the current element with same x coordinate
         for (let i = index + 1; i < universes.data.length; i++) {
-          const { el, x: tx, y: ty } = getRect(`channel-${i}`)
+          const targetRect = getRect(`channel-${i}`)
+          if (!targetRect) continue
+          const { el, x: tx, y: ty } = targetRect
 
           if (x === tx && y < ty) {
             UniversesActions.select_channel(i)
@@ -391,7 +396,9 @@ function Channels() {
       else if (event.key === "ArrowUp") {
         // select the first element that is above the current element with same x coordinate
         for (let i = index; i >= 0; i--) {
-          const { el, x: tx, y: ty } = getRect(`channel-${i}`)
+          const targetRect = getRect(`channel-${i}`)
+          if (!targetRect) continue
+          const { el, x: tx, y: ty } = targetRect
 
           if (x === tx && y > ty) {
             UniversesActions.select_channel(i)
@@ -422,37 +429,37 @@ function Channels() {
     <div class={theme().base}>
       <Index each={universes.data}>
         {(value, index) => {
-          const selected = () => universes.selected_channel === index();
+          const selected = () => universes.selected_channel === index;
           const highlight = () => theme().selected[selected() ? "on" : "off"];
-          const active = () => theme().active[value > 0 ? "on" : "off"];
-          const height = `height: ${ (value * 100) / 255 }%`;
+          const active = () => theme().active[value() > 0 ? "on" : "off"];
+          const height = () => `height: ${ (value() * 100) / 255 }%`;
 
           return (
             <div
-              id={`channel-${index()}`}
+              id={`channel-${index}`}
               tabindex="-1"
-              title={`Select Channel ${index() + 1}`}
+              title={`Select Channel ${index + 1}`}
               class={twMerge(theme().item, highlight())}
-              onClick={() => UniversesActions.select_channel(index())}
+              onClick={() => UniversesActions.select_channel(index)}
               onKeyDown={navigate}
             >
-              <div class={theme().content} style={height} />
+              <div class={theme().content} style={height()} />
               {settings.view === "channels" &&
-                <div class={active()}>{index() + 1}</div>
+                <div class={active()}>{index + 1}</div>
               }
               {settings.view === "values" &&
-                <div class={active()}>{value}</div>
+                <div class={active()}>{value()}</div>
               }
               {settings.view === "both" && (
                 <div class="flex flex-col items-center">
-                  <div class={theme().active.off}>{index() + 1}</div>
-                  <div class={active()}>{value}</div>
+                  <div class={theme().active.off}>{index + 1}</div>
+                  <div class={active()}>{value()}</div>
                 </div>
               )}
             </div>
           );
         }}
-      </For>
+      </Index>
     </div>
   );
 }
@@ -467,7 +474,9 @@ function Stats() {
   const universeHex = () => universe() ? Number(universe().num).toString(16).toUpperCase() : "";
   const lastHeard = () => {
     if (!universe()) return "";
-    const diff = Date.now() - Date.parse(universe().last_received);
+    const parsed = Date.parse(universe().last_received);
+    if (Number.isNaN(parsed)) return "";
+    const diff = Date.now() - parsed;
     return diff < UNIVERSE_TIMEOUT ? "Receiving" : "Timeout";
   };
   const channelStr = () => channel() !== null ? channel() + 1 : "";
