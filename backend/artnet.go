@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"strings"
+	"sync"
 
 	"github.com/jsimonetti/go-artnet/packet"
 	"github.com/jsimonetti/go-artnet/packet/code"
@@ -12,7 +13,10 @@ import (
 	"golang.org/x/net/ipv4"
 )
 
-var artnetNodes map[string]string
+var (
+	artnetNodes     = make(map[string]string)
+	artnetNodesMu   sync.RWMutex
+)
 
 type artNetReceiver struct {
 	service        *DMXService
@@ -20,14 +24,11 @@ type artNetReceiver struct {
 	localAddr      net.IPNet
 	localBcastAddr net.IP
 	stop           chan bool
+	stopOnce       sync.Once
 }
 
 func NewArtnetReceiver(iface NetInterface, service *DMXService) (*artNetReceiver, error) {
 	log.Println("Init ArtNet receiver")
-
-	if artnetNodes == nil {
-		artnetNodes = make(map[string]string)
-	}
 
 	addr := fmt.Sprintf(":%d", packet.ArtNetPort)
 	listener, err := reuseport.ListenPacket("udp4", addr)
@@ -49,6 +50,7 @@ func NewArtnetReceiver(iface NetInterface, service *DMXService) (*artNetReceiver
 		localAddr:      localAddr,
 		localBcastAddr: GetBroadcastIP(localAddr.IP, localAddr.Mask),
 		stop:           make(chan bool),
+		stopOnce:       sync.Once{},
 	}
 
 	go r.recvPackets()
@@ -57,9 +59,11 @@ func NewArtnetReceiver(iface NetInterface, service *DMXService) (*artNetReceiver
 }
 
 func (r *artNetReceiver) Stop() {
-	if r.stop != nil {
-		close(r.stop)
-	}
+	r.stopOnce.Do(func() {
+		if r.stop != nil {
+			close(r.stop)
+		}
+	})
 }
 
 func (r *artNetReceiver) recvPackets() {
@@ -73,7 +77,7 @@ func (r *artNetReceiver) recvPackets() {
 			buf := make([]byte, 1024)
 			n, cm, src, err := r.conn.ReadFrom(buf)
 			if err != nil {
-				log.Panicln(err)
+				log.Println(err)
 				continue
 			}
 
@@ -123,7 +127,9 @@ func (r *artNetReceiver) handleArtDMX(p *packet.ArtDMXPacket, source *net.UDPAdd
 		Destination: destination,
 	}
 
+	artnetNodesMu.RLock()
 	sourceName, ok := artnetNodes[sourceIP]
+	artnetNodesMu.RUnlock()
 	if ok {
 		uni.SourceName = sourceName
 	}
@@ -137,5 +143,7 @@ func (r *artNetReceiver) handleArtPollReply(p *packet.ArtPollReplyPacket, addr *
 	sourceName = strings.Trim(sourceName, "\x00") // remove trailing zeros from array
 
 	sourceIP := addr.IP.String()
+	artnetNodesMu.Lock()
 	artnetNodes[sourceIP] = sourceName
+	artnetNodesMu.Unlock()
 }

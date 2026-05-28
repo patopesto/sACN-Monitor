@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"runtime"
+	"sync"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
 
@@ -169,6 +170,7 @@ func createWindow(app *application.App) *application.WebviewWindow {
 type AppService struct {
 	app             *application.App
 	pendingUniverse *dmx.UniverseKey
+	pendingMu       sync.Mutex
 }
 
 func NewAppService(app *application.App) *AppService {
@@ -183,12 +185,16 @@ func (a *AppService) OpenNewWindow() {
 }
 
 func (a *AppService) OpenNewWindowWithUniverse(key dmx.UniverseKey) {
+	a.pendingMu.Lock()
 	a.pendingUniverse = &key
+	a.pendingMu.Unlock()
 	window := createWindow(a.app)
 	window.Show()
 }
 
 func (a *AppService) GetPendingUniverse() *dmx.UniverseKey {
+	a.pendingMu.Lock()
+	defer a.pendingMu.Unlock()
 	if a.pendingUniverse != nil {
 		universe := *a.pendingUniverse
 		a.pendingUniverse = nil

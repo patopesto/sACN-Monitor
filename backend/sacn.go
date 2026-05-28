@@ -6,12 +6,16 @@ import (
 	"log"
 	"net"
 	"strings"
+	"sync"
 
 	"gitlab.com/patopest/go-sacn"
 	"gitlab.com/patopest/go-sacn/packet"
 )
 
-var discoveredUniverses map[uint16]bool
+var (
+	discoveredUniverses   = make(map[uint16]bool)
+	discoveredUniversesMu sync.RWMutex
+)
 
 type sACNReceiver struct {
 	service  *DMXService
@@ -20,10 +24,6 @@ type sACNReceiver struct {
 
 func NewSACNReceiver(iface NetInterface, service *DMXService) (*sACNReceiver, error) {
 	log.Println("Init sACN receiver")
-
-	if discoveredUniverses == nil {
-		discoveredUniverses = make(map[uint16]bool)
-	}
 
 	if iface.Name == "" {
 		return nil, errors.New(fmt.Sprintf("No interface specified for sACN receiver"))
@@ -45,10 +45,12 @@ func NewSACNReceiver(iface NetInterface, service *DMXService) (*sACNReceiver, er
 
 	receiver.JoinUniverse(sacn.DISCOVERY_UNIVERSE)
 	// Join already discovered universes
+	discoveredUniversesMu.RLock()
 	for uni := range discoveredUniverses {
 		log.Println("Joining known universe", uni)
 		receiver.JoinUniverse(uni)
 	}
+	discoveredUniversesMu.RUnlock()
 
 	receiver.Start()
 
@@ -70,7 +72,9 @@ func (r *sACNReceiver) discoveryPacketCallback(p packet.SACNPacket, info sacn.Pa
 	log.Printf("Discovered universes from: %s\n", string(d.SourceName[:]))
 	for i := 0; i < d.GetNumUniverses(); i++ {
 		var universe = d.Universes[i]
+		discoveredUniversesMu.RLock()
 		_, exists := discoveredUniverses[universe]
+		discoveredUniversesMu.RUnlock()
 		if !exists {
 			r.JoinUniverse(universe)
 		}
@@ -111,6 +115,8 @@ func (r *sACNReceiver) JoinUniverse(universe uint16) {
 		if err != nil {
 			log.Println(err)
 		}
+		discoveredUniversesMu.Lock()
 		discoveredUniverses[universe] = true
+		discoveredUniversesMu.Unlock()
 	}
 }
