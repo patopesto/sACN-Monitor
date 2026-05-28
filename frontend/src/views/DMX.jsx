@@ -1,4 +1,4 @@
-import { For, createSignal, createMemo, createEffect } from "solid-js";
+import { For, Index, createSignal, createMemo, createEffect, onMount, onCleanup } from "solid-js";
 import { SegmentedControl } from "@kobalte/core/segmented-control";
 import { Select } from "@kobalte/core/select";
 import { Dialog } from "@kobalte/core/dialog";
@@ -12,8 +12,6 @@ import { universes, UniversesActions } from '../stores/universes';
 import { settings, SettingsActions } from '../stores/settings';
 
 
-const UNIVERSE_TIMEOUT = 2500;
-
 export function DMX() {
   onMount(() => {
     SettingsActions.init();
@@ -25,7 +23,7 @@ export function DMX() {
     UniversesActions.cleanup();
   });
 
-  const theme = () => ({
+  const theme = createMemo(() => ({
     base: "flex flex-row h-screen overflow-hidden bg-zinc-900/60 select-none cursor-default",
     column: "h-full",
     sidebar: {
@@ -37,7 +35,7 @@ export function DMX() {
       base: "flex-grow border-x border-zinc-700",
     },
     toggle: "p-1 rounded hover:bg-zinc-700 transition-colors",
-  });
+  }));
 
   return (
     <div class={theme().base}>
@@ -101,13 +99,14 @@ Column.Title = function ColumnTitle(props) {
 
 
 function UniverseList() {
-  const list = () => UniversesActions.get_list();
   onMount(() => {
     UniversesActions.get_universes();
   });
 
-  const color = () => appTheme[settings.theme];
-  const theme = () => ({
+  const list = createMemo(() => UniversesActions.get_list());
+
+  const color = createMemo(() => appTheme[settings.theme]);
+  const theme = createMemo(() => ({
     base: "flex flex-col pt-2 pb-10 overflow-auto overscroll-none",
     row: {
       base: twMerge("flex flex-row min-h-8 h-8 items-center focus:outline-none", "hover:" + color().secondary),
@@ -127,7 +126,7 @@ function UniverseList() {
       item: "flex items-center justify-between px-3 py-2 rounded-md text-[13px] text-slate-300 cursor-pointer outline-none transition-colors duration-150 hover:bg-zinc-700 hover:text-white data-[highlighted]:bg-zinc-700 data-[highlighted]:text-white data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed",
       separator: "h-px my-1.5 bg-zinc-700",
     },
-  });
+  }));
 
   const navigate = (event, index, universe) => {
     if (event.key === "ArrowUp" && index - 1 >= 0) {
@@ -146,7 +145,8 @@ function UniverseList() {
   return (
     <>
       <div class={theme().base}>
-        <For each={list()}>
+        <For each={list()} key={(item) => `${item.protocol}-${item.num}-${item.source}`}>
+        {/*<For each={list()} key={(item) => `${item.protocol}-${item.num}-${item.source}`}>*/}
           {(universe, index) => {
             const selected = () => JSON.stringify(universes.selected_key) === JSON.stringify(universe);
             const rowSelected = () => theme().row[selected() ? "on" : "off"];
@@ -259,8 +259,8 @@ function AddUniverseModal() {
     }
   };
 
-  const color = () => appTheme[settings.theme];
-  const theme = () => ({
+  const color = createMemo(() => appTheme[settings.theme]);
+  const theme = createMemo(() => ({
     trigger: twMerge("fixed bottom-0 self-end m-3 rounded-md bg-blue-600 p-1", color().primary),
     dialog: {
       base: "fixed inset-0 flex items-center justify-center z-50 outline-none",
@@ -285,7 +285,7 @@ function AddUniverseModal() {
         join: twMerge("px-4 py-2 rounded-lg text-white transition-opacity hover:opacity-80", color().primary),
       }
     }
-  })
+  }));
 
   return (
     <Dialog open={open()} onOpenChange={setOpen}>
@@ -403,8 +403,8 @@ function Channels() {
     }
   };
 
-  const color = () => appTheme[settings.theme];
-  const theme = () => ({
+  const color = createMemo(() => appTheme[settings.theme]);
+  const theme = createMemo(() => ({
     base: "flex flex-row flex-wrap overflow-auto overscroll-none",
     item: "relative w-10 h-8 flex justify-center items-center focus:outline-none",
     content: twMerge("absolute border-box self-end w-full", color().primary),
@@ -416,11 +416,11 @@ function Channels() {
       off: "",
       on: "border-2 border-slate-300",
     },
-  });
+  }));
 
   return (
     <div class={theme().base}>
-      <For each={universes.data}>
+      <Index each={universes.data}>
         {(value, index) => {
           const selected = () => universes.selected_channel === index();
           const highlight = () => theme().selected[selected() ? "on" : "off"];
@@ -459,6 +459,8 @@ function Channels() {
 
 
 function Stats() {
+  const UNIVERSE_TIMEOUT = 2500;
+
   const universe = () => universes.selected;
   const channel = () => universes.selected_channel;
   
@@ -509,8 +511,8 @@ function StatsBox(props) {
 
 function SettingsPane() {
 
-  const color = () => appTheme[settings.theme];
-  const theme = () => ({
+  const color = createMemo(() => appTheme[settings.theme]);
+  const theme = createMemo(() => ({
     label: "text-sm text-slate-300 mb-2",
     toggle: {
       base: "bg-zinc-800 m-1 rounded-lg relative",
@@ -533,7 +535,7 @@ function SettingsPane() {
         active: "bg-gray-600",
       }
     }
-  })
+  }));
 
   return (
     <div class="flex flex-col items-center gap-3 px-5 py-3">
@@ -607,7 +609,7 @@ function SettingsPane() {
         value={settings.selected_interface}
         onChange={SettingsActions.set_interface}
         options={settings.interfaces}
-        optionValue="name"
+        optionValue="ip"
         optionTextValue="name"
         placeholder="Select network interface"
         title="Select network interface"
@@ -637,7 +639,7 @@ function SettingsPane() {
       <div class="w-full">
         <div class={theme().label}>Theme</div>
         <div class="px-2 py-2 flex justify-between gap-3">
-          <For each={Object.keys(appTheme)}>
+          <For each={Object.keys(appTheme)} key={(value) => value}>
             {(value, index) => (
               <button
                 title={value.charAt(0).toUpperCase() + value.slice(1)}
