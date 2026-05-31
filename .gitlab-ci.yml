@@ -74,7 +74,8 @@ build-wails-cross-image:
       artifacts: false
   before_script:
     # Install tools needed on the host: Node.js (frontend), NSIS (Windows), Docker CLI
-    - apt-get update && apt-get install -y --no-install-recommends ca-certificates curl nodejs git nsis task
+    - apt-get update && apt-get install -y --no-install-recommends ca-certificates curl nodejs npm git nsis task
+    - npm install --global corepack@latest
     - corepack enable
     - corepack prepare pnpm@latest-11 --activate
     # Install Wails v3 CLI and nfpm (Linux packaging)
