@@ -63,7 +63,7 @@ build-wails-cross-image:
 
 .build:
   stage: build
-  image: golang:${GO_VERSION}-bookworm
+  image: ${WAILS_CROSS_IMAGE}
   tags:
     - docker-builder
   rules:
@@ -72,18 +72,8 @@ build-wails-cross-image:
     - job: build-wails-cross-image
       artifacts: false
   before_script:
-    # Install tools needed on the host: Node.js (frontend), NSIS (Windows), Docker CLI
-    - apt-get update && apt-get install -y --no-install-recommends ca-certificates curl nodejs npm git nsis
-    - npm install --global corepack@latest
-    - corepack enable
-    - corepack prepare pnpm@latest-11 --activate
-    - sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b /usr/local/bin
-    # Install Wails v3 CLI and nfpm (Linux packaging)
-    - go install github.com/wailsapp/wails/v3/cmd/wails3@latest
-    - go install github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
-    # Pull the cross-compilation image so wails3 build can find it locally
     - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
-    - docker pull ${WAILS_CROSS_IMAGE}
+    - docker pull ${WAILS_CROSS_IMAGE} || true
     - docker tag ${WAILS_CROSS_IMAGE} wails-cross
   script:
     - wails3 build GOOS=${GOOS} GOARCH=${GOARCH}
@@ -155,8 +145,9 @@ build-linux-arm64:
   rules:
     - if: $CI_COMMIT_TAG
   before_script:
-    - export PATH="$HOME/go/bin:/usr/local/go/bin:$PATH"
+    - export PATH="$HOME/go/bin:/usr/local/go/bin:$HOME/.local/bin$PATH"
     - go install github.com/wailsapp/wails/v3/cmd/wails3@latest
+    - sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b $HOME/.local/bin
   script:
     - wails3 build GOOS=darwin GOARCH=${GOARCH}
     - wails3 package GOOS=darwin GOARCH=${GOARCH}
