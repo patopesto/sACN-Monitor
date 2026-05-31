@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Name=sacn-monitor
+Name=sACN Monitor
 Exec=sACN Monitor
 Icon=sACN Monitor
 Categories=Development;

@@ -1,8 +1,5 @@
 version: '3'
 
-vars:
-  BIN_DIR: "dist"
-
 # Custom tasks to integrate in top-level Taskfile architecture
 tasks:
   check:
@@ -24,5 +21,7 @@ tasks:
   clean:
     desc: Clean build directoy
     dir: frontend
+    vars:
+      BIN_DIR: dist
     cmds:
       - rm -rf {{.BIN_DIR}}

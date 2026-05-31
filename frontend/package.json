@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@kobalte/core": "^0.13.11",
-    "@wailsio/runtime": "latest",
+    "@wailsio/runtime": "3.0.0-alpha.79",
     "solid-icons": "^1.2.0",
     "solid-js": "^1.9.13"
   }

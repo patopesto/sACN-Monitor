@@ -1,0 +1,156 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+# GoReleaser configuration for sACN Monitor
+# Designed for use with GitLab CI — binaries are cross-compiled in CI and
+# GoReleaser handles packaging, checksums, changelog and the GitLab release.
+#
+# Prerequisites:
+#   - Binaries must exist at the paths defined in the prebuilt section below.
+#     These are produced by the GitLab CI build jobs.
+#   - GITLAB_TOKEN (or CI_JOB_TOKEN on GitLab 16.0+) with 'api' scope.
+version: 2
+
+project_name: sacn-monitor
+
+before:
+  hooks:
+    - go mod tidy
+
+# ------------------------------------------------------------------------------
+# BUILDS
+# ------------------------------------------------------------------------------
+# We use the prebuilt builder because Wails v3 requires a complex build process
+# (frontend build, bindings, icons, .syso generation, CGO cross-compilers)
+# that is fully orchestrated in GitLab CI. GoReleaser picks up the finished
+# binaries and packages them.
+# ------------------------------------------------------------------------------
+
+builds:
+  - id: darwin-amd64
+    builder: prebuilt
+    goos: [darwin]
+    goarch: [amd64]
+    binary: "sACN Monitor"
+    prebuilt:
+      path: bin/darwin-amd64/sACN Monitor
+
+  - id: darwin-arm64
+    builder: prebuilt
+    goos: [darwin]
+    goarch: [arm64]
+    binary: "sACN Monitor"
+    prebuilt:
+      path: bin/darwin-arm64/sACN Monitor
+
+  - id: windows-amd64
+    builder: prebuilt
+    goos: [windows]
+    goarch: [amd64]
+    binary: "sACN Monitor"
+    prebuilt:
+      path: bin/windows-amd64/sACN Monitor.exe
+
+  - id: windows-arm64
+    builder: prebuilt
+    goos: [windows]
+    goarch: [arm64]
+    binary: "sACN Monitor"
+    prebuilt:
+      path: bin/windows-arm64/sACN Monitor.exe
+
+  - id: linux-amd64
+    builder: prebuilt
+    goos: [linux]
+    goarch: [amd64]
+    binary: "sACN Monitor"
+    prebuilt:
+      path: bin/linux-amd64/sACN Monitor
+
+  - id: linux-arm64
+    builder: prebuilt
+    goos: [linux]
+    goarch: [arm64]
+    binary: "sACN Monitor"
+    prebuilt:
+      path: bin/linux-arm64/sACN Monitor
+
+# ------------------------------------------------------------------------------
+# ARCHIVES
+# ------------------------------------------------------------------------------
+# One archive per platform/arch containing the binary only.
+# Windows gets .zip; everything else gets .tar.gz.
+# ------------------------------------------------------------------------------
+
+archives:
+  - id: all
+    builds:
+      - darwin-amd64
+      - darwin-arm64
+      - windows-amd64
+      - windows-arm64
+      - linux-amd64
+      - linux-arm64
+    format: tar.gz
+    format_overrides:
+      - goos: windows
+        format: zip
+    name_template: 'sACN-Monitor_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+
+# ------------------------------------------------------------------------------
+# CHECKSUMS
+# ------------------------------------------------------------------------------
+
+checksum:
+  name_template: "sACN-Monitor_{{ .Version }}_checksums.txt"
+  algorithm: sha256
+
+# ------------------------------------------------------------------------------
+# CHANGELOG
+# ------------------------------------------------------------------------------
+
+changelog:
+  sort: asc
+  use: git
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^ci:"
+      - "^chore:"
+      - "^refactor:"
+      - "Merge branch"
+      - "Merge pull request"
+
+# ------------------------------------------------------------------------------
+# RELEASE
+# ------------------------------------------------------------------------------
+# Publishes to the project's GitLab releases page. Assets are the archives
+# produced above plus the checksums file.
+# ------------------------------------------------------------------------------
+
+release:
+  gitlab:
+    owner: "{{ .Env.CI_PROJECT_NAMESPACE }}"
+    name: "{{ .Env.CI_PROJECT_NAME }}"
+  mode: replace
+  header: |
+    ## sACN Monitor {{ .Version }}
+  footer: |
+    ## Installation
+
+    Download the archive for your platform and extract it.
+
+    - **macOS**: Separate builds for Intel (`amd64`) and Apple Silicon (`arm64`) Macs.
+    - **Windows**: Run `sACN Monitor.exe` after extracting, or use the NSIS installer.
+    - **Linux**: Run `sACN Monitor` after extracting. GTK4 / WebKitGTK 6.0 must be installed.
+      `.deb` and `.rpm` packages are also provided.
+  extra_files:
+    - glob: ./bin/darwin-amd64/*.tar.gz
+    - glob: ./bin/darwin-arm64/*.tar.gz
+    - glob: ./bin/windows-amd64/*-installer.exe
+    - glob: ./bin/windows-arm64/*-installer.exe
+    - glob: ./bin/linux-amd64/*.deb
+    - glob: ./bin/linux-amd64/*.rpm
+    - glob: ./bin/linux-amd64/*.AppImage
+    - glob: ./bin/linux-arm64/*.deb
+    - glob: ./bin/linux-arm64/*.rpm
+    - glob: ./bin/linux-arm64/*.AppImage
