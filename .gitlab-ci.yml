@@ -47,14 +47,10 @@ build-wails-cross-image:
     - linux
   rules:
     - if: $CI_COMMIT_TAG
-  before_script:
-    - export PATH="$HOME/go/bin:/usr/local/go/bin:$PATH"
-    - apt install golang-go
-    - go install github.com/wailsapp/wails/v3/cmd/wails3@latest
   script:
-    - wails3 task setup:docker
     - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
-    - docker tag wails-cross ${WAILS_CROSS_IMAGE}
+    - docker pull ${WAILS_CROSS_IMAGE} || true
+    - docker build --cache-from ${WAILS_CROSS_IMAGE} -t ${WAILS_CROSS_IMAGE} -f build/docker/Dockerfile.cross .
     - docker push ${WAILS_CROSS_IMAGE}
 
 # ===================================================================
