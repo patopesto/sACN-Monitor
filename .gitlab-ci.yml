@@ -70,6 +70,7 @@ build-wails-cross-image:
     - job: build-wails-cross-image
       artifacts: false
   before_script:
+    - export PATH=$PATH:/usr/local/go/bin
     # Install Wails v3 CLI and nfpm (Linux packaging)
     - go install github.com/wailsapp/wails/v3/cmd/wails3@latest
     - go install github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
