@@ -65,8 +65,7 @@ build-wails-cross-image:
   stage: build
   image: golang:${GO_VERSION}-bookworm
   tags:
-    - shell
-    - linux
+    - docker-build
   rules:
     - if: $CI_COMMIT_TAG
   needs:
