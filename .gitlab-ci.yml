@@ -49,7 +49,7 @@ build-wails-cross-image:
     - if: $CI_COMMIT_TAG
   script:
     - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
-    - docker build -t ${WAILS_CROSS_IMAGE} -f build/docker/Dockerfile.cross build/docker/
+    - docker build -t ${WAILS_CROSS_IMAGE} -f build/docker/Dockerfile.cross
     - docker push ${WAILS_CROSS_IMAGE}
 
 # ===================================================================
