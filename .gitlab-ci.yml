@@ -90,8 +90,9 @@ build-win-linux:
       artifacts: false
   before_script:
     # Install host build dependencies: Node.js, GTK/WebKit dev libs, NSIS
-    - apt-get update && apt-get install -y --no-install-recommends \
-      ca-certificates curl git nodejs npm pkg-config gcc nsis \
+    - |
+      apt-get update && apt-get install -y --no-install-recommends
+      ca-certificates curl git nodejs npm pkg-config gcc nsis
       libgtk-4-dev libwebkitgtk-6.0-dev libgtk-4-1
     # Install pnpm, Wails v3 CLI, and nfpm
     - npm install -g pnpm
