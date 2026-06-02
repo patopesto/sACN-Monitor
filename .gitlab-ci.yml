@@ -53,6 +53,9 @@ build-wails-cross-image:
 
 prep-runner:
   stage: prepare
+  tags:
+    - shell
+    - linux
   rules:
     - if: $CI_COMMIT_TAG
   script:
@@ -82,6 +85,7 @@ prep-runner:
     - job: prep-runner
       artifacts: false
   before_script:
+    - export PATH=$PATH:/usr/local/go/bin:$GOPATH
     # Pull the cross-compilation image so wails3 build can find it locally
     - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
     - docker pull ${WAILS_CROSS_IMAGE}
