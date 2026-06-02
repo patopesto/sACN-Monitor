@@ -87,7 +87,7 @@ build-ci-image:
 # is required (Windows targets and Linux arm64 on an amd64 host).
 # ===================================================================
 
-build-win-linux:
+build:
   stage: build
   image: ${CI_BUILD_IMAGE}
   services:
@@ -113,20 +113,6 @@ build-win-linux:
     - docker pull ${WAILS_CROSS_IMAGE} || true
     - docker tag ${WAILS_CROSS_IMAGE} wails-cross
   script:
-    # --- Windows amd64 ---
-    - wails3 build GOOS=windows GOARCH=amd64
-    - wails3 package GOOS=windows GOARCH=amd64
-    - mkdir -p bin/windows-amd64
-    - cp "bin/${PROJECT_NAME}.exe" "bin/windows-amd64/sACN Monitor.exe" 2>/dev/null || cp "bin/${PROJECT_NAME}-windows-amd64.exe" "bin/windows-amd64/sACN Monitor.exe" 2>/dev/null || true
-    - mv "bin/${PROJECT_NAME}-amd64-installer.exe" "bin/windows-amd64/${PACKAGE_NAME}-windows-amd64-installer.exe" 2>/dev/null || true
-
-    # --- Windows arm64 ---
-    - wails3 build GOOS=windows GOARCH=arm64
-    - wails3 package GOOS=windows GOARCH=arm64
-    - mkdir -p bin/windows-arm64
-    - cp "bin/${PROJECT_NAME}.exe" "bin/windows-arm64/sACN Monitor.exe" 2>/dev/null || cp "bin/${PROJECT_NAME}-windows-arm64.exe" "bin/windows-arm64/sACN Monitor.exe" 2>/dev/null || true
-    - mv "bin/${PROJECT_NAME}-arm64-installer.exe" "bin/windows-arm64/${PACKAGE_NAME}-windows-arm64-installer.exe" 2>/dev/null || true
-
     # --- Linux amd64 ---
     - wails3 task linux:build GOOS=linux GOARCH=amd64
     - wails3 package GOOS=linux GOARCH=amd64
@@ -146,32 +132,7 @@ build-win-linux:
     - mv bin/*.rpm "bin/linux-arm64/" 2>/dev/null || true
     - mv bin/*.AppImage "bin/linux-arm64/" 2>/dev/null || true
     - mv bin/*.pkg.tar.zst "bin/linux-arm64/" 2>/dev/null || true
-  artifacts:
-    paths:
-      - bin/windows-amd64/
-      - bin/windows-arm64/
-      - bin/linux-amd64/
-      - bin/linux-arm64/
-    expire_in: 1 day
 
-# ===================================================================
-# BUILD + PACKAGE: macOS (single macOS job)
-# ===================================================================
-# Both Darwin targets build in one job so that frontend deps, bindings,
-# and icons are built only once. macOS requires a shell executor.
-# ===================================================================
-
-build-darwin:
-  stage: build
-  tags:
-    - macos
-  rules:
-    - if: $CI_COMMIT_TAG
-  before_script:
-    - export PATH="$HOME/go/bin:/usr/local/go/bin:$HOME/.local/bin:$PATH"
-    - go install github.com/wailsapp/wails/v3/cmd/wails3@latest
-    - sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b $HOME/.local/bin
-  script:
     # --- Darwin amd64 ---
     - wails3 build GOOS=darwin GOARCH=amd64
     - wails3 package GOOS=darwin GOARCH=amd64
@@ -185,11 +146,32 @@ build-darwin:
     - mkdir -p bin/darwin-arm64
     - cp "bin/${PROJECT_NAME}" "bin/darwin-arm64/sACN Monitor"
     - tar -czf "bin/darwin-arm64/${PACKAGE_NAME}-darwin-arm64.app.tar.gz" -C bin "${PROJECT_NAME}.app"
+
+    # --- Windows amd64 ---
+    - wails3 build GOOS=windows GOARCH=amd64
+    - wails3 package GOOS=windows GOARCH=amd64
+    - mkdir -p bin/windows-amd64
+    - cp "bin/${PROJECT_NAME}.exe" "bin/windows-amd64/sACN Monitor.exe" 2>/dev/null || cp "bin/${PROJECT_NAME}-windows-amd64.exe" "bin/windows-amd64/sACN Monitor.exe" 2>/dev/null || true
+    - mv "bin/${PROJECT_NAME}-amd64-installer.exe" "bin/windows-amd64/${PACKAGE_NAME}-windows-amd64-installer.exe" 2>/dev/null || true
+
+    # --- Windows arm64 ---
+    - wails3 build GOOS=windows GOARCH=arm64
+    - wails3 package GOOS=windows GOARCH=arm64
+    - mkdir -p bin/windows-arm64
+    - cp "bin/${PROJECT_NAME}.exe" "bin/windows-arm64/sACN Monitor.exe" 2>/dev/null || cp "bin/${PROJECT_NAME}-windows-arm64.exe" "bin/windows-arm64/sACN Monitor.exe" 2>/dev/null || true
+    - mv "bin/${PROJECT_NAME}-arm64-installer.exe" "bin/windows-arm64/${PACKAGE_NAME}-windows-arm64-installer.exe" 2>/dev/null || true
+
   artifacts:
     paths:
+      - bin/windows-amd64/
+      - bin/windows-arm64/
+      - bin/linux-amd64/
+      - bin/linux-arm64/
       - bin/darwin-amd64/
       - bin/darwin-arm64/
     expire_in: 1 day
+
+
 
 # ===================================================================
 # RELEASE: GoReleaser packages binaries and creates GitLab release
@@ -205,9 +187,7 @@ release:
   rules:
     - if: $CI_COMMIT_TAG
   needs:
-    - job: build-win-linux
-      artifacts: true
-    - job: build-darwin
+    - job: build
       artifacts: true
   variables:
     GITLAB_TOKEN: $CI_JOB_TOKEN
