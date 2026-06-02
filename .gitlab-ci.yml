@@ -9,6 +9,11 @@
 # This pipeline uses `wails3 build` and `wails3 package` directly.
 # Cross-compilation is handled automatically by the Wails task system.
 #
+# Architecture note: All non-macOS builds run in a single job on a standard
+# golang image. The wails-cross image is built in the prepare stage and is
+# launched internally by `wails3 build` when cross-compilation is required.
+# macOS builds run in a separate job because they require a macOS runner.
+#
 # Prerequisites:
 #   1. GitLab Container Registry enabled (for the wails-cross image).
 #   2. GoReleaser creates the GitLab release using CI_JOB_TOKEN.
@@ -27,6 +32,7 @@ variables:
   PROJECT_NAME: "sACN Monitor"
   PACKAGE_NAME: "sACN-Monitor"
   GO_VERSION: "1.25.0"
+  DOCKER_VERSION: "27.3.1"
   # Prevent Node OOM during frontend build
   NODE_OPTIONS: "--max-old-space-size=4096"
   # Container Registry path for the cross-compilation image
@@ -37,7 +43,7 @@ variables:
 # ===================================================================
 
 # Build the wails-cross Docker image once and push it to the project
-# Container Registry so subsequent build jobs can pull it quickly.
+# Container Registry so that `wails3 build` can launch it internally.
 build-wails-cross-image:
   stage: prepare
   tags:
@@ -47,117 +53,106 @@ build-wails-cross-image:
     - if: $CI_COMMIT_TAG
   script:
     - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+    # Pull existing image to prime layer cache (no-op if absent)
     - docker pull ${WAILS_CROSS_IMAGE} || true
     - docker build --cache-from ${WAILS_CROSS_IMAGE} -t ${WAILS_CROSS_IMAGE} -f build/docker/Dockerfile.cross .
     - docker push ${WAILS_CROSS_IMAGE}
 
-prep-runner:
-  stage: prepare
-  tags:
-    - shell
-    - linux
-  rules:
-    - if: $CI_COMMIT_TAG
-  script:
-    - export GOPATH=$HOME/go
-    - export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
-    # Install Wails v3 CLI and nfpm (Linux packaging)
-    - go install github.com/wailsapp/wails/v3/cmd/wails3@latest
-    - go install github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
-    - wails3 doctor
-
 # ===================================================================
-# BUILD + PACKAGE: Windows & Linux (Docker runner)
+# BUILD + PACKAGE: Windows & Linux (single job, golang image)
 # ===================================================================
-# Each job runs `wails3 build` then `wails3 package` for one platform.
-# `wails3 build` handles frontend deps, bindings, icons and compilation.
-# `wails3 package` creates platform-specific installers/packages.
+# All four targets build in one job so that frontend deps, bindings,
+# and icons are built only once. Task's timestamp-based dependency
+# caching skips the shared steps after the first build.
+#
+# The job runs in a standard golang image with all tools installed.
+# `wails3 build` automatically launches the wails-cross Docker image
+# internally when cross-compilation is required (Windows targets and
+# Linux arm64 on an amd64 host).
 # ===================================================================
 
-.build:
+build-win-linux:
   stage: build
+  image: golang:${GO_VERSION}-bookworm
+  services:
+    - docker:dind
+  variables:
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_CERT_PATH: "/certs/client"
+    DOCKER_TLS_VERIFY: 1
   tags:
-    - shell
-    - linux
+    - docker-builder
   rules:
     - if: $CI_COMMIT_TAG
   needs:
-    - job: prep-runner
+    - job: build-wails-cross-image
       artifacts: false
   before_script:
-    - export GOPATH=$HOME/go
-    - export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
-    # Use pnpm
-    - corepack enable
-    - corepack use pnpm@latest-11
-    # Pull the cross-compilation image so wails3 build can find it locally
+    # Install host build dependencies: Node.js, GTK/WebKit dev libs, NSIS
+    - apt-get update && apt-get install -y --no-install-recommends ca-certificates curl git nodejs npm pkg-config gcc nsis
+    # Install pnpm, Wails v3 CLI, and nfpm
+    - npm install -g pnpm
+    - go install github.com/wailsapp/wails/v3/cmd/wails3@latest
+    - go install github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
+    # Install Docker CLI (static binary) so wails3 build can launch containers
+    - |
+      curl -fsSL "https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz" | tar xz -C /tmp
+      cp /tmp/docker/docker /usr/local/bin/
+    # Ensure the wails-cross image is available for wails3 build internally
     - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
-    - docker pull ${WAILS_CROSS_IMAGE}
+    - docker pull ${WAILS_CROSS_IMAGE} || true
     - docker tag ${WAILS_CROSS_IMAGE} wails-cross
   script:
-    - wails3 build GOOS=${GOOS} GOARCH=${GOARCH}
-    - wails3 package GOOS=${GOOS} GOARCH=${GOARCH}
-    - |
-      mkdir -p "bin/${GOOS}-${GOARCH}"
-      EXT=""
-      [ "${GOOS}" = "windows" ] && EXT=".exe"
-      # Normalize raw binary path for GoReleaser
-      if [ -f "bin/${PROJECT_NAME}${EXT}" ]; then
-        cp "bin/${PROJECT_NAME}${EXT}" "bin/${GOOS}-${GOARCH}/${BINARY_NAME}"
-      elif [ -f "bin/${PROJECT_NAME}-${GOOS}-${GOARCH}${EXT}" ]; then
-        cp "bin/${PROJECT_NAME}-${GOOS}-${GOARCH}${EXT}" "bin/${GOOS}-${GOARCH}/${BINARY_NAME}"
-      fi
-      # Normalize platform packages
-      if [ "${GOOS}" = "windows" ]; then
-        mv "bin/${PROJECT_NAME}-${GOARCH}-installer.exe" "bin/${GOOS}-${GOARCH}/${PACKAGE_NAME}-${GOOS}-${GOARCH}-installer.exe" 2>/dev/null || true
-      elif [ "${GOOS}" = "linux" ]; then
-        mv bin/*.deb "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
-        mv bin/*.rpm "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
-        mv bin/*.AppImage "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
-        mv bin/*.pkg.tar.zst "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
-      fi
+    # --- Windows amd64 ---
+    - wails3 build GOOS=windows GOARCH=amd64
+    - wails3 package GOOS=windows GOARCH=amd64
+    - mkdir -p bin/windows-amd64
+    - cp "bin/${PROJECT_NAME}.exe" "bin/windows-amd64/sACN Monitor.exe" 2>/dev/null || cp "bin/${PROJECT_NAME}-windows-amd64.exe" "bin/windows-amd64/sACN Monitor.exe" 2>/dev/null || true
+    - mv "bin/${PROJECT_NAME}-amd64-installer.exe" "bin/windows-amd64/${PACKAGE_NAME}-windows-amd64-installer.exe" 2>/dev/null || true
+
+    # --- Windows arm64 ---
+    - wails3 build GOOS=windows GOARCH=arm64
+    - wails3 package GOOS=windows GOARCH=arm64
+    - mkdir -p bin/windows-arm64
+    - cp "bin/${PROJECT_NAME}.exe" "bin/windows-arm64/sACN Monitor.exe" 2>/dev/null || cp "bin/${PROJECT_NAME}-windows-arm64.exe" "bin/windows-arm64/sACN Monitor.exe" 2>/dev/null || true
+    - mv "bin/${PROJECT_NAME}-arm64-installer.exe" "bin/windows-arm64/${PACKAGE_NAME}-windows-arm64-installer.exe" 2>/dev/null || true
+
+    # --- Linux amd64 ---
+    - wails3 task linux:build GOOS=linux GOARCH=amd64
+    - wails3 package GOOS=linux GOARCH=amd64
+    - mkdir -p bin/linux-amd64
+    - cp "bin/${PROJECT_NAME}" "bin/linux-amd64/sACN Monitor" 2>/dev/null || cp "bin/${PROJECT_NAME}-linux-amd64" "bin/linux-amd64/sACN Monitor" 2>/dev/null || true
+    - mv bin/*.deb "bin/linux-amd64/" 2>/dev/null || true
+    - mv bin/*.rpm "bin/linux-amd64/" 2>/dev/null || true
+    - mv bin/*.AppImage "bin/linux-amd64/" 2>/dev/null || true
+    - mv bin/*.pkg.tar.zst "bin/linux-amd64/" 2>/dev/null || true
+
+    # --- Linux arm64 ---
+    - wails3 task linux:build GOOS=linux GOARCH=arm64
+    - wails3 package GOOS=linux GOARCH=arm64
+    - mkdir -p bin/linux-arm64
+    - cp "bin/${PROJECT_NAME}" "bin/linux-arm64/sACN Monitor" 2>/dev/null || cp "bin/${PROJECT_NAME}-linux-arm64" "bin/linux-arm64/sACN Monitor" 2>/dev/null || true
+    - mv bin/*.deb "bin/linux-arm64/" 2>/dev/null || true
+    - mv bin/*.rpm "bin/linux-arm64/" 2>/dev/null || true
+    - mv bin/*.AppImage "bin/linux-arm64/" 2>/dev/null || true
+    - mv bin/*.pkg.tar.zst "bin/linux-arm64/" 2>/dev/null || true
   artifacts:
     paths:
-      - bin/${GOOS}-${GOARCH}/
+      - bin/windows-amd64/
+      - bin/windows-arm64/
+      - bin/linux-amd64/
+      - bin/linux-arm64/
     expire_in: 1 day
 
-build-windows-amd64:
-  extends: .build
-  variables:
-    GOOS: windows
-    GOARCH: amd64
-    BINARY_NAME: "sACN Monitor.exe"
-
-build-windows-arm64:
-  extends: .build
-  variables:
-    GOOS: windows
-    GOARCH: arm64
-    BINARY_NAME: "sACN Monitor.exe"
-
-build-linux-amd64:
-  extends: .build
-  variables:
-    GOOS: linux
-    GOARCH: amd64
-    BINARY_NAME: "sACN Monitor"
-
-build-linux-arm64:
-  extends: .build
-  variables:
-    GOOS: linux
-    GOARCH: arm64
-    BINARY_NAME: "sACN Monitor"
-
 # ===================================================================
-# BUILD + PACKAGE: macOS (macOS runner)
+# BUILD + PACKAGE: macOS (single macOS job)
 # ===================================================================
-# macOS jobs run natively on a macOS shell executor. `wails3 package`
-# depends on `build`, so running `wails3 package` alone builds and
-# packages the .app bundle, then we codesign and tar it.
+# Both Darwin targets build in one job so that frontend deps, bindings,
+# and icons are built only once. macOS requires a shell executor.
 # ===================================================================
 
-.build-darwin:
+build-darwin:
   stage: build
   tags:
     - macos
@@ -168,26 +163,24 @@ build-linux-arm64:
     - go install github.com/wailsapp/wails/v3/cmd/wails3@latest
     - sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b $HOME/.local/bin
   script:
-    - wails3 build GOOS=darwin GOARCH=${GOARCH}
-    - wails3 package GOOS=darwin GOARCH=${GOARCH}
-    - |
-      mkdir -p "bin/darwin-${GOARCH}"
-      cp "bin/${PROJECT_NAME}" "bin/darwin-${GOARCH}/${PROJECT_NAME}"
-      tar -czf "bin/darwin-${GOARCH}/${PACKAGE_NAME}-darwin-${GOARCH}.app.tar.gz" -C bin "${PROJECT_NAME}.app"
+    # --- Darwin amd64 ---
+    - wails3 build GOOS=darwin GOARCH=amd64
+    - wails3 package GOOS=darwin GOARCH=amd64
+    - mkdir -p bin/darwin-amd64
+    - cp "bin/${PROJECT_NAME}" "bin/darwin-amd64/sACN Monitor"
+    - tar -czf "bin/darwin-amd64/${PACKAGE_NAME}-darwin-amd64.app.tar.gz" -C bin "${PROJECT_NAME}.app"
+
+    # --- Darwin arm64 ---
+    - wails3 build GOOS=darwin GOARCH=arm64
+    - wails3 package GOOS=darwin GOARCH=arm64
+    - mkdir -p bin/darwin-arm64
+    - cp "bin/${PROJECT_NAME}" "bin/darwin-arm64/sACN Monitor"
+    - tar -czf "bin/darwin-arm64/${PACKAGE_NAME}-darwin-arm64.app.tar.gz" -C bin "${PROJECT_NAME}.app"
   artifacts:
     paths:
-      - bin/darwin-${GOARCH}/
+      - bin/darwin-amd64/
+      - bin/darwin-arm64/
     expire_in: 1 day
-
-build-darwin-amd64:
-  extends: .build-darwin
-  variables:
-    GOARCH: amd64
-
-build-darwin-arm64:
-  extends: .build-darwin
-  variables:
-    GOARCH: arm64
 
 # ===================================================================
 # RELEASE: GoReleaser packages binaries and creates GitLab release
@@ -203,17 +196,9 @@ release:
   rules:
     - if: $CI_COMMIT_TAG
   needs:
-    - job: build-windows-amd64
+    - job: build-win-linux
       artifacts: true
-    - job: build-windows-arm64
-      artifacts: true
-    - job: build-linux-amd64
-      artifacts: true
-    - job: build-linux-arm64
-      artifacts: true
-    - job: build-darwin-amd64
-      artifacts: true
-    - job: build-darwin-arm64
+    - job: build-darwin
       artifacts: true
   variables:
     GITLAB_TOKEN: $CI_JOB_TOKEN
