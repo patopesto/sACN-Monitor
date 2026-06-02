@@ -113,25 +113,6 @@ build:
     - docker pull ${WAILS_CROSS_IMAGE} || true
     - docker tag ${WAILS_CROSS_IMAGE} wails-cross
   script:
-    # --- Linux amd64 ---
-    - wails3 task linux:build:docker GOOS=linux GOARCH=amd64
-    - wails3 package GOOS=linux GOARCH=amd64
-    - mkdir -p bin/linux-amd64
-    - cp "bin/${PROJECT_NAME}" "bin/linux-amd64/sACN Monitor" 2>/dev/null || cp "bin/${PROJECT_NAME}-linux-amd64" "bin/linux-amd64/sACN Monitor" 2>/dev/null || true
-    - mv bin/*.deb "bin/linux-amd64/" 2>/dev/null || true
-    - mv bin/*.rpm "bin/linux-amd64/" 2>/dev/null || true
-    - mv bin/*.AppImage "bin/linux-amd64/" 2>/dev/null || true
-    - mv bin/*.pkg.tar.zst "bin/linux-amd64/" 2>/dev/null || true
-
-    # --- Linux arm64 ---
-    - wails3 task linux:build:docker GOOS=linux GOARCH=arm64
-    - wails3 package GOOS=linux GOARCH=arm64
-    - mkdir -p bin/linux-arm64
-    - cp "bin/${PROJECT_NAME}" "bin/linux-arm64/sACN Monitor" 2>/dev/null || cp "bin/${PROJECT_NAME}-linux-arm64" "bin/linux-arm64/sACN Monitor" 2>/dev/null || true
-    - mv bin/*.deb "bin/linux-arm64/" 2>/dev/null || true
-    - mv bin/*.rpm "bin/linux-arm64/" 2>/dev/null || true
-    - mv bin/*.AppImage "bin/linux-arm64/" 2>/dev/null || true
-    - mv bin/*.pkg.tar.zst "bin/linux-arm64/" 2>/dev/null || true
 
     # --- Darwin amd64 ---
     - wails3 build GOOS=darwin GOARCH=amd64
@@ -160,6 +141,26 @@ build:
     - mkdir -p bin/windows-arm64
     - cp "bin/${PROJECT_NAME}.exe" "bin/windows-arm64/sACN Monitor.exe" 2>/dev/null || cp "bin/${PROJECT_NAME}-windows-arm64.exe" "bin/windows-arm64/sACN Monitor.exe" 2>/dev/null || true
     - mv "bin/${PROJECT_NAME}-arm64-installer.exe" "bin/windows-arm64/${PACKAGE_NAME}-windows-arm64-installer.exe" 2>/dev/null || true
+
+    # --- Linux amd64 ---
+    - wails3 task linux:build:docker GOOS=linux GOARCH=amd64
+    - wails3 package GOOS=linux GOARCH=amd64
+    - mkdir -p bin/linux-amd64
+    - cp "bin/${PROJECT_NAME}" "bin/linux-amd64/sACN Monitor" 2>/dev/null || cp "bin/${PROJECT_NAME}-linux-amd64" "bin/linux-amd64/sACN Monitor" 2>/dev/null || true
+    - mv bin/*.deb "bin/linux-amd64/" 2>/dev/null || true
+    - mv bin/*.rpm "bin/linux-amd64/" 2>/dev/null || true
+    - mv bin/*.AppImage "bin/linux-amd64/" 2>/dev/null || true
+    - mv bin/*.pkg.tar.zst "bin/linux-amd64/" 2>/dev/null || true
+
+    # --- Linux arm64 ---
+    - wails3 task linux:build:docker GOOS=linux GOARCH=arm64
+    - wails3 package GOOS=linux GOARCH=arm64
+    - mkdir -p bin/linux-arm64
+    - cp "bin/${PROJECT_NAME}" "bin/linux-arm64/sACN Monitor" 2>/dev/null || cp "bin/${PROJECT_NAME}-linux-arm64" "bin/linux-arm64/sACN Monitor" 2>/dev/null || true
+    - mv bin/*.deb "bin/linux-arm64/" 2>/dev/null || true
+    - mv bin/*.rpm "bin/linux-arm64/" 2>/dev/null || true
+    - mv bin/*.AppImage "bin/linux-arm64/" 2>/dev/null || true
+    - mv bin/*.pkg.tar.zst "bin/linux-arm64/" 2>/dev/null || true
 
   artifacts:
     paths:
