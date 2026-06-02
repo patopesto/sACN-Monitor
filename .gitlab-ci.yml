@@ -87,6 +87,9 @@ prep-runner:
   before_script:
     - export GOPATH=$HOME/go
     - export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
+    # Use pnpm
+    - corepack enable
+    - corepack use pnpm@latest-11
     # Pull the cross-compilation image so wails3 build can find it locally
     - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
     - docker pull ${WAILS_CROSS_IMAGE}
