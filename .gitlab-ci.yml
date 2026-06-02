@@ -60,7 +60,7 @@ prep-runner:
     - if: $CI_COMMIT_TAG
   script:
     - export GOPATH=$HOME/go
-    - export PATH=$PATH:/usr/local/go/bin:$GOPATH
+    - export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
     # Install Wails v3 CLI and nfpm (Linux packaging)
     - go install github.com/wailsapp/wails/v3/cmd/wails3@latest
     - go install github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
@@ -85,7 +85,8 @@ prep-runner:
     - job: prep-runner
       artifacts: false
   before_script:
-    - export PATH=$PATH:/usr/local/go/bin:$GOPATH
+    - export GOPATH=$HOME/go
+    - export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
     # Pull the cross-compilation image so wails3 build can find it locally
     - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
     - docker pull ${WAILS_CROSS_IMAGE}
