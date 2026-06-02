@@ -118,14 +118,14 @@ build:
     - wails3 build GOOS=darwin GOARCH=amd64
     - wails3 package GOOS=darwin GOARCH=amd64
     - mkdir -p bin/darwin-amd64
-    - cp "bin/${PROJECT_NAME}" "bin/darwin-amd64/sACN Monitor"
+    - cp "bin/${PROJECT_NAME}.app" "bin/darwin-amd64/sACN Monitor.app"
     - tar -czf "bin/darwin-amd64/${PACKAGE_NAME}-darwin-amd64.app.tar.gz" -C bin "${PROJECT_NAME}.app"
 
     # --- Darwin arm64 ---
     - wails3 build GOOS=darwin GOARCH=arm64
     - wails3 package GOOS=darwin GOARCH=arm64
     - mkdir -p bin/darwin-arm64
-    - cp "bin/${PROJECT_NAME}" "bin/darwin-arm64/sACN Monitor"
+    - cp "bin/${PROJECT_NAME}.app" "bin/darwin-arm64/sACN Monitor.app"
     - tar -czf "bin/darwin-arm64/${PACKAGE_NAME}-darwin-arm64.app.tar.gz" -C bin "${PROJECT_NAME}.app"
 
     # --- Windows amd64 ---
