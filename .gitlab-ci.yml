@@ -31,7 +31,7 @@ stages:
 variables:
   PROJECT_NAME: "sACN Monitor"
   PACKAGE_NAME: "sACN-Monitor"
-  GO_VERSION: "1.25.0"
+  GO_VERSION: "1.25"
   DOCKER_VERSION: "27.3.1"
   # Prevent Node OOM during frontend build
   NODE_OPTIONS: "--max-old-space-size=4096"
@@ -90,7 +90,9 @@ build-win-linux:
       artifacts: false
   before_script:
     # Install host build dependencies: Node.js, GTK/WebKit dev libs, NSIS
-    - apt-get update && apt-get install -y --no-install-recommends ca-certificates curl git nodejs npm pkg-config gcc nsis
+    - apt-get update && apt-get install -y --no-install-recommends \
+      ca-certificates curl git nodejs npm pkg-config gcc nsis \
+      libgtk-4-dev libwebkitgtk-6.0-dev libgtk-4-1
     # Install pnpm, Wails v3 CLI, and nfpm
     - npm install -g pnpm
     - go install github.com/wailsapp/wails/v3/cmd/wails3@latest
