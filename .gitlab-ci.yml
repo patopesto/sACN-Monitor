@@ -114,7 +114,7 @@ build:
     - docker tag ${WAILS_CROSS_IMAGE} wails-cross
   script:
     # --- Linux amd64 ---
-    - wails3 task linux:build GOOS=linux GOARCH=amd64
+    - wails3 task linux:build:docker GOOS=linux GOARCH=amd64
     - wails3 package GOOS=linux GOARCH=amd64
     - mkdir -p bin/linux-amd64
     - cp "bin/${PROJECT_NAME}" "bin/linux-amd64/sACN Monitor" 2>/dev/null || cp "bin/${PROJECT_NAME}-linux-amd64" "bin/linux-amd64/sACN Monitor" 2>/dev/null || true
@@ -124,7 +124,7 @@ build:
     - mv bin/*.pkg.tar.zst "bin/linux-amd64/" 2>/dev/null || true
 
     # --- Linux arm64 ---
-    - wails3 task linux:build GOOS=linux GOARCH=arm64
+    - wails3 task linux:build:docker GOOS=linux GOARCH=arm64
     - wails3 package GOOS=linux GOARCH=arm64
     - mkdir -p bin/linux-arm64
     - cp "bin/${PROJECT_NAME}" "bin/linux-arm64/sACN Monitor" 2>/dev/null || cp "bin/${PROJECT_NAME}-linux-arm64" "bin/linux-arm64/sACN Monitor" 2>/dev/null || true
