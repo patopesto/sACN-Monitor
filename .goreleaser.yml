@@ -31,7 +31,7 @@ builds:
     goarch: [amd64]
     binary: "sACN Monitor"
     prebuilt:
-      path: bin/darwin-amd64/sACN Monitor
+      path: bin/darwin-amd64/sACN Monitor.app
 
   - id: darwin-arm64
     builder: prebuilt
@@ -39,7 +39,7 @@ builds:
     goarch: [arm64]
     binary: "sACN Monitor"
     prebuilt:
-      path: bin/darwin-arm64/sACN Monitor
+      path: bin/darwin-arm64/sACN Monitor.app
 
   - id: windows-amd64
     builder: prebuilt
