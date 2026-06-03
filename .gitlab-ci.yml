@@ -146,37 +146,37 @@ build:
     - mv "bin/${PROJECT_NAME}-${GOARCH}-installer.exe" "bin/${GOOS}-${GOARCH}/${PACKAGE_NAME}-${GOOS}-${GOARCH}-installer.exe" 2>/dev/null || true
 
     # --- Linux amd64 ---
-    - export GOOS=linux
-    - export GOARCH=amd64
-    - wails3 build -tags gtk3
-    - wails3 package EXTRA_TAGS=gtk3
-    - mkdir -p bin/${GOOS}-${GOARCH}
-    - cp "bin/${PROJECT_NAME}" "bin/${GOOS}-${GOARCH}/" 2>/dev/null || cp "bin/${PROJECT_NAME}-${GOOS}-${GOARCH}" "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
-    - mv bin/*.deb "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
-    - mv bin/*.rpm "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
-    - mv bin/*.AppImage "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
-    - mv bin/*.pkg.tar.zst "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
+    # - export GOOS=linux
+    # - export GOARCH=amd64
+    # - wails3 build -tags gtk3
+    # - wails3 package EXTRA_TAGS=gtk3
+    # - mkdir -p bin/${GOOS}-${GOARCH}
+    # - cp "bin/${PROJECT_NAME}" "bin/${GOOS}-${GOARCH}/" 2>/dev/null || cp "bin/${PROJECT_NAME}-${GOOS}-${GOARCH}" "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
+    # - mv bin/*.deb "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
+    # - mv bin/*.rpm "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
+    # - mv bin/*.AppImage "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
+    # - mv bin/*.pkg.tar.zst "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
 
-    # --- Linux arm64 ---
-    - export GOARCH=arm64
-    - wails3 build -tags gtk3
-    - wails3 package EXTRA_TAGS=gtk3
-    - mkdir -p bin/${GOOS}-${GOARCH}
-    - cp "bin/${PROJECT_NAME}" "bin/${GOOS}-${GOARCH}/" 2>/dev/null || cp "bin/${PROJECT_NAME}-${GOOS}-${GOARCH}" "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
-    - mv bin/*.deb "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
-    - mv bin/*.rpm "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
-    - mv bin/*.AppImage "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
-    - mv bin/*.pkg.tar.zst "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
+    # # --- Linux arm64 ---
+    # - export GOARCH=arm64
+    # - wails3 build -tags gtk3
+    # - wails3 package EXTRA_TAGS=gtk3
+    # - mkdir -p bin/${GOOS}-${GOARCH}
+    # - cp "bin/${PROJECT_NAME}" "bin/${GOOS}-${GOARCH}/" 2>/dev/null || cp "bin/${PROJECT_NAME}-${GOOS}-${GOARCH}" "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
+    # - mv bin/*.deb "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
+    # - mv bin/*.rpm "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
+    # - mv bin/*.AppImage "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
+    # - mv bin/*.pkg.tar.zst "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
 
 
   artifacts:
     paths:
-      - bin/windows-amd64/
-      - bin/windows-arm64/
-      - bin/linux-amd64/
-      - bin/linux-arm64/
       - bin/darwin-amd64/
       - bin/darwin-arm64/
+      - bin/windows-amd64/
+      - bin/windows-arm64/
+      # - bin/linux-amd64/
+      # - bin/linux-arm64/
     expire_in: 1 day
 
 
