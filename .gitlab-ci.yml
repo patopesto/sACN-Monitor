@@ -149,7 +149,7 @@ build:
     - export GOOS=linux
     - export GOARCH=amd64
     - wails3 build -tags gtk3
-    - wails3 package
+    - wails3 package EXTRA_TAGS=gtk3
     - mkdir -p bin/${GOOS}-${GOARCH}
     - cp "bin/${PROJECT_NAME}" "bin/${GOOS}-${GOARCH}/" 2>/dev/null || cp "bin/${PROJECT_NAME}-${GOOS}-${GOARCH}" "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
     - mv bin/*.deb "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
@@ -160,7 +160,7 @@ build:
     # --- Linux arm64 ---
     - export GOARCH=arm64
     - wails3 build -tags gtk3
-    - wails3 package
+    - wails3 package EXTRA_TAGS=gtk3
     - mkdir -p bin/${GOOS}-${GOARCH}
     - cp "bin/${PROJECT_NAME}" "bin/${GOOS}-${GOARCH}/" 2>/dev/null || cp "bin/${PROJECT_NAME}-${GOOS}-${GOARCH}" "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
     - mv bin/*.deb "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
