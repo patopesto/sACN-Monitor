@@ -116,46 +116,58 @@ build:
     - wails3 doctor
 
     # --- Darwin amd64 ---
-    - wails3 package GOOS=darwin GOARCH=amd64
-    - mkdir -p bin/darwin-amd64
-    - cp -r "bin/${PROJECT_NAME}.app" "bin/darwin-amd64/sACN Monitor.app"
-    - tar -czf "bin/darwin-amd64/${PACKAGE_NAME}-darwin-amd64.app.tar.gz" -C bin "${PROJECT_NAME}.app"
+    - export GOOS=darwin
+    - export GOARCH=amd64
+    - wails3 package
+    - mkdir -p bin/${GOOS}-${GOARCH}
+    - cp -r "bin/${PROJECT_NAME}.app" "bin/${GOOS}-${GOARCH}/"
+    - tar -czf "bin/${GOOS}-${GOARCH}/${PACKAGE_NAME}-${GOOS}-${GOARCH}.app.tar.gz" -C bin "${PROJECT_NAME}.app"
 
     # --- Darwin arm64 ---
-    - wails3 package GOOS=darwin GOARCH=arm64
-    - mkdir -p bin/darwin-arm64
-    - cp -r "bin/${PROJECT_NAME}.app" "bin/darwin-arm64/sACN Monitor.app"
-    - tar -czf "bin/darwin-arm64/${PACKAGE_NAME}-darwin-arm64.app.tar.gz" -C bin "${PROJECT_NAME}.app"
+    - export GOARCH=arm64
+    - wails3 package
+    - mkdir -p bin/${GOOS}-${GOARCH}
+    - cp -r "bin/${PROJECT_NAME}.app" "bin/${GOOS}-${GOARCH}/"
+    - tar -czf "bin/${GOOS}-${GOARCH}/${PACKAGE_NAME}-${GOOS}-${GOARCH}.app.tar.gz" -C bin "${PROJECT_NAME}.app"
 
     # --- Windows amd64 ---
-    - wails3 package GOOS=windows GOARCH=amd64
-    - mkdir -p bin/windows-amd64
-    - cp "bin/${PROJECT_NAME}.exe" "bin/windows-amd64/sACN Monitor.exe" 2>/dev/null || cp "bin/${PROJECT_NAME}-windows-amd64.exe" "bin/windows-amd64/sACN Monitor.exe" 2>/dev/null || true
-    - mv "bin/${PROJECT_NAME}-amd64-installer.exe" "bin/windows-amd64/${PACKAGE_NAME}-windows-amd64-installer.exe" 2>/dev/null || true
+    - export GOOS=windows
+    - export GOARCH=amd64
+    - wails3 package
+    - mkdir -p bin/${GOOS}-${GOARCH}
+    - cp "bin/${PROJECT_NAME}.exe" "bin/${GOOS}-${GOARCH}/" 2>/dev/null || cp "bin/${PROJECT_NAME}-${GOOS}-${GOARCH}.exe" "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
+    - mv "bin/${PROJECT_NAME}-${GOARCH}-installer.exe" "bin/${GOOS}-${GOARCH}/${PACKAGE_NAME}-${GOOS}-${GOARCH}-installer.exe" 2>/dev/null || true
 
     # --- Windows arm64 ---
-    - wails3 package GOOS=windows GOARCH=arm64
-    - mkdir -p bin/windows-arm64
-    - cp "bin/${PROJECT_NAME}.exe" "bin/windows-arm64/sACN Monitor.exe" 2>/dev/null || cp "bin/${PROJECT_NAME}-windows-arm64.exe" "bin/windows-arm64/sACN Monitor.exe" 2>/dev/null || true
-    - mv "bin/${PROJECT_NAME}-arm64-installer.exe" "bin/windows-arm64/${PACKAGE_NAME}-windows-arm64-installer.exe" 2>/dev/null || true
+    - export GOARCH=arm64
+    - wails3 package
+    - mkdir -p bin/${GOOS}-${GOARCH}
+    - cp "bin/${PROJECT_NAME}.exe" "bin/${GOOS}-${GOARCH}/" 2>/dev/null || cp "bin/${PROJECT_NAME}-${GOOS}-${GOARCH}.exe" "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
+    - mv "bin/${PROJECT_NAME}-${GOARCH}-installer.exe" "bin/${GOOS}-${GOARCH}/${PACKAGE_NAME}-${GOOS}-${GOARCH}-installer.exe" 2>/dev/null || true
 
     # --- Linux amd64 ---
-    - wails3 package -tags gtk3 GOOS=linux GOARCH=amd64
-    - mkdir -p bin/linux-amd64
-    - cp "bin/${PROJECT_NAME}" "bin/linux-amd64/sACN Monitor" 2>/dev/null || cp "bin/${PROJECT_NAME}-linux-amd64" "bin/linux-amd64/sACN Monitor" 2>/dev/null || true
-    - mv bin/*.deb "bin/linux-amd64/" 2>/dev/null || true
-    - mv bin/*.rpm "bin/linux-amd64/" 2>/dev/null || true
-    - mv bin/*.AppImage "bin/linux-amd64/" 2>/dev/null || true
-    - mv bin/*.pkg.tar.zst "bin/linux-amd64/" 2>/dev/null || true
+    - export GOOS=linux
+    - export GOARCH=amd64
+    - wails3 build -tags gtk3
+    - wails3 package
+    - mkdir -p bin/${GOOS}-${GOARCH}
+    - cp "bin/${PROJECT_NAME}" "bin/${GOOS}-${GOARCH}/" 2>/dev/null || cp "bin/${PROJECT_NAME}-${GOOS}-${GOARCH}" "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
+    - mv bin/*.deb "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
+    - mv bin/*.rpm "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
+    - mv bin/*.AppImage "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
+    - mv bin/*.pkg.tar.zst "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
 
     # --- Linux arm64 ---
-    - wails3 package -tags gtk3 GOOS=linux GOARCH=arm64
-    - mkdir -p bin/linux-arm64
-    - cp "bin/${PROJECT_NAME}" "bin/linux-arm64/sACN Monitor" 2>/dev/null || cp "bin/${PROJECT_NAME}-linux-arm64" "bin/linux-arm64/sACN Monitor" 2>/dev/null || true
-    - mv bin/*.deb "bin/linux-arm64/" 2>/dev/null || true
-    - mv bin/*.rpm "bin/linux-arm64/" 2>/dev/null || true
-    - mv bin/*.AppImage "bin/linux-arm64/" 2>/dev/null || true
-    - mv bin/*.pkg.tar.zst "bin/linux-arm64/" 2>/dev/null || true
+    - export GOARCH=arm64
+    - wails3 build -tags gtk3
+    - wails3 package
+    - mkdir -p bin/${GOOS}-${GOARCH}
+    - cp "bin/${PROJECT_NAME}" "bin/${GOOS}-${GOARCH}/" 2>/dev/null || cp "bin/${PROJECT_NAME}-${GOOS}-${GOARCH}" "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
+    - mv bin/*.deb "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
+    - mv bin/*.rpm "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
+    - mv bin/*.AppImage "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
+    - mv bin/*.pkg.tar.zst "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
+
 
   artifacts:
     paths:
