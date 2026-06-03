@@ -15,11 +15,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     pkg-config \
     gcc \
-    nsis \
+    nsis
+# If running on debian13+ with GTK4.0
+RUN apt-get install -y --no-install-recommends \
     libgtk-4-dev \
     libwebkitgtk-6.0-dev \
-    libgtk-4-1 \
-    && rm -rf /var/lib/apt/lists/*
+    libgtk-4-1
+# If running on debian12 with GTK3.0
+RUN apt-get install -y --no-install-recommends \
+    libgtk-3-dev \
+    libwebkit2gtk-4.1-dev
+RUN rm -rf /var/lib/apt/lists/*
 
 # Install Node.js 22 (required for latest pnpm)
 ARG NODE_VERSION=22.14.0

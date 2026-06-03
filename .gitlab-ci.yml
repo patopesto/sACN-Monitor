@@ -140,7 +140,7 @@ build:
     - mv "bin/${PROJECT_NAME}-arm64-installer.exe" "bin/windows-arm64/${PACKAGE_NAME}-windows-arm64-installer.exe" 2>/dev/null || true
 
     # --- Linux amd64 ---
-    - wails3 package GOOS=linux GOARCH=amd64
+    - wails3 package -tags gtk3 GOOS=linux GOARCH=amd64
     - mkdir -p bin/linux-amd64
     - cp "bin/${PROJECT_NAME}" "bin/linux-amd64/sACN Monitor" 2>/dev/null || cp "bin/${PROJECT_NAME}-linux-amd64" "bin/linux-amd64/sACN Monitor" 2>/dev/null || true
     - mv bin/*.deb "bin/linux-amd64/" 2>/dev/null || true
@@ -149,7 +149,7 @@ build:
     - mv bin/*.pkg.tar.zst "bin/linux-amd64/" 2>/dev/null || true
 
     # --- Linux arm64 ---
-    - wails3 package GOOS=linux GOARCH=arm64
+    - wails3 package -tags gtk3 GOOS=linux GOARCH=arm64
     - mkdir -p bin/linux-arm64
     - cp "bin/${PROJECT_NAME}" "bin/linux-arm64/sACN Monitor" 2>/dev/null || cp "bin/${PROJECT_NAME}-linux-arm64" "bin/linux-arm64/sACN Monitor" 2>/dev/null || true
     - mv bin/*.deb "bin/linux-arm64/" 2>/dev/null || true
