@@ -213,7 +213,7 @@ release:
   needs:
     - job: build
       artifacts: true
-    - job: upload-artifacts
+    - job: upload
       artifacts: false
   variables:
     GIT_DEPTH: 0
