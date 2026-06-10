@@ -25,6 +25,7 @@ tasks:
           DEV: '{{.DEV}}'
           EXTRA_TAGS: '{{.EXTRA_TAGS}}'
     vars:
+      ARCH: '{{.ARCH}}'
       # Default to CGO_ENABLED=0 if not explicitly set
       CGO_ENABLED: '{{.CGO_ENABLED | default "0"}}'
 
@@ -89,10 +90,22 @@ tasks:
     cmds:
       - task: '{{if eq (.FORMAT | default "nsis") "msix"}}create:msix:package{{else}}create:nsis:installer{{end}}'
         vars:
+          ARCH: '{{.ARCH}}'
           INSTALL_SCOPE: '{{.INSTALL_SCOPE | default "machine"}}'
     vars:
       FORMAT: '{{.FORMAT | default "nsis"}}'
       INSTALL_SCOPE: '{{.INSTALL_SCOPE | default "machine"}}'
+
+  release:collect:
+    summary: Collect Windows release artifacts
+    cmds:
+      - mkdir -p '{{.RELEASE_DIR}}/{{.PLATFORM}}'
+      - cp 'bin/{{.APP_NAME}}.exe' '{{.RELEASE_DIR}}/{{.PLATFORM}}/' 2>/dev/null || cp 'bin/{{.APP_NAME}}-windows-{{.ARCH}}.exe' '{{.RELEASE_DIR}}/{{.PLATFORM}}/' 2>/dev/null || true
+      - |
+        installer="build/windows/nsis/{{.APP_NAME}}-installer.exe"
+        if [ -f "$installer" ]; then
+          mv "$installer" '{{.RELEASE_DIR}}/{{.PLATFORM}}/{{.PACKAGE_NAME}}-{{.PLATFORM}}-installer.exe'
+        fi
 
   generate:syso:
     summary: Generates Windows `.syso` file
@@ -107,6 +120,8 @@ tasks:
     dir: build/windows/nsis
     deps:
       - task: build
+        vars:
+          ARCH: '{{.ARCH}}'
     preconditions:
       - sh: '[ "{{.INSTALL_SCOPE}}" = "user" ] || [ "{{.INSTALL_SCOPE}}" = "machine" ]'
         msg: "INSTALL_SCOPE must be 'user' or 'machine', got '{{.INSTALL_SCOPE}}'"
@@ -128,6 +143,8 @@ tasks:
     summary: Creates an MSIX package
     deps:
       - task: build
+        vars:
+          ARCH: '{{.ARCH}}'
     cmds:
       - |-
         wails3 tool msix \

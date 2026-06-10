@@ -28,6 +28,7 @@ tasks:
           OUTPUT: '{{.OUTPUT}}'
           EXTRA_TAGS: '{{.EXTRA_TAGS}}'
     vars:
+      ARCH: '{{.ARCH}}'
       DEFAULT_OUTPUT: '{{.BIN_DIR}}/{{.APP_NAME}}'
       OUTPUT: '{{ .OUTPUT | default .DEFAULT_OUTPUT }}'
       # Determine target architecture (defaults to host ARCH if not specified)
@@ -93,17 +94,31 @@ tasks:
     summary: Packages the application for Linux
     deps:
       - task: build
+        vars:
+          ARCH: '{{.ARCH}}'
     cmds:
       - task: create:appimage
       - task: create:deb
       - task: create:rpm
       - task: create:aur
 
+  release:collect:
+    summary: Collect Linux release artifacts
+    cmds:
+      - mkdir -p '{{.RELEASE_DIR}}/{{.PLATFORM}}'
+      - cp 'bin/{{.APP_NAME}}' '{{.RELEASE_DIR}}/{{.PLATFORM}}/' 2>/dev/null || cp 'bin/{{.APP_NAME}}-linux-{{.ARCH}}' '{{.RELEASE_DIR}}/{{.PLATFORM}}/' 2>/dev/null || true
+      - mv bin/*.deb      '{{.RELEASE_DIR}}/{{.PLATFORM}}/' 2>/dev/null || true
+      - mv bin/*.rpm      '{{.RELEASE_DIR}}/{{.PLATFORM}}/' 2>/dev/null || true
+      - mv bin/*.AppImage '{{.RELEASE_DIR}}/{{.PLATFORM}}/' 2>/dev/null || true
+      - mv bin/*.pkg.tar.zst '{{.RELEASE_DIR}}/{{.PLATFORM}}/' 2>/dev/null || true
+
   create:appimage:
     summary: Creates an AppImage
     dir: build/linux/appimage
     deps:
       - task: build
+        vars:
+          ARCH: '{{.ARCH}}'
       - task: generate:dotdesktop
     cmds:
       - cp "{{.APP_BINARY}}" "{{.APP_NAME}}"
@@ -120,6 +135,8 @@ tasks:
     summary: Creates a deb package
     deps:
       - task: build
+        vars:
+          ARCH: '{{.ARCH}}'
     cmds:
       - task: generate:dotdesktop
       - task: generate:deb
@@ -128,6 +145,8 @@ tasks:
     summary: Creates a rpm package
     deps:
       - task: build
+        vars:
+          ARCH: '{{.ARCH}}'
     cmds:
       - task: generate:dotdesktop
       - task: generate:rpm
@@ -136,6 +155,8 @@ tasks:
     summary: Creates a arch linux packager package
     deps:
       - task: build
+        vars:
+          ARCH: '{{.ARCH}}'
     cmds:
       - task: generate:dotdesktop
       - task: generate:aur

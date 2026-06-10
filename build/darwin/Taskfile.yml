@@ -23,6 +23,7 @@ tasks:
           OUTPUT: '{{.OUTPUT}}'
           EXTRA_TAGS: '{{.EXTRA_TAGS}}'
     vars:
+      ARCH: '{{.ARCH}}'
       DEFAULT_OUTPUT: '{{.BIN_DIR}}/{{.APP_NAME}}'
       OUTPUT: '{{ .OUTPUT | default .DEFAULT_OUTPUT }}'
 
@@ -112,6 +113,8 @@ tasks:
     summary: Packages the application into a `.app` bundle
     deps:
       - task: build
+        vars:
+          ARCH: '{{.ARCH}}'
     cmds:
       - task: create:app:bundle
 
@@ -122,6 +125,11 @@ tasks:
     cmds:
       - task: create:app:bundle
 
+  release:collect:
+    summary: Collect macOS release artifacts
+    cmds:
+      - mkdir -p '{{.RELEASE_DIR}}/{{.PLATFORM}}'
+      - cp -r 'bin/{{.APP_NAME}}.app' '{{.RELEASE_DIR}}/{{.PLATFORM}}/'
 
   create:app:bundle:
     summary: Creates an `.app` bundle

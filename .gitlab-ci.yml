@@ -70,9 +70,9 @@ build-ci-image:
     - docker push ${CI_BUILD_IMAGE}
 
 # ===================================================================
-# BUILD + PACKAGE: Windows & Linux (single job, CI build image)
+# BUILD + PACKAGE: All platforms (single job, CI build image)
 # ===================================================================
-# All four targets build in one job so that frontend deps, bindings,
+# All targets build in one job so that frontend deps, bindings,
 # and icons are built only once. Task's timestamp-based dependency
 # caching skips the shared steps after the first build.
 # ===================================================================
@@ -104,69 +104,10 @@ build:
     - docker tag ${WAILS_CROSS_IMAGE} wails-cross
   script:
     - wails3 doctor
-
-    # --- Darwin amd64 ---
-    - export GOOS=darwin
-    - export GOARCH=amd64
-    - wails3 package
-    - mkdir -p bin/${GOOS}-${GOARCH}
-    - cp -r "bin/${PROJECT_NAME}.app" "bin/${GOOS}-${GOARCH}/"
-    - tar -czf "bin/${GOOS}-${GOARCH}/${PACKAGE_NAME}-${GOOS}-${GOARCH}.app.tar.gz" -C bin "${PROJECT_NAME}.app"
-
-    # --- Darwin arm64 ---
-    - export GOARCH=arm64
-    - wails3 package
-    - mkdir -p bin/${GOOS}-${GOARCH}
-    - cp -r "bin/${PROJECT_NAME}.app" "bin/${GOOS}-${GOARCH}/"
-    - tar -czf "bin/${GOOS}-${GOARCH}/${PACKAGE_NAME}-${GOOS}-${GOARCH}.app.tar.gz" -C bin "${PROJECT_NAME}.app"
-
-    # --- Windows amd64 ---
-    - export GOOS=windows
-    - export GOARCH=amd64
-    - wails3 package
-    - mkdir -p bin/${GOOS}-${GOARCH}
-    - cp "bin/${PROJECT_NAME}.exe" "bin/${GOOS}-${GOARCH}/" 2>/dev/null || cp "bin/${PROJECT_NAME}-${GOOS}-${GOARCH}.exe" "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
-    - mv "bin/${PROJECT_NAME}-${GOARCH}-installer.exe" "bin/${GOOS}-${GOARCH}/${PACKAGE_NAME}-${GOOS}-${GOARCH}-installer.exe" 2>/dev/null || true
-
-    # --- Windows arm64 ---
-    - export GOARCH=arm64
-    - wails3 package
-    - mkdir -p bin/${GOOS}-${GOARCH}
-    - cp "bin/${PROJECT_NAME}.exe" "bin/${GOOS}-${GOARCH}/" 2>/dev/null || cp "bin/${PROJECT_NAME}-${GOOS}-${GOARCH}.exe" "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
-    - mv "bin/${PROJECT_NAME}-${GOARCH}-installer.exe" "bin/${GOOS}-${GOARCH}/${PACKAGE_NAME}-${GOOS}-${GOARCH}-installer.exe" 2>/dev/null || true
-
-    # --- Linux amd64 ---
-    # - export GOOS=linux
-    # - export GOARCH=amd64
-    # - wails3 build -tags gtk3
-    # - wails3 package EXTRA_TAGS=gtk3
-    # - mkdir -p bin/${GOOS}-${GOARCH}
-    # - cp "bin/${PROJECT_NAME}" "bin/${GOOS}-${GOARCH}/" 2>/dev/null || cp "bin/${PROJECT_NAME}-${GOOS}-${GOARCH}" "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
-    # - mv bin/*.deb "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
-    # - mv bin/*.rpm "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
-    # - mv bin/*.AppImage "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
-    # - mv bin/*.pkg.tar.zst "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
-
-    # # --- Linux arm64 ---
-    # - export GOARCH=arm64
-    # - wails3 build -tags gtk3
-    # - wails3 package EXTRA_TAGS=gtk3
-    # - mkdir -p bin/${GOOS}-${GOARCH}
-    # - cp "bin/${PROJECT_NAME}" "bin/${GOOS}-${GOARCH}/" 2>/dev/null || cp "bin/${PROJECT_NAME}-${GOOS}-${GOARCH}" "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
-    # - mv bin/*.deb "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
-    # - mv bin/*.rpm "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
-    # - mv bin/*.AppImage "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
-    # - mv bin/*.pkg.tar.zst "bin/${GOOS}-${GOARCH}/" 2>/dev/null || true
-
-
+    - wails3 task release:all VERSION="${CI_COMMIT_TAG#v}"
   artifacts:
     paths:
-      - bin/darwin-amd64/
-      - bin/darwin-arm64/
-      - bin/windows-amd64/
-      - bin/windows-arm64/
-      # - bin/linux-amd64/
-      # - bin/linux-arm64/
+      - dist/
     expire_in: 1 day
 
 # ===================================================================
@@ -175,7 +116,7 @@ build:
 
 upload:
   stage: release
-  image: alpine
+  image: alpine:3.24.0
   tags:
     - docker
   rules:
@@ -187,12 +128,12 @@ upload:
     - apk add --no-cache curl
   script:
     - |
-      echo "Uploading artifacts to Package Registry..."
-      find bin/ -type f -print0 | while IFS= read -r -d '' file; do
-        filename=$(basename "$file")
+      for archive in dist/*.tar.gz; do
+        [ -f "$archive" ] || continue
+        filename=$(basename "$archive")
         echo "  -> ${filename}"
         curl --fail --location --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
-          --upload-file "${file}" \
+          --upload-file "${archive}" \
           "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/sacn-monitor/${CI_COMMIT_TAG}/${filename}"
       done
 
@@ -229,16 +170,16 @@ release:
         description="Release ${CI_COMMIT_TAG}"
       fi
       echo "DESCRIPTION=${description}" >> release.env
-    # --- Build release-cli --assets-link flags ---
+    # --- Build release-cli --assets-link flags for platform archives ---
     - |
-      links_file="release-links.txt"
-      : > "${links_file}"
-      find bin/ -type f -print0 | while IFS= read -r -d '' file; do
-        filename=$(basename "$file")
+      : > release-links.txt
+      for archive in dist/*.tar.gz; do
+        [ -f "$archive" ] || continue
+        filename=$(basename "$archive")
         url="${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/sacn-monitor/${CI_COMMIT_TAG}/${filename}"
         name_json=$(echo "$filename" | jq -Rs . | sed 's/^"//;s/"$//')
         url_json=$(echo "$url" | jq -Rs . | sed 's/^"//;s/"$//')
-        echo "--assets-link={\"name\":\"${name_json}\",\"url\":\"${url_json}\"}" >> "${links_file}"
+        echo "--assets-link={\"name\":\"${name_json}\",\"url\":\"${url_json}\"}" >> release-links.txt
       done
     # --- Create the GitLab release using release-cli ---
     - |

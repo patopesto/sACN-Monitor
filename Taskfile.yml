@@ -10,6 +10,9 @@ includes:
 vars:
   APP_NAME: "sACN Monitor"
   BIN_DIR: "bin"
+  PACKAGE_NAME: "sACN-Monitor"
+  RELEASE_DIR: "dist"
+  VERSION: "dev"
   PACKAGE_MANAGER: '{{.PACKAGE_MANAGER | default "pnpm"}}'
   VITE_PORT: '{{.WAILS_VITE_PORT | default 9245}}'
 
@@ -103,3 +106,49 @@ tasks:
     cmds:
       - rm -rf {{.BIN_DIR}}
       - task: frontend:clean
+
+  release:
+    summary: Build and archive a single platform
+    vars:
+      GOOS: '{{.GOOS | default OS}}'
+      GOARCH: '{{.GOARCH | default ARCH}}'
+      PLATFORM: '{{.GOOS}}-{{.GOARCH}}'
+    cmds:
+      - task: '{{.GOOS}}:package'
+        vars:
+          ARCH: '{{.GOARCH}}'
+      - task: '{{.GOOS}}:release:collect'
+        vars:
+          ARCH: '{{.GOARCH}}'
+          PLATFORM: '{{.PLATFORM}}'
+      - task: 'common:release:archive'
+        vars:
+          PLATFORM: '{{.PLATFORM}}'
+
+  release:all:
+    summary: Build and archive all release platforms
+    cmds:
+      - task: release
+        vars:
+          GOOS: darwin
+          GOARCH: amd64
+      - task: release
+        vars:
+          GOOS: darwin
+          GOARCH: arm64
+      - task: release
+        vars:
+          GOOS: windows
+          GOARCH: amd64
+      - task: release
+        vars:
+          GOOS: windows
+          GOARCH: arm64
+      # - task: release
+      #   vars:
+      #     GOOS: linux
+      #     GOARCH: amd64
+      # - task: release
+      #   vars:
+      #     GOOS: linux
+      #     GOARCH: arm64
