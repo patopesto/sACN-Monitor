@@ -183,12 +183,15 @@ release:
     # --- Create the GitLab release using release-cli ---
     - |
       echo "Creating GitLab release ${CI_COMMIT_TAG}..."
-      mapfile -t link_args < release-links.txt
+      set --
+      while IFS= read -r line; do
+        set -- "$@" "$line"
+      done < release-links.txt
       release-cli create \
         --name="sACN Monitor ${CI_COMMIT_TAG}" \
         --tag-name="${CI_COMMIT_TAG}" \
         --description="$(cat release-description.txt)" \
-        "${link_args[@]}"
+        "$@"
 
 # ===================================================================
 # PAGES: Documentation (Hugo site)
