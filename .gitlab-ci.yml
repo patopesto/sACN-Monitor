@@ -1,45 +1,17 @@
-# ===================================================================
-# sACN Monitor — GitLab CI
-# Wails v3 Cross-Platform Build & Package Pipeline
-# ===================================================================
-# Runners required:
-#   - macos  : macOS shell executor (for codesigning .app bundles)
-#   - docker : Ubuntu Docker executor (cross-compilation)
-#
-# This pipeline uses `wails3 build` and `wails3 package` directly.
-# Cross-compilation is handled automatically by the Wails task system.
-#
-# Architecture note: All non-macOS builds run in a single job on a CI
-# build image. The wails-cross image is built in the prepare stage and
-# is launched internally by `wails3 build` when cross-compilation is required.
-# macOS builds run in a separate job because they require a macOS runner.
-#
-# Triggers: Git tags only (build + release). Docs deploy on main.
-# ===================================================================
-
 stages:
   - prepare
   - build
   - release
 
 variables:
-  PROJECT_NAME: "sACN Monitor"
   PACKAGE_NAME: "sACN-Monitor"
-  GO_VERSION: "1.25"
   DOCKER_VERSION: "27.3.1"
   # Prevent Node OOM during frontend build
   NODE_OPTIONS: "--max-old-space-size=4096"
-  # Container Registry path for the cross-compilation image
   WAILS_CROSS_IMAGE: "${CI_REGISTRY_IMAGE}/wails-cross:latest"
-  # Container Registry path for the CI build environment image
   CI_BUILD_IMAGE: "${CI_REGISTRY_IMAGE}/builder:latest"
 
-# ===================================================================
-# PREPARE
-# ===================================================================
 
-# Build the wails-cross Docker image once and push it to the project
-# Container Registry so that `wails3 build` can launch it internally.
 build-wails-cross-image:
   stage: prepare
   tags:
@@ -54,8 +26,6 @@ build-wails-cross-image:
     - docker build --cache-from ${WAILS_CROSS_IMAGE} -t ${WAILS_CROSS_IMAGE} -f build/docker/Dockerfile.cross .
     - docker push ${WAILS_CROSS_IMAGE}
 
-# Build the CI environment image containing all host-side build tools.
-# This avoids reinstalling dependencies on every pipeline run.
 build-ci-image:
   stage: prepare
   tags:
@@ -69,13 +39,7 @@ build-ci-image:
     - docker build --cache-from ${CI_BUILD_IMAGE} --build-arg DOCKER_VERSION=${DOCKER_VERSION} -t ${CI_BUILD_IMAGE} -f build/docker/Dockerfile.ci .
     - docker push ${CI_BUILD_IMAGE}
 
-# ===================================================================
-# BUILD + PACKAGE: All platforms (single job, CI build image)
-# ===================================================================
-# All targets build in one job so that frontend deps, bindings,
-# and icons are built only once. Task's timestamp-based dependency
-# caching skips the shared steps after the first build.
-# ===================================================================
+
 
 build:
   stage: build
@@ -110,9 +74,7 @@ build:
       - dist/
     expire_in: 1 day
 
-# ===================================================================
-# RELEASE: Upload artifacts to Package Registry
-# ===================================================================
+
 
 upload:
   stage: release
@@ -137,12 +99,6 @@ upload:
           "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/sacn-monitor/${CI_COMMIT_TAG}/${filename}"
       done
 
-# ===================================================================
-# RELEASE: Create GitLab release using release-cli
-# ===================================================================
-# Uses GitLab's official release-cli as documented in GitLab CI docs.
-# Generates asset links from the uploaded artifacts and creates the release.
-# ===================================================================
 
 release:
   stage: release
@@ -175,7 +131,7 @@ release:
       for archive in dist/*.tar.gz; do
         [ -f "$archive" ] || continue
         filename=$(basename "$archive")
-        url="${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/sacn-monitor/${CI_COMMIT_TAG}/${filename}"
+        url="${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PACKAGE_NAME}/${CI_COMMIT_TAG}/${filename}"
         name_json=$(echo "$filename" | jq -Rs . | sed 's/^"//;s/"$//')
         url_json=$(echo "$url" | jq -Rs . | sed 's/^"//;s/"$//')
         echo "--assets-link={\"name\":\"${name_json}\",\"url\":\"${url_json}\"}" >> release-links.txt
@@ -193,9 +149,7 @@ release:
         --description="$(cat release-description.txt)" \
         "$@"
 
-# ===================================================================
-# PAGES: Documentation (Hugo site)
-# ===================================================================
+
 
 pages:
   stage: release
