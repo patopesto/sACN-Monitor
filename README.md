@@ -1,7 +1,7 @@
 # sACN Monitor
 
 <div align="center">
-	<img alt="Verion" src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fgitlab.com%2Fpatopest%2Fsacn-monitor%2F-%2Fraw%2Fmaster%2Fwails.json&query=version&prefix=v&style=for-the-badge&label=Latest&link=https%3A%2F%2Fgitlab.com%2Fpatopest%2Fsacn-monitor%2F-%2Freleases">
+	<img alt="Version" src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fgitlab.com%2Fpatopest%2Fsacn-monitor%2F-%2Fraw%2Fmaster%2Fwails.json&query=version&prefix=v&style=for-the-badge&label=Latest&link=https%3A%2F%2Fgitlab.com%2Fpatopest%2Fsacn-monitor%2F-%2Freleases">
 	<img alt="License" src="https://img.shields.io/badge/license-MIT-blue?style=for-the-badge">
 	<img alt="Platforms" src="https://img.shields.io/badge/platforms-macOS%20%7C%20Windows%20%7C%20Linux-blue?style=for-the-badge">
 

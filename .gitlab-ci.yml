@@ -144,7 +144,7 @@ release:
         set -- "$@" "$line"
       done < release-links.txt
       release-cli create \
-        --name="sACN Monitor ${CI_COMMIT_TAG}" \
+        --name="${CI_COMMIT_TAG}" \
         --tag-name="${CI_COMMIT_TAG}" \
         --description="$(cat release-description.txt)" \
         "$@"
