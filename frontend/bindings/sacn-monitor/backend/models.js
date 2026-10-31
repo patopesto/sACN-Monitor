@@ -6,10 +6,6 @@
 // @ts-ignore: Unused imports
 import { Create as $Create } from "@wailsio/runtime";
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore: Unused imports
-import * as time$0 from "../../time/models.js";
-
 export class NetInterface {
     /**
      * Creates a new NetInterface instance.
@@ -101,9 +97,9 @@ export class Universe {
         if (!("last_received" in $$source)) {
             /**
              * @member
-             * @type {time$0.Time}
+             * @type {Date}
              */
-            this["last_received"] = null;
+            this["last_received"] = new Date("0001-01-01T00:00:00.000Z");
         }
         if (!("fps" in $$source)) {
             /**
@@ -152,7 +148,11 @@ export class Universe {
      * @returns {Universe}
      */
     static createFrom($$source = {}) {
+        const $$createField4_0 = $Create.DateFromTime;
         let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
+        if ("last_received" in $$parsedSource) {
+            $$parsedSource["last_received"] = $$createField4_0($$parsedSource["last_received"]);
+        }
         return new Universe(/** @type {Partial<Universe>} */($$parsedSource));
     }
 }

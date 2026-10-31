@@ -1,7 +1,7 @@
 # CI Build Environment for sACN Monitor
 # Contains all host-side tools needed for wails3 build/package.
 # wails3 build internally launches the wails-cross image for actual compilation.
-FROM golang:1.25-bookworm
+FROM golang:1.26-trixie
 
 ARG TARGETARCH
 
@@ -16,13 +16,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     pkg-config \
     gcc \
     nsis
-# If running on debian13+ with GTK4.0
+# GTK4/WebKitGTK 6.0 is the default Linux backend; GTK3/WebKit2GTK 4.1 is the
+# legacy -tags gtk3 path.
 RUN apt-get install -y --no-install-recommends \
     libgtk-4-dev \
     libwebkitgtk-6.0-dev \
-    libgtk-4-1
-# If running on debian12 with GTK3.0
-RUN apt-get install -y --no-install-recommends \
+    libgtk-4-1 \
     libgtk-3-dev \
     libwebkit2gtk-4.1-dev
 RUN rm -rf /var/lib/apt/lists/*
@@ -36,7 +35,7 @@ RUN NODE_ARCH=$(case "${TARGETARCH}" in arm64) echo "arm64" ;; *) echo "x64" ;; 
 RUN npm install -g pnpm
 
 # Install Go-based build tools
-RUN go install github.com/wailsapp/wails/v3/cmd/wails3@latest
+RUN go install github.com/wailsapp/wails/v3/cmd/wails3@v3.0.0
 RUN go install github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
 
 # Install Docker CLI (static binary) so wails3 build can launch containers

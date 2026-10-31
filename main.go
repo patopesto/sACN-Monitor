@@ -38,13 +38,13 @@ func main() {
 		menu := app.NewMenu()
 
 		if runtime.GOOS == "darwin" {
-        	menu.AddRole(application.AppMenu)  // macOS only
-    	}
+			menu.AddRole(application.AppMenu) // macOS only
+		}
 
-    	// File: extend default menu
-    	menu.AddRole(application.FileMenu)
-    	fileMenu := menu.FindByRole(application.FileMenu).GetSubmenu()
-    	fileMenu.Add("New Window").
+		// File: extend default menu
+		menu.AddRole(application.FileMenu)
+		fileMenu := menu.FindByRole(application.FileMenu).GetSubmenu()
+		fileMenu.Add("New Window").
 			SetAccelerator("CmdOrCtrl+N").
 			OnClick(func(ctx *application.Context) {
 				appService.OpenNewWindow()
@@ -120,17 +120,17 @@ func main() {
 				}
 			})
 		viewMenu.AddSeparator()
-		
+
 		// Add other defaults
 		menu.AddRole(application.WindowMenu)
 
-    	// Help: custom menu
+		// Help: custom menu
 		helpMenu := menu.AddSubmenu("Help")
-    	helpMenu.Add("Learn More").OnClick(func(ctx *application.Context) {
+		helpMenu.Add("Learn More").OnClick(func(ctx *application.Context) {
 			err := app.Browser.OpenURL(url)
-	        if err != nil {
-	            log.Printf("Failed to open help url %v %v", url, err)
-	        }
+			if err != nil {
+				log.Printf("Failed to open help url %v %v", url, err)
+			}
 		})
 
 		app.Menu.Set(menu)
@@ -148,13 +148,13 @@ func main() {
 
 func createWindow(app *application.App) *application.WebviewWindow {
 	return app.Window.NewWithOptions(application.WebviewWindowOptions{
-		Title:  name,
-		Width:  1280,
-		Height: 720,
+		Title:              name,
+		Width:              1280,
+		Height:             720,
 		UseApplicationMenu: true,
-		BackgroundType: application.BackgroundTypeTranslucent,
+		BackgroundType:     application.BackgroundTypeTranslucent,
 		Mac: application.MacWindow{
-			Backdrop: application.MacBackdropTranslucent,
+			Backdrop:   application.MacBackdropTranslucent,
 			Appearance: application.NSAppearanceNameDarkAqua,
 		},
 		Windows: application.WindowsWindow{

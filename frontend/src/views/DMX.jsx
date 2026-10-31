@@ -474,7 +474,7 @@ function Stats() {
   const universeHex = () => universe() ? Number(universe().num).toString(16).toUpperCase() : "";
   const lastHeard = () => {
     if (!universe()) return "";
-    const parsed = Date.parse(universe().last_received);
+    const parsed = new Date(universe().last_received).getTime();
     if (Number.isNaN(parsed)) return "";
     const diff = Date.now() - parsed;
     return diff < UNIVERSE_TIMEOUT ? "Receiving" : "Timeout";

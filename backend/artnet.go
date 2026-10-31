@@ -14,8 +14,8 @@ import (
 )
 
 var (
-	artnetNodes     = make(map[string]string)
-	artnetNodesMu   sync.RWMutex
+	artnetNodes   = make(map[string]string)
+	artnetNodesMu sync.RWMutex
 )
 
 type artNetReceiver struct {
