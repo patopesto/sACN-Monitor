@@ -12,9 +12,9 @@ info:
   copyright: "© 2023-2026 Alban Moreon" # Copyright text
   comments: "Supports sACN and ArtNet" # Comments
   version: "1.5.0" # The application version
-  #cfBundleIconName: "appicon" # The macOS icon name in Assets.car icon bundles (optional)
-                                 # Should match the name of your .icon file without the extension
-                                 # If not set and Assets.car exists, defaults to "appicon"
+  cfBundleIconName: "appicon" # The macOS icon name in Assets.car icon bundles (optional)
+                              # Should match the name of your .icon file without the extension
+                              # If not set and Assets.car exists, defaults to "appicon"
 
 
 # Dev mode configuration

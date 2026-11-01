@@ -191,15 +191,21 @@ tasks:
       - wails3 generate bindings -f '{{.BUILD_FLAGS}}' -clean=true{{if not (and .UseInterfaces .Typescript)}} -time-type=Date{{end}}{{if eq .OBFUSCATED "true"}} -obfuscated{{end}}{{if .Typescript}} -ts{{end}}{{if and .UseInterfaces .Typescript}} -i{{end}}
 
   generate:icons:
-    summary: Generates Windows `.ico` and Mac `.icns` from an image
+    summary: Generates Windows `.ico`, Mac `.icns` and `Assets.car` from the Icon Composer source
     run: once
     dir: build
     sources:
       - "appicon.png"
+      - "appicon.icon/**"
     generates:
       - "darwin/icons.icns"
+      - "darwin/Assets.car"
       - "windows/icon.ico"
     cmds:
+      - cmd: |
+          if [ "$(uname -s)" = "Darwin" ] && [ "$(sw_vers -productVersion | cut -d. -f1)" -ge 26 ]; then
+            wails3 generate icons -input appicon.png -macfilename darwin/icons.icns -windowsfilename windows/icon.ico -iconcomposerinput appicon.icon -macassetdir darwin
+          fi
       - wails3 generate icons -input appicon.png -macfilename darwin/icons.icns -windowsfilename windows/icon.ico
 
   dev:frontend:
