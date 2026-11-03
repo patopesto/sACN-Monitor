@@ -6,27 +6,17 @@ variables:
   PACKAGE_NAME: "sACN-Monitor"
   # Prevent Node OOM during frontend build
   NODE_OPTIONS: "--max-old-space-size=4096"
-  GOCACHE: "$CI_PROJECT_DIR/.cache/go-build"
-  GOMODCACHE: "$CI_PROJECT_DIR/.cache/gomod"
 
-# Each platform builds on a native runner. The mac and windows jobs build both
-# architectures on one machine, so `task setup` and the frontend build run once
-# per platform and the second pass reuses them via Task's checksum markers.
 .build:
   stage: build
   rules:
     - if: $CI_COMMIT_TAG
   before_script:
     - task setup
-  cache:
-    key: ${CI_JOB_NAME}
-    paths:
-      - .cache/
   artifacts:
     paths:
       - dist/
     expire_in: 1 day
-
 
 build-macos:
   extends: .build
@@ -52,7 +42,6 @@ build-macos:
   after_script:
     - security lock-keychain "$APPLE_KEYCHAIN_NAME"
 
-
 build-windows:
   extends: .build
   tags:
@@ -62,7 +51,6 @@ build-windows:
     - wails3 task release GOOS=windows GOARCH=amd64 ARCH=amd64 VERSION="${CI_COMMIT_TAG#v}"
     - wails3 task release GOOS=windows GOARCH=arm64 ARCH=arm64 VERSION="${CI_COMMIT_TAG#v}"
 
-
 build-linux-amd64:
   extends: .build
   tags:
@@ -70,7 +58,6 @@ build-linux-amd64:
     - amd64
   script:
     - wails3 task release GOOS=linux GOARCH=amd64 ARCH=amd64 VERSION="${CI_COMMIT_TAG#v}"
-
 
 build-linux-arm64:
   extends: .build
@@ -109,7 +96,6 @@ upload:
           --upload-file "${archive}" \
           "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PACKAGE_NAME}/${CI_COMMIT_TAG}/${filename}"
       done
-
 
 release:
   stage: release

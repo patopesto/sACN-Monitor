@@ -16,21 +16,19 @@ vars:
 
 tasks:
   setup:
-    desc: Install the Windows build dependencies
+    desc: Setup the development environment for Windows
     cmds:
-      - task: setup:system-deps
       - go install github.com/wailsapp/wails/v3/cmd/wails3@{{.WAILS_VERSION}}
       - npm install -g pnpm@{{.PNPM_VERSION}}
 
   setup:system-deps:
-    desc: Install the Windows system build dependencies
-    preconditions:
-      - sh: winget --version
-        msg: "winget is required"
+    desc: Install the Windows build dependencies
     cmds:
       - winget install --exact --id GoLang.Go --silent --disable-interactivity --accept-package-agreements --accept-source-agreements
       - winget install --exact --id OpenJS.NodeJS.LTS --silent --disable-interactivity --accept-package-agreements --accept-source-agreements
       - winget install --exact --id NSIS.NSIS --silent --disable-interactivity --accept-package-agreements --accept-source-agreements
+    preconditions:
+      - winget --version
 
   build:
     summary: Builds the application for Windows
