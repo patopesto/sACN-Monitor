@@ -15,11 +15,20 @@ vars:
   VERSION: "dev"
   PACKAGE_MANAGER: '{{.PACKAGE_MANAGER | default "pnpm"}}'
   VITE_PORT: '{{.WAILS_VITE_PORT | default 9245}}'
+  GO_VERSION: "1.26.10"
+  NODE_VERSION: "22.14.0"
+  PNPM_VERSION: "11"
+  WAILS_VERSION: "v3.1.0"
   # Target OS for build/package/run. Defaults to the host OS, and is overridden
   # by `wails3 build GOOS=...` (or the GOOS env var) for cross-compilation.
   GOOS: '{{.GOOS | default OS}}'
 
 tasks:
+  setup:
+    desc: Install the build dependencies for the current platform
+    cmds:
+      - task: '{{OS}}:setup'
+
   # Wails tasks
   build:
     summary: Builds the application

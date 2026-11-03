@@ -7,8 +7,28 @@ vars:
   # Docker image for cross-compilation (used when building on non-macOS)
   CROSS_IMAGE: wails-cross
   EXTRA_TAGS: private_mac_apis
+  SIGN_IDENTITY: '{{.SIGN_IDENTITY | default "Developer ID Application: Alban Moreon (4HVZ49QS46)"}}'
 
 tasks:
+  setup:
+    desc: Install the macOS build dependencies
+    cmds:
+      - task: setup:system-deps
+      - go install github.com/wailsapp/wails/v3/cmd/wails3@{{.WAILS_VERSION}}
+
+  setup:system-deps:
+    desc: Install the macOS system build dependencies
+    preconditions:
+      - sh: brew --version
+        msg: "Homebrew is required: https://brew.sh"
+      - sh: xcode-select -p
+        msg: "Xcode Command Line Tools are required: xcode-select --install"
+    env:
+      HOMEBREW_NO_AUTO_UPDATE: 1
+      HOMEBREW_NO_INSTALL_CLEANUP: 1
+    cmds:
+      - brew install go node pnpm
+
   build:
     summary: Builds the application
     cmds:
@@ -121,6 +141,7 @@ tasks:
       - task: build
     cmds:
       - task: create:app:bundle
+      - task: package:dmg
 
   package:universal:
     summary: Packages darwin universal binary (arm64 + amd64)
@@ -134,13 +155,16 @@ tasks:
     cmds:
       - mkdir -p '{{.RELEASE_DIR}}/{{.PLATFORM}}'
       - cp -r 'bin/{{.APP_NAME}}.app' '{{.RELEASE_DIR}}/{{.PLATFORM}}/'
+      - cp 'bin/{{.APP_NAME}}.dmg' '{{.RELEASE_DIR}}/{{.PACKAGE_NAME}}-{{.VERSION}}-{{.PLATFORM}}.dmg' 2>/dev/null || true
 
   package:dmg:
-    summary: Packages the application into a styled `.dmg`
-    deps:
-      - task: package
+    desc: Signs the app and builds, signs and notarizes the `.dmg`
+    platforms: [darwin]
     cmds:
+      - task: sign
       - task: create:dmg
+      - task: sign:dmg
+      - task: sign:notarize
 
   create:dmg:
     summary: Creates a configurable `.dmg` from the `.app` bundle
@@ -215,23 +239,39 @@ tasks:
   sign:
     summary: Signs the application bundle with Developer ID
     desc: |
-      Signs the .app bundle for distribution.
-      Uses signing identity from `wails3 setup` (stored in ~/.config/wails/defaults.yaml).
-      Override with: task darwin:sign -- --identity "Developer ID Application: ..."
-    deps:
-      - task: package
+      Signs the .app bundle for distribution with SIGN_IDENTITY, which defaults
+      to the Developer ID certificate shared with the multiviewer project.
+    platforms: [darwin]
     cmds:
-      - wails3 tool sign --input "{{.BIN_DIR}}/{{.APP_NAME}}.app" {{.CLI_ARGS}}
+      - codesign --force --deep --options runtime --timestamp --sign "{{.SIGN_IDENTITY}}" "{{.BIN_DIR}}/{{.APP_NAME}}.app"
+      - codesign --verify --deep --strict "{{.BIN_DIR}}/{{.APP_NAME}}.app"
+
+  sign:dmg:
+    desc: Signs the `.dmg` with the Developer ID certificate
+    platforms: [darwin]
+    cmds:
+      - codesign --force --timestamp --sign "{{.SIGN_IDENTITY}}" "{{.BIN_DIR}}/{{.APP_NAME}}.dmg"
+      - codesign --verify --strict "{{.BIN_DIR}}/{{.APP_NAME}}.dmg"
 
   sign:notarize:
-    summary: Signs and notarizes the application bundle
-    desc: |
-      Signs the .app bundle and submits it for notarization.
-      Uses signing identity and keychain profile from `wails3 setup`.
-
-      First-time setup:
-        wails3 setup
-    deps:
-      - task: package
+    desc: Notarizes and staples the `.dmg`
+    platforms: [darwin]
     cmds:
-      - wails3 tool sign --input "{{.BIN_DIR}}/{{.APP_NAME}}.app" --notarize {{.CLI_ARGS}}
+      - |
+        set -e
+        dmg="{{.BIN_DIR}}/{{.APP_NAME}}.dmg"
+        if [ ! -f "$dmg" ]; then
+          echo "DMG not found: $dmg" >&2
+          exit 1
+        fi
+
+        if [ -n "${APPLE_KEYCHAIN_PROFILE:-}" ]; then
+          echo "Submitting $dmg for notarization (keychain profile)..."
+          xcrun notarytool submit "$dmg" --keychain-profile "$APPLE_KEYCHAIN_PROFILE" --wait
+        else
+          echo "Skipping notarization: APPLE_KEYCHAIN_PROFILE is not set" >&2
+          exit 0
+        fi
+
+        echo "Stapling notarization ticket to $dmg..."
+        xcrun stapler staple "$dmg"

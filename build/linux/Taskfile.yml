@@ -14,6 +14,33 @@ vars:
   CROSS_IMAGE: wails-cross
 
 tasks:
+  setup:
+    desc: Install the Linux build dependencies
+    cmds:
+      - task: setup:system-deps
+      - go install github.com/wailsapp/wails/v3/cmd/wails3@{{.WAILS_VERSION}}
+
+  setup:system-deps:
+    desc: Install the Debian system build dependencies
+    preconditions:
+      - sh: command -v apt-get
+        msg: "This task targets Debian/Ubuntu hosts"
+    cmds:
+      - sudo apt-get update -qq
+      - sudo apt-get install -y --no-install-recommends build-essential pkg-config libgtk-4-dev libwebkitgtk-6.0-dev curl xz-utils ca-certificates
+      # Debian's packaged Go is older than go.mod's requirement, so use the
+      # official tarball for the host architecture.
+      - |
+        set -e
+        arch=$(case "$(uname -m)" in aarch64|arm64) echo arm64 ;; *) echo amd64 ;; esac)
+        node_arch=$(case "$arch" in arm64) echo arm64 ;; *) echo x64 ;; esac)
+        curl -fsSL "https://go.dev/dl/go{{.GO_VERSION}}.linux-${arch}.tar.gz" | sudo tar -C /usr/local -xz
+        curl -fsSL "https://nodejs.org/dist/v{{.NODE_VERSION}}/node-v{{.NODE_VERSION}}-linux-${node_arch}.tar.xz" | sudo tar -C /usr/local --strip-components=1 -xJ
+        # The tarball installs under /usr/local/go/bin, which is not on PATH.
+        sudo ln -sf /usr/local/go/bin/go /usr/local/bin/go
+        sudo ln -sf /usr/local/go/bin/gofmt /usr/local/bin/gofmt
+      - sudo npm install -g pnpm@{{.PNPM_VERSION}}
+
   build:
     summary: Builds the application for Linux
     cmds:
@@ -162,16 +189,23 @@ tasks:
 
   generate:deb:
     summary: Creates a deb package
+    # nfpm expands ${GOARCH} from the environment (see build/linux/nfpm/nfpm.yaml).
+    env:
+      GOARCH: '{{.ARCH | default ARCH}}'
     cmds:
       - wails3 tool package -name "{{.APP_NAME}}" -format deb -config ./build/linux/nfpm/nfpm.yaml -out {{.ROOT_DIR}}/bin
 
   generate:rpm:
     summary: Creates a rpm package
+    env:
+      GOARCH: '{{.ARCH | default ARCH}}'
     cmds:
       - wails3 tool package -name "{{.APP_NAME}}" -format rpm -config ./build/linux/nfpm/nfpm.yaml -out {{.ROOT_DIR}}/bin
 
   generate:aur:
     summary: Creates a arch linux packager package
+    env:
+      GOARCH: '{{.ARCH | default ARCH}}'
     cmds:
       - wails3 tool package -name "{{.APP_NAME}}" -format archlinux -config ./build/linux/nfpm/nfpm.yaml -out {{.ROOT_DIR}}/bin
 

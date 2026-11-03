@@ -1,79 +1,84 @@
 stages:
-  - prepare
   - build
   - release
 
 variables:
   PACKAGE_NAME: "sACN-Monitor"
-  DOCKER_VERSION: "27.3.1"
   # Prevent Node OOM during frontend build
   NODE_OPTIONS: "--max-old-space-size=4096"
-  WAILS_CROSS_IMAGE: "${CI_REGISTRY_IMAGE}/wails-cross:latest"
-  CI_BUILD_IMAGE: "${CI_REGISTRY_IMAGE}/builder:latest"
+  GOCACHE: "$CI_PROJECT_DIR/.cache/go-build"
+  GOMODCACHE: "$CI_PROJECT_DIR/.cache/gomod"
 
-
-build-wails-cross-image:
-  stage: prepare
-  tags:
-    - shell
-    - linux
-  rules:
-    - if: $CI_COMMIT_TAG
-  script:
-    - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
-    # Pull existing image to prime layer cache (no-op if absent)
-    - docker pull ${WAILS_CROSS_IMAGE} || true
-    - docker build --cache-from ${WAILS_CROSS_IMAGE} -t ${WAILS_CROSS_IMAGE} -f build/docker/Dockerfile.cross .
-    - docker push ${WAILS_CROSS_IMAGE}
-
-build-ci-image:
-  stage: prepare
-  tags:
-    - shell
-    - linux
-  rules:
-    - if: $CI_COMMIT_TAG
-  script:
-    - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
-    - docker pull ${CI_BUILD_IMAGE} || true
-    - docker build --cache-from ${CI_BUILD_IMAGE} --build-arg DOCKER_VERSION=${DOCKER_VERSION} -t ${CI_BUILD_IMAGE} -f build/docker/Dockerfile.ci .
-    - docker push ${CI_BUILD_IMAGE}
-
-
-
-build:
+# Each platform builds on a native runner. The mac and windows jobs build both
+# architectures on one machine, so `task setup` and the frontend build run once
+# per platform and the second pass reuses them via Task's checksum markers.
+.build:
   stage: build
-  image: ${CI_BUILD_IMAGE}
-  services:
-    - docker:dind
-  variables:
-    DOCKER_HOST: tcp://docker:2376
-    DOCKER_TLS_CERTDIR: "/certs"
-    DOCKER_CERT_PATH: "/certs/client"
-    DOCKER_TLS_VERIFY: 1
-  tags:
-    - docker-builder
   rules:
     - if: $CI_COMMIT_TAG
-  needs:
-    - job: build-ci-image
-      artifacts: false
-    - job: build-wails-cross-image
-      artifacts: false
   before_script:
-    # Ensure the wails-cross image is available in the Docker daemon
-    # for wails3 build's internal docker usage.
-    - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
-    - docker pull ${WAILS_CROSS_IMAGE} || true
-    - docker tag ${WAILS_CROSS_IMAGE} wails-cross
-  script:
-    - wails3 doctor
-    - wails3 task release:all VERSION="${CI_COMMIT_TAG#v}"
+    - task setup
+  cache:
+    key: ${CI_JOB_NAME}
+    paths:
+      - .cache/
   artifacts:
     paths:
       - dist/
     expire_in: 1 day
 
+
+build-macos:
+  extends: .build
+  tags:
+    - macos
+    - arm64
+  variables:
+    # Notary credentials live in the keychain profile; no secrets are passed to
+    # notarytool here. Reuses the profile already provisioned for multiviewer.
+    APPLE_KEYCHAIN_PROFILE: "multiviewer-notary"
+  before_script:
+    - !reference [.build, before_script]
+    - security unlock-keychain -p "$APPLE_KEYCHAIN_PWD" "$APPLE_KEYCHAIN_NAME"
+    - security set-keychain-settings -u "$APPLE_KEYCHAIN_NAME" # Prevents auto-locks
+    - security list-keychains -d user -s "$APPLE_KEYCHAIN_NAME" $(security list-keychains -d user | xargs) # Add keychain to user search path
+    - > # Authorise codesign and apple tools to use the content of the keychain
+      security set-key-partition-list -S apple-tool:,codesign: -s -k "$APPLE_KEYCHAIN_PWD" "$APPLE_KEYCHAIN_NAME"
+  script:
+    - wails3 task release GOOS=darwin GOARCH=amd64 ARCH=amd64 VERSION="${CI_COMMIT_TAG#v}"
+    - xcrun stapler validate "dist/${PACKAGE_NAME}-${CI_COMMIT_TAG#v}-darwin-amd64.dmg"
+    - wails3 task release GOOS=darwin GOARCH=arm64 ARCH=arm64 VERSION="${CI_COMMIT_TAG#v}"
+    - xcrun stapler validate "dist/${PACKAGE_NAME}-${CI_COMMIT_TAG#v}-darwin-arm64.dmg"
+  after_script:
+    - security lock-keychain "$APPLE_KEYCHAIN_NAME"
+
+
+build-windows:
+  extends: .build
+  tags:
+    - windows
+    - amd64
+  script:
+    - wails3 task release GOOS=windows GOARCH=amd64 ARCH=amd64 VERSION="${CI_COMMIT_TAG#v}"
+    - wails3 task release GOOS=windows GOARCH=arm64 ARCH=arm64 VERSION="${CI_COMMIT_TAG#v}"
+
+
+build-linux-amd64:
+  extends: .build
+  tags:
+    - linux
+    - amd64
+  script:
+    - wails3 task release GOOS=linux GOARCH=amd64 ARCH=amd64 VERSION="${CI_COMMIT_TAG#v}"
+
+
+build-linux-arm64:
+  extends: .build
+  tags:
+    - linux
+    - arm64
+  script:
+    - wails3 task release GOOS=linux GOARCH=arm64 ARCH=arm64 VERSION="${CI_COMMIT_TAG#v}"
 
 
 upload:
@@ -84,13 +89,19 @@ upload:
   rules:
     - if: $CI_COMMIT_TAG
   needs:
-    - job: build
+    - job: build-macos
+      artifacts: true
+    - job: build-windows
+      artifacts: true
+    - job: build-linux-amd64
+      artifacts: true
+    - job: build-linux-arm64
       artifacts: true
   before_script:
     - apk add --no-cache curl
   script:
     - |
-      for archive in dist/*.tar.gz; do
+      for archive in dist/*.tar.gz dist/*.dmg; do
         [ -f "$archive" ] || continue
         filename=$(basename "$archive")
         echo "  -> ${filename}"
@@ -108,7 +119,13 @@ release:
   rules:
     - if: $CI_COMMIT_TAG
   needs:
-    - job: build
+    - job: build-macos
+      artifacts: true
+    - job: build-windows
+      artifacts: true
+    - job: build-linux-amd64
+      artifacts: true
+    - job: build-linux-arm64
       artifacts: true
     - job: upload
       artifacts: false
@@ -128,7 +145,7 @@ release:
     # --- Build release-cli --assets-link flags for platform archives ---
     - |
       : > release-links.txt
-      for archive in dist/*.tar.gz; do
+      for archive in dist/*.tar.gz dist/*.dmg; do
         [ -f "$archive" ] || continue
         filename=$(basename "$archive")
         url="${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PACKAGE_NAME}/${CI_COMMIT_TAG}/${filename}"
@@ -148,7 +165,6 @@ release:
         --tag-name="${CI_COMMIT_TAG}" \
         --description="$(cat release-description.txt)" \
         "$@"
-
 
 
 pages:
