@@ -18,7 +18,7 @@ tasks:
     desc: Setup the development environment for Linux
     cmds:
       - go install github.com/wailsapp/wails/v3/cmd/wails3@{{.WAILS_VERSION}}
-      - npm install -g pnpm@{{.PNPM_VERSION}}
+      - npm install -g --prefix "$HOME/.local" pnpm@{{.PNPM_VERSION}}
 
   setup:system-deps:
     desc: Install the Linux build dependencies

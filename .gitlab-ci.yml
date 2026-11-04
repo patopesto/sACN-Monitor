@@ -25,6 +25,12 @@ variables:
     - export PATH="$HOME/.local/bin:$HOME/go/bin:$PATH"
     - task setup
 
+.build-windows:
+  extends: .build
+  before_script:
+    - export PATH="/c/Program Files (x86)/NSIS:/c/Program Files/NSIS:$PATH"
+    - task setup
+
 build-macos:
   extends: .build
   tags:
@@ -50,7 +56,7 @@ build-macos:
     - security lock-keychain "$APPLE_KEYCHAIN_NAME"
 
 build-windows:
-  extends: .build
+  extends: .build-windows
   tags:
     - windows
     - amd64
