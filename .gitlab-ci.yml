@@ -7,6 +7,7 @@ variables:
   # Prevent Node OOM during frontend build
   NODE_OPTIONS: "--max-old-space-size=4096"
 
+
 .build:
   stage: build
   rules:
@@ -17,6 +18,12 @@ variables:
     paths:
       - dist/
     expire_in: 1 day
+
+.build-linux:
+  extends: .build
+  before_script:
+    - export PATH="$HOME/.local/bin:$HOME/go/bin:$PATH"
+    - task setup
 
 build-macos:
   extends: .build
@@ -52,7 +59,7 @@ build-windows:
     - wails3 task release GOOS=windows GOARCH=arm64 ARCH=arm64 VERSION="${CI_COMMIT_TAG#v}"
 
 build-linux-amd64:
-  extends: .build
+  extends: .build-linux
   tags:
     - linux
     - amd64
@@ -60,7 +67,7 @@ build-linux-amd64:
     - wails3 task release GOOS=linux GOARCH=amd64 ARCH=amd64 VERSION="${CI_COMMIT_TAG#v}"
 
 build-linux-arm64:
-  extends: .build
+  extends: .build-linux
   tags:
     - linux
     - arm64

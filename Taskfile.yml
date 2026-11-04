@@ -15,7 +15,7 @@ vars:
   VERSION: "dev"
   PACKAGE_MANAGER: '{{.PACKAGE_MANAGER | default "pnpm"}}'
   VITE_PORT: '{{.WAILS_VITE_PORT | default 9245}}'
-  PNPM_VERSION: "11"
+  PNPM_VERSION: "12"
   WAILS_VERSION: "v3.1.0"
   GOOS: '{{.GOOS | default OS}}'
 

@@ -14,14 +14,13 @@ tasks:
     desc: Setup the development environment for macOS
     cmds:
       - go install github.com/wailsapp/wails/v3/cmd/wails3@{{.WAILS_VERSION}}
-      - npm install -g pnpm@{{.PNPM_VERSION}}
 
   setup:system-deps:
     desc: Install the macOS build dependencies
     env:
       HOMEBREW_NO_AUTO_UPDATE: 1
     cmds:
-      - brew install go node
+      - brew install go node pnpm
     preconditions:
       - brew --version
 
