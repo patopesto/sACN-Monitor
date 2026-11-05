@@ -28,7 +28,7 @@ variables:
 .build-windows:
   extends: .build
   before_script:
-    - export PATH="/c/Program Files (x86)/NSIS:/c/Program Files/NSIS:$PATH"
+    - '$env:Path = "C:\Program Files (x86)\NSIS;C:\Program Files\Git\usr\bin;$env:Path"'
     - task setup
 
 build-macos:

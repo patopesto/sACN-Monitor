@@ -3,7 +3,7 @@
 #
 # The lines below are called `modelines`. See `:help modeline`
 
-name: "sACN Monitor"
+name: "sACN-Monitor"
 arch: ${GOARCH}
 platform: "linux"
 version: "1.5.0"
