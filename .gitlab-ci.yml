@@ -42,11 +42,12 @@ build-macos:
     APPLE_KEYCHAIN_PROFILE: "multiviewer-notary"
   before_script:
     - !reference [.build, before_script]
+    # Setup the signing keychain
     - security unlock-keychain -p "$APPLE_KEYCHAIN_PWD" "$APPLE_KEYCHAIN_NAME"
     - security set-keychain-settings -u "$APPLE_KEYCHAIN_NAME" # Prevents auto-locks
     - security list-keychains -d user -s "$APPLE_KEYCHAIN_NAME" $(security list-keychains -d user | xargs) # Add keychain to user search path
     - > # Authorise codesign and apple tools to use the content of the keychain
-      security set-key-partition-list -S apple-tool:,codesign: -s -k "$APPLE_KEYCHAIN_PWD" "$APPLE_KEYCHAIN_NAME"
+      security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$APPLE_KEYCHAIN_PWD" "$APPLE_KEYCHAIN_NAME"
   script:
     - wails3 task release GOOS=darwin GOARCH=amd64 ARCH=amd64 VERSION="${CI_COMMIT_TAG#v}"
     - xcrun stapler validate "dist/${PACKAGE_NAME}-${CI_COMMIT_TAG#v}-darwin-amd64.dmg"
