@@ -39,6 +39,8 @@
 		<string>12.0.0</string>
 		<key>NSHighResolutionCapable</key>
 		<string>true</string>
+		<key>NSLocalNetworkUsageDescription</key>
+		<string>sACN Monitor receives sACN and ArtNet DMX data on your local network.</string>
 		<key>NSHumanReadableCopyright</key>
 		<string>© 2023-2026 Alban Moreon</string>
 	</dict>
