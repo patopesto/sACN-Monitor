@@ -14,7 +14,7 @@
     !define INFO_PRODUCTNAME "sACN Monitor"
 !endif
 !ifndef INFO_PRODUCTVERSION
-    !define INFO_PRODUCTVERSION "1.5.0"
+    !define INFO_PRODUCTVERSION "2.0.0"
 !endif
 !ifndef INFO_COPYRIGHT
     !define INFO_COPYRIGHT "© 2023-2026 Alban Moreon"

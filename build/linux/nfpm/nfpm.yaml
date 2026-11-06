@@ -6,7 +6,7 @@
 name: "sACN-Monitor"
 arch: ${GOARCH}
 platform: "linux"
-version: "1.5.0"
+version: "2.0.0"
 section: "default"
 priority: "extra"
 maintainer: "Alban Moreon <alban.moreon@protonmail.com>"

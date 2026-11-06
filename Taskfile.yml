@@ -12,7 +12,7 @@ vars:
   BIN_DIR: "bin"
   PACKAGE_NAME: "sACN-Monitor"
   RELEASE_DIR: "dist"
-  APP_VERSION: "1.5.0"
+  APP_VERSION: "2.0.0"
   VERSION: '{{.VERSION | default .APP_VERSION}}'
   PACKAGE_MANAGER: '{{.PACKAGE_MANAGER | default "pnpm"}}'
   VITE_PORT: '{{.WAILS_VITE_PORT | default 9245}}'

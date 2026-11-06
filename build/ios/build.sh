@@ -4,8 +4,8 @@ set -e
 # Build configuration
 APP_NAME="sACN Monitor"
 BUNDLE_ID="net.bambinito.sacn-monitor"
-VERSION="1.5.0"
-BUILD_NUMBER="1.5.0"
+VERSION="2.0.0"
+BUILD_NUMBER="2.0.0"
 BUILD_DIR="build/ios"
 TARGET="simulator"
 

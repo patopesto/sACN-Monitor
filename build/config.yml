@@ -11,7 +11,7 @@ info:
   description: "An App to view sACN (ANSI E1.31) DMX data" # The application description
   copyright: "© 2023-2026 Alban Moreon" # Copyright text
   comments: "Supports sACN and ArtNet" # Comments
-  version: "1.5.0" # The application version
+  version: "2.0.0" # The application version
   cfBundleIconName: "appicon" # The macOS icon name in Assets.car icon bundles (optional)
                               # Should match the name of your .icon file without the extension
                               # If not set and Assets.car exists, defaults to "appicon"

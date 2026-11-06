@@ -1,10 +1,10 @@
 {
 	"fixed": {
-		"file_version": "1.5.0"
+		"file_version": "2.0.0"
 	},
 	"info": {
 		"0409": {
-			"ProductVersion": "1.5.0",
+			"ProductVersion": "2.0.0",
 			"CompanyName": "Alban Moreon",
 			"FileDescription": "An App to view sACN (ANSI E1.31) DMX data",
 			"LegalCopyright": "© 2023-2026 Alban Moreon",
