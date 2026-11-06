@@ -12,7 +12,8 @@ vars:
   BIN_DIR: "bin"
   PACKAGE_NAME: "sACN-Monitor"
   RELEASE_DIR: "dist"
-  VERSION: "dev"
+  APP_VERSION: "1.5.0"
+  VERSION: '{{.VERSION | default .APP_VERSION}}'
   PACKAGE_MANAGER: '{{.PACKAGE_MANAGER | default "pnpm"}}'
   VITE_PORT: '{{.WAILS_VITE_PORT | default 9245}}'
   PNPM_VERSION: "12"
@@ -90,6 +91,92 @@ tasks:
       - task: build:generator
       - ./{{.BIN_DIR}}/generate_dmx {{.CLI_ARGS}}
 
+  version:set:
+    desc: Set the app version in Taskfile.yml and all build assets
+    platforms: [darwin, linux]
+    silent: true
+    vars:
+      NEW_VERSION: '{{.VERSION | default .APP_VERSION}}'
+    cmds:
+      - |
+        set -eu
+        new="{{.NEW_VERSION}}"
+        new="${new#v}"
+        if ! printf '%s\n' "$new" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+([-+][0-9A-Za-z.-]+)*$'; then
+          echo "Invalid version: $new (expected x.y.z)"
+          exit 1
+        fi
+        old="{{.APP_VERSION}}"
+        # Token boundaries keep 2.0.0 from rewriting 12.0.0 (LSMinimumSystemVersion).
+        escaped=$(printf '%s' "$old" | sed 's/\./\\./g; s/\+/\\+/g')
+        sed -E -i.bak "s/^  APP_VERSION: \"$escaped\"$/  APP_VERSION: \"$new\"/" Taskfile.yml
+        rm -f Taskfile.yml.bak
+        for file in \
+          build/config.yml \
+          build/darwin/Info.plist \
+          build/darwin/Info.dev.plist \
+          build/ios/Info.plist \
+          build/ios/Info.dev.plist \
+          build/ios/build.sh \
+          build/linux/nfpm/nfpm.yaml \
+          build/windows/info.json \
+          build/windows/nsis/wails_tools.nsh \
+          build/windows/wails.exe.manifest; do
+          sed -E -i.bak "s/(^|[^0-9A-Za-z.+-])$escaped(-dev)?([^0-9A-Za-z.+-]|$)/\1$new\2\3/g" "$file"
+          rm -f "$file.bak"
+        done
+        echo "Updated app version: $old -> $new"
+      - task: version:check
+        vars:
+          EXPECTED_VERSION: '{{.NEW_VERSION | default .APP_VERSION}}'
+
+  version:check:
+    desc: Verify versions are consistent
+    platforms: [darwin, linux]
+    silent: true
+    vars:
+      EXPECTED_VERSION: '{{.EXPECTED_VERSION | default .VERSION}}'
+    cmds:
+      - |
+        set -eu
+        version="{{.EXPECTED_VERSION}}"
+        version="${version#v}"
+        if [ -z "$version" ]; then
+          echo "APP_VERSION is empty"
+          exit 1
+        fi
+        # Token boundaries keep 2.0.0 from matching 12.0.0 (LSMinimumSystemVersion).
+        escaped=$(printf '%s' "$version" | sed 's/\./\\./g; s/\+/\\+/g')
+        fail=0
+        source_version=$(sed -n 's/^  APP_VERSION: "\([^"]*\)"$/\1/p' Taskfile.yml)
+        if [ "$source_version" != "$version" ]; then
+          echo "Mismatch: Taskfile.yml APP_VERSION=$source_version, expected $version"
+          fail=1
+        fi
+        check() {
+          file=$1
+          want=$2
+          actual=$(grep -E -c "(^|[^0-9A-Za-z.+-])$escaped(-dev)?([^0-9A-Za-z.+-]|$)" "$file" || true)
+          if [ "$actual" != "$want" ]; then
+            echo "❌ Mismatch: $file has $actual occurrence(s) of $version, expected $want"
+            fail=1
+          fi
+        }
+        check build/config.yml 1
+        check build/darwin/Info.plist 2
+        check build/darwin/Info.dev.plist 2
+        check build/ios/Info.plist 2
+        check build/ios/Info.dev.plist 2
+        check build/ios/build.sh 2
+        check build/linux/nfpm/nfpm.yaml 1
+        check build/windows/info.json 2
+        check build/windows/nsis/wails_tools.nsh 1
+        check build/windows/wails.exe.manifest 1
+        if [ "$fail" -ne 0 ]; then
+          exit 1
+        fi
+        echo "✅ All build assets at version $version"
+
   check:
     desc: Clean, tidy and audit
     cmds:
@@ -98,6 +185,7 @@ tasks:
       - task: common:go:mod:tidy
       - go run golang.org/x/vuln/cmd/govulncheck@latest -show verbose ./...
       - task: frontend:check
+      - task: version:check
 
   fmt:
     desc: Run Formatting
@@ -127,6 +215,7 @@ tasks:
       GOARCH: '{{.GOARCH | default ARCH}}'
       PLATFORM: '{{.GOOS}}-{{.GOARCH}}'
     cmds:
+      - task: version:check
       - task: '{{.GOOS}}:package'
         vars:
           ARCH: '{{.GOARCH}}'
