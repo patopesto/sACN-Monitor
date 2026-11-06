@@ -19,6 +19,8 @@ vars:
   PNPM_VERSION: "12"
   WAILS_VERSION: "v3.1.0"
   GOOS: '{{.GOOS | default OS}}'
+  GOARCH: '{{.GOARCH | default ARCH}}'
+  DIST_NAME: '{{.PACKAGE_NAME}}_v{{.VERSION}}_{{.GOOS}}_{{.GOARCH}}'
 
 tasks:
   setup:
@@ -209,11 +211,13 @@ tasks:
       - task: frontend:clean
 
   release:
-    summary: Build and archive a single platform
+    summary: Build and collect a single platform's installers
     vars:
       GOOS: '{{.GOOS | default OS}}'
       GOARCH: '{{.GOARCH | default ARCH}}'
-      PLATFORM: '{{.GOOS}}-{{.GOARCH}}'
+    preconditions:
+      - sh: test -n '{{.VERSION}}'
+        msg: "VERSION is empty; pass VERSION=x.y.z or set APP_VERSION in Taskfile.yml"
     cmds:
       - task: version:check
       - task: '{{.GOOS}}:package'
@@ -222,7 +226,3 @@ tasks:
       - task: '{{.GOOS}}:release:collect'
         vars:
           ARCH: '{{.GOARCH}}'
-          PLATFORM: '{{.PLATFORM}}'
-      - task: 'common:release:archive'
-        vars:
-          PLATFORM: '{{.PLATFORM}}'

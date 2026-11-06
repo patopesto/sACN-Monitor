@@ -342,11 +342,6 @@ tasks:
       - sh: docker info > /dev/null 2>&1
         msg: "Docker is required. Please install Docker first."
 
-  release:archive:
-    summary: Archive release artifacts into a tar.gz
-    cmds:
-      - tar -czf '{{.RELEASE_DIR}}/{{.PACKAGE_NAME}}-{{.VERSION}}-{{.PLATFORM}}.tar.gz' -C '{{.RELEASE_DIR}}/{{.PLATFORM}}' .
-
   ios:device:list:
     summary: Lists connected iOS devices (UDIDs)
     cmds:

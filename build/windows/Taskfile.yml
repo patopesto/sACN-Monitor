@@ -122,13 +122,8 @@ tasks:
   release:collect:
     summary: Collect Windows release artifacts
     cmds:
-      - mkdir -p '{{.RELEASE_DIR}}/{{.PLATFORM}}'
-      - cp 'bin/{{.APP_NAME}}.exe' '{{.RELEASE_DIR}}/{{.PLATFORM}}/' 2>/dev/null || cp 'bin/{{.APP_NAME}}-windows-{{.ARCH}}.exe' '{{.RELEASE_DIR}}/{{.PLATFORM}}/' 2>/dev/null || true
-      - |
-        installer="build/windows/nsis/{{.APP_NAME}}-installer.exe"
-        if [ -f "$installer" ]; then
-          mv "$installer" '{{.RELEASE_DIR}}/{{.PLATFORM}}/{{.PACKAGE_NAME}}-{{.PLATFORM}}-installer.exe'
-        fi
+      - mkdir -p '{{.RELEASE_DIR}}'
+      - cp 'bin/{{.APP_NAME}}-{{.ARCH}}-installer.exe' '{{.RELEASE_DIR}}/{{.DIST_NAME}}-setup.exe'
 
   generate:syso:
     summary: Generates Windows `.syso` file

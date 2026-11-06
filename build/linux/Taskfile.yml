@@ -127,12 +127,11 @@ tasks:
   release:collect:
     summary: Collect Linux release artifacts
     cmds:
-      - mkdir -p '{{.RELEASE_DIR}}/{{.PLATFORM}}'
-      - cp 'bin/{{.APP_NAME}}' '{{.RELEASE_DIR}}/{{.PLATFORM}}/' 2>/dev/null || cp 'bin/{{.APP_NAME}}-linux-{{.ARCH}}' '{{.RELEASE_DIR}}/{{.PLATFORM}}/' 2>/dev/null || true
-      - mv bin/*.deb      '{{.RELEASE_DIR}}/{{.PLATFORM}}/' 2>/dev/null || true
-      - mv bin/*.rpm      '{{.RELEASE_DIR}}/{{.PLATFORM}}/' 2>/dev/null || true
-      - mv bin/*.AppImage '{{.RELEASE_DIR}}/{{.PLATFORM}}/' 2>/dev/null || true
-      - mv bin/*.pkg.tar.zst '{{.RELEASE_DIR}}/{{.PLATFORM}}/' 2>/dev/null || true
+      - mkdir -p '{{.RELEASE_DIR}}'
+      - cp bin/*.deb '{{.RELEASE_DIR}}/{{.DIST_NAME}}.deb'
+      - cp bin/*.rpm '{{.RELEASE_DIR}}/{{.DIST_NAME}}.rpm'
+      - cp bin/*.AppImage '{{.RELEASE_DIR}}/{{.DIST_NAME}}.AppImage'
+      - cp bin/*.pkg.tar.zst '{{.RELEASE_DIR}}/{{.DIST_NAME}}.pkg.tar.zst'
 
   create:appimage:
     summary: Creates an AppImage

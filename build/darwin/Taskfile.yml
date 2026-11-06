@@ -148,9 +148,8 @@ tasks:
   release:collect:
     summary: Collect macOS release artifacts
     cmds:
-      - mkdir -p '{{.RELEASE_DIR}}/{{.PLATFORM}}'
-      - cp -r 'bin/{{.APP_NAME}}.app' '{{.RELEASE_DIR}}/{{.PLATFORM}}/'
-      - cp 'bin/{{.APP_NAME}}.dmg' '{{.RELEASE_DIR}}/{{.PACKAGE_NAME}}-{{.VERSION}}-{{.PLATFORM}}.dmg' 2>/dev/null || true
+      - mkdir -p '{{.RELEASE_DIR}}'
+      - cp 'bin/{{.APP_NAME}}.dmg' '{{.RELEASE_DIR}}/{{.DIST_NAME}}.dmg'
 
   package:dmg:
     desc: Signs the app and builds, signs and notarizes the `.dmg`

@@ -62,8 +62,8 @@ build-windows:
     - windows
     - amd64
   script:
-    - wails3 task release GOOS=windows GOARCH=amd64 ARCH=amd64 VERSION="${CI_COMMIT_TAG#v}"
-    - wails3 task release GOOS=windows GOARCH=arm64 ARCH=arm64 VERSION="${CI_COMMIT_TAG#v}"
+    - wails3 task release GOOS=windows GOARCH=amd64 ARCH=amd64 VERSION=$($env:CI_COMMIT_TAG -replace '^v','')
+    - wails3 task release GOOS=windows GOARCH=arm64 ARCH=arm64 VERSION=$($env:CI_COMMIT_TAG -replace '^v','')
 
 build-linux-amd64:
   extends: .build-linux
@@ -102,7 +102,7 @@ upload:
     - apk add --no-cache curl
   script:
     - |
-      for archive in dist/*.tar.gz dist/*.dmg; do
+      for archive in dist/*; do
         [ -f "$archive" ] || continue
         filename=$(basename "$archive")
         echo "  -> ${filename}"
@@ -142,15 +142,15 @@ release:
       else
         echo "Release ${CI_COMMIT_TAG}" > release-description.txt
       fi
-    # --- Build release-cli --assets-link flags for platform archives ---
+    # --- Build release-cli --assets-link flags for installers ---
     - |
       : > release-links.txt
-      for archive in dist/*.tar.gz dist/*.dmg; do
+      for archive in dist/*; do
         [ -f "$archive" ] || continue
         filename=$(basename "$archive")
         url="${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PACKAGE_NAME}/${CI_COMMIT_TAG}/${filename}"
-        name_json=$(echo "$filename" | jq -Rs . | sed 's/^"//;s/"$//')
-        url_json=$(echo "$url" | jq -Rs . | sed 's/^"//;s/"$//')
+        name_json=$(printf '%s' "$filename" | jq -Rs . | sed 's/^"//;s/"$//')
+        url_json=$(printf '%s' "$url" | jq -Rs . | sed 's/^"//;s/"$//')
         echo "--assets-link={\"name\":\"${name_json}\",\"url\":\"${url_json}\"}" >> release-links.txt
       done
     # --- Create the GitLab release using release-cli ---
