@@ -50,9 +50,13 @@ build-macos:
       security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$APPLE_KEYCHAIN_PWD" "$APPLE_KEYCHAIN_NAME"
   script:
     - wails3 task release GOOS=darwin GOARCH=amd64 ARCH=amd64 VERSION="${CI_COMMIT_TAG#v}"
-    - xcrun stapler validate "dist/${PACKAGE_NAME}-${CI_COMMIT_TAG#v}-darwin-amd64.dmg"
     - wails3 task release GOOS=darwin GOARCH=arm64 ARCH=arm64 VERSION="${CI_COMMIT_TAG#v}"
-    - xcrun stapler validate "dist/${PACKAGE_NAME}-${CI_COMMIT_TAG#v}-darwin-arm64.dmg"
+    # stapler validate takes a single path, so loop over the collected dmgs.
+    - |
+      set -e
+      for dmg in dist/*.dmg; do
+        xcrun stapler validate "$dmg"
+      done
   after_script:
     - security lock-keychain "$APPLE_KEYCHAIN_NAME"
 
