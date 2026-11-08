@@ -1,5 +1,6 @@
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
+import theme from '@patopest/astro-theme/integration';
 import { realpathSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { createRequire } from 'node:module';
@@ -12,7 +13,7 @@ const themeDir = realpathSync(dirname(require.resolve('@patopest/astro-theme/pac
 
 export default defineConfig({
   site: 'https://sacn-monitor.bambinito.net',
-  integrations: [mdx()],
+  integrations: [mdx(), theme({ exclude: ['/faq/'] })],
   vite: {
     ssr: { noExternal: ['@patopest/astro-theme'] },
     server: { fs: { allow: [siteRoot, themeDir] } },
