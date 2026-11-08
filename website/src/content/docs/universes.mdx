@@ -1,0 +1,61 @@
+---
+title: Universes
+description: How sACN Monitor discovers universes, adds them manually, and reports their state.
+lead: What each row in the universe list represents, and why a universe might be missing.
+order: 2
+---
+
+## One row per source
+
+The universe list is keyed by protocol, universe number and sender address. If two consoles send the
+same universe, the list shows two rows with different sender addresses and lets you inspect each stream
+separately. In **Both** mode every row carries an sACN or ArtNet badge.
+
+Universes are sorted by number. The sender address is the IP the packets came from, not the configured
+source name.
+
+## sACN discovery
+
+sACN sources announce the universes they transmit on the standard universe discovery group. sACN Monitor
+joins that group, subscribes to every advertised universe, and then receives the DMX data on the
+universe's own multicast address.
+
+Discovery is part of ANSI E1.31, but not every implementation sends it. If a source is transmitting and
+nothing appears, add the universe manually.
+
+## Add an sACN universe manually
+
+Click the **+** button in the bottom right corner of the Universes column, or press `Cmd/Ctrl+U`. Enter a
+universe number between 1 and 63999 and confirm. The app joins that multicast group and starts listening
+immediately.
+
+The universe appears as soon as a packet arrives. Manual adds apply to sACN only; ArtNet is not
+subscription based.
+
+## ArtNet
+
+The app listens to port 6454 on the selected interface and decodes every ArtDMX packet it can see,
+whether the sender used unicast, multicast or broadcast. ArtPollReply packets provide the node's long
+name, which then appears as the **Source Name** in the statistics.
+
+No manual step is needed, but the packets must arrive on the selected interface's subnet.
+
+## Reception statistics
+
+Selecting a universe fills the right column with:
+
+- **Universe** and **Universe Hex**: decimal and hexadecimal number.
+- **Sender**: IP address of the source.
+- **Source Name**: the sACN source name or the ArtNet node's long name, when the source provides one.
+- **Status**: **Receiving** while packets arrive, **Timeout** after about 2.5 seconds of silence.
+- **Mode**: how the packets are addressed: Unicast, Multicast or Broadcast.
+- **FPS**: packets per second, smoothed over recent packets.
+- **Priority** and **Sync Address**: sACN only. ArtNet has no equivalent fields.
+
+Below the separator, **Selected Channel** and **Selected Value** follow the channel you last clicked in
+the grid.
+
+## Reload the list
+
+**File > Reload Universes** (`Cmd/Ctrl+R`) clears the list. Universes reappear as new packets arrive, or
+on the next discovery announcement. It does not change the selected interface or the protocol filter.

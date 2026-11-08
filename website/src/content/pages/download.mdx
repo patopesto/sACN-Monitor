@@ -1,0 +1,35 @@
+---
+title: Download
+description: Download the latest version of sACN Monitor for macOS, Windows and Linux.
+---
+
+import DownloadGrid from '@patopest/astro-theme/components/DownloadGrid.astro';
+import { project } from '../../project';
+
+<div class="container prose section">
+
+# Download sACN Monitor
+
+sACN Monitor is free and open source. Pick the build for your platform.
+
+</div>
+
+<DownloadGrid project={project} />
+
+<div class="container prose section">
+
+## Platform requirements
+
+- **macOS**: Apple Silicon or Intel, macOS 12 or later. The `.dmg` is signed and notarized.
+- **Windows**: Windows 10 or later, amd64 or arm64.
+- **Linux**: amd64 or arm64, as AppImage, `.deb`, `.rpm` or an Arch package.
+
+## Homebrew
+
+On macOS you can install and update with Homebrew:
+
+```bash
+brew install patopesto/tap/sacn-monitor
+```
+
+</div>

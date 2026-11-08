@@ -1,0 +1,57 @@
+---
+title: FAQ
+description: Common questions about sACN, ArtNet and sACN Monitor.
+lead: Short answers to the questions that come up most often.
+order: 5
+---
+
+## What is sACN?
+
+sACN, or Streaming ACN, carries DMX512-A packets over UDP on an IP network. Each universe is sent to its
+own multicast group. It is defined by the [ANSI E1.31](https://tsp.esta.org/tsp/documents/docs/ANSI_E1-31-2018.pdf)
+standard.
+
+## What is ArtNet?
+
+ArtNet is a royalty-free protocol from Artistic Licence that also carries DMX512-A over UDP, normally on
+port 6454. It uses a Net and SubUni addressing scheme instead of a single universe number. The
+[Art-Net 4 specification](https://artisticlicence.com/WebSiteMaster/User%20Guides/art-net.pdf) is
+available from Artistic Licence.
+
+## A universe does not show up, but a source is sending it
+
+The app uses the sACN universe discovery mechanism to find universes. Any source that follows the
+standard advertises its universes, but not every implementation does. Add the universe manually with the
+**+** button in the Universes column, or with `Cmd/Ctrl+U`.
+
+Before that, check the protocol filter and the selected interface. A console sending ArtNet will not
+appear while the filter is set to sACN.
+
+## Why are there two rows for the same universe?
+
+The list is keyed by sender as well as universe. Two consoles sending the same universe produce two rows,
+which lets you compare their streams, priorities and FPS side by side.
+
+## Why did the list clear when I changed interfaces?
+
+Switching interfaces restarts both receivers on the new network card and resets the universe list.
+Universes return as packets arrive. Manual sACN adds are re-joined automatically.
+
+## Why is there no priority on an ArtNet universe?
+
+Priority and sync address are sACN fields. Art-Net has no equivalent, so the app hides those rows for
+ArtNet universes.
+
+## The app cannot see any traffic on macOS
+
+Allow **Local Network** access for sACN Monitor under System Settings > Privacy & Security > Local
+Network. Without it macOS blocks the multicast and broadcast traffic the app depends on.
+
+## Does the app send DMX?
+
+No. sACN Monitor is receive-only. It never transmits on the show network.
+
+## Which platforms are supported?
+
+macOS 12 or later (Apple Silicon and Intel), Windows 10 or later (amd64 and arm64), and Linux (amd64 and
+arm64). See the [download page](/download/).

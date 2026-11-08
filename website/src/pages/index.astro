@@ -1,0 +1,14 @@
+---
+import { getEntry, render } from 'astro:content';
+import MarketingLayout from '@patopest/astro-theme/layouts/MarketingLayout.astro';
+import { project } from '../project';
+
+const entry = await getEntry('pages', 'index');
+if (!entry) {
+  throw new Error('Missing src/content/pages/index.mdx');
+}
+const { Content } = await render(entry);
+---
+<MarketingLayout config={project} description={entry.data.description}>
+  <Content />
+</MarketingLayout>

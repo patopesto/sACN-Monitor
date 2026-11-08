@@ -1,0 +1,23 @@
+{
+  "name": "sacn-monitor-website",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.10.1",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^8.0.3",
+    "@patopest/astro-theme": "git+https://gitlab.com/patopest/astro-theme.git#510979074cb13e2c2ed0ed470b655fa66d51e70c",
+    "astro": "7.3.8",
+    "sharp": "^0.35.5"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.10",
+    "typescript": "^6.0.3"
+  }
+}

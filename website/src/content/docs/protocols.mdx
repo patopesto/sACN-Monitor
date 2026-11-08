@@ -1,0 +1,68 @@
+---
+title: Protocols
+description: How sACN and ArtNet differ, and what sACN Monitor does with each.
+lead: Two ways to carry DMX over IP, and the fields each one exposes.
+order: 4
+---
+
+## At a glance
+
+| | sACN | ArtNet |
+|---|---|---|
+| Standard | ANSI E1.31 | Art-Net 4, Artistic Licence |
+| Transport | UDP multicast per universe | UDP 6454, unicast, multicast or broadcast |
+| Universe range | 1 to 63999 | Net and SubUni, combined by the app |
+| Discovery | Universe discovery group | Passive; ArtPollReply names the node |
+| Priority | 8-bit priority | None |
+| Source name | Yes | Node long name, when reported |
+| Sync | Sync address | None |
+
+## sACN
+
+Streaming ACN carries DMX512-A over IP. Every universe is sent to its own IPv4 multicast group, and
+receivers subscribe to the groups they care about.
+
+sACN Monitor:
+
+- joins the universe discovery group and subscribes to every universe a source advertises;
+- decodes the DMX data, source name, priority and sync address from each packet;
+- reports the reception mode (unicast or multicast) as **Mode**.
+
+A source that does not implement discovery must be added manually. See [Universes](/docs/universes/).
+
+The specification is [ANSI E1.31](https://tsp.esta.org/tsp/documents/docs/ANSI_E1-31-2018.pdf).
+
+## ArtNet
+
+Art-Net is a royalty-free protocol from Artistic Licence. It also carries DMX512-A over UDP, normally on
+port 6454, but addresses universes with a Net number and a SubUni number.
+
+sACN Monitor:
+
+- listens passively on port 6454 for ArtDMX packets;
+- combines Net and SubUni into a single universe number in the list;
+- listens for ArtPollReply packets to learn each node's long name;
+- reports whether the packet was sent to a unicast address, a multicast group or the broadcast address.
+
+Art-Net has no priority or sync address, so those rows are hidden when an ArtNet universe is selected.
+
+The specification is [Art-Net 4](https://artisticlicence.com/WebSiteMaster/User%20Guides/art-net.pdf).
+
+## Interface selection
+
+Both receivers bind to the interface selected in the app. Only IPv4 interfaces that are up, support
+multicast and are not loopback or point-to-point appear in the list.
+
+Changing the interface stops both receivers, clears the universe list, and starts them again on the new
+interface. Manually added sACN universes are joined again automatically. The app keeps no state between
+selected interfaces beyond that.
+
+## Firewall
+
+The app only receives, and only needs inbound traffic:
+
+- UDP 5568 for sACN, plus the multicast group for each universe;
+- UDP 6454 for ArtNet.
+
+On macOS, the system's **Local Network** permission must be granted for the app, otherwise the operating
+system drops the packets before the app sees them.

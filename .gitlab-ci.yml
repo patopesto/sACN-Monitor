@@ -1,6 +1,7 @@
 stages:
   - build
   - release
+  - deploy
 
 variables:
   PACKAGE_NAME: "sACN-Monitor"
@@ -172,20 +173,32 @@ release:
 
 
 pages:
-  stage: release
-  image:
-    name: floryn90/hugo:0.123.8-ext-alpine
-    entrypoint: [""]
+  stage: deploy
+  image: node:lts-alpine
   tags:
     - docker
+  needs: []
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - website/**/*
+    - if: $CI_PIPELINE_SOURCE == "web"
+  cache:
+    key:
+      files:
+        - website/pnpm-lock.yaml
+    paths:
+      - .pnpm-store
   before_script:
-    - corepack enable
-    - corepack prepare pnpm@latest-11 --activate
-    - cd ./docs && pnpm install --frozen-lockfile
+    - npm install --global pnpm@12.10.1
+    - pnpm config set store-dir "$CI_PROJECT_DIR/.pnpm-store"
   script:
-    - hugo
+    - cd website
+    - pnpm install --frozen-lockfile
+    - pnpm run build
   artifacts:
     paths:
-      - public
+      - website/dist
+    expire_in: 1 day
+  pages:
+    publish: website/dist

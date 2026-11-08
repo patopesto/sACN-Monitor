@@ -6,6 +6,9 @@ includes:
   darwin: ./build/darwin/Taskfile.yml
   linux: ./build/linux/Taskfile.yml
   frontend: ./frontend/Taskfile.yml
+  website:
+    taskfile: ./website/Taskfile.yml
+    dir: ./website
 
 vars:
   APP_NAME: "sACN Monitor"

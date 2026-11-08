@@ -1,0 +1,48 @@
+version: '3'
+
+vars:
+  # Local astro-theme checkout used by `link`; override with THEME_DIR=...
+  THEME_DIR: '$HOME/Documents/web/astro-theme'
+
+tasks:
+  install:
+    desc: Install website dependencies
+    cmds:
+      - pnpm install
+
+  run:
+    desc: Start the Astro dev server
+    cmds:
+      - pnpm run dev
+
+  build:
+    desc: Build the static site into dist/
+    cmds:
+      - pnpm run build
+
+  preview:
+    desc: Serve the built site locally
+    cmds:
+      - pnpm run preview
+
+  check:
+    desc: Type-check pages, components and content
+    cmds:
+      - pnpm run check
+
+  clean:
+    desc: Remove build output and the Astro cache
+    cmds:
+      - rm -rf dist .astro
+
+  link:
+    desc: Use the local astro-theme checkout instead of the pinned git version
+    cmds:
+      - pnpm --dir "{{.THEME_DIR}}" install
+      - pnpm link "{{.THEME_DIR}}"
+
+  unlink:
+    desc: Restore the pinned astro-theme git version
+    cmds:
+      - pnpm unlink "@patopest/astro-theme"
+      - pnpm install
