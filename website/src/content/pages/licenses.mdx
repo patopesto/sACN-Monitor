@@ -1,0 +1,41 @@
+---
+title: Licenses
+description: sACN Monitor's license, plus the sACN and Art-Net protocol notices.
+---
+
+import AppLicense from '@patopest/astro-theme/components/AppLicense.astro';
+import license from '../../../../LICENSE?raw';
+
+<div class="container prose section">
+
+# Licenses
+
+sACN Monitor is released under the MIT License. The protocols it implements carry their own notices, reproduced below.
+
+## sACN Monitor
+
+<AppLicense text={license} />
+
+## Protocol notices
+
+### sACN
+
+sACN is defined by ANSI E1.31-2018, *Entertainment Technology - Lightweight streaming protocol for transport of DMX512 using ACN*, published by ESTA.
+
+> Copyright © 2018 ESTA 630 Ninth Avenue, Suite 609 New York, NY 10036, USA. All rights reserved.
+
+sACN Monitor is an independent implementation of the standard and is not certified or endorsed by ESTA.
+
+[ANSI E1.31-2018](https://tsp.esta.org/tsp/documents/docs/E1-31-2018.pdf)
+
+### Art-Net
+
+> Art-Net™ Designed by and Copyright Artistic Licence Holdings Ltd.
+
+> Art-Net™ is a trade mark of Artistic Licence Holdings Ltd. The Art-Net protocol and associated documentation is copyright Artistic Licence Holdings Ltd. Any third parties are welcome to use this communication protocol without royalty.
+
+sACN Monitor is not affiliated with or endorsed by Artistic Licence Holdings Ltd.
+
+[Art-Net specification](https://art-net.org.uk/)
+
+</div>

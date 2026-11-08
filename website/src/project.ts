@@ -49,7 +49,7 @@ export const project: ProjectConfig = {
       links: [
         { label: 'Source code', href: repository },
         { label: 'Report an issue', href: `${repository}/-/issues` },
-        { label: 'License', href: `${repository}/-/blob/master/LICENSE` },
+        { label: 'Licenses', href: '/licenses/' },
       ],
     },
   ],
