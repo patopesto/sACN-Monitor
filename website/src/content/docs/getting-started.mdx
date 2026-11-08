@@ -11,25 +11,22 @@ Download the build for your platform from the [download page](/download/) and op
 
 ## Open the app
 
-On first launch, sACN Monitor lists the usable IPv4 interfaces and activates the first one. The
-**Interfaces** control in the right column shows which one is active; pick another if the show traffic
-arrives on a different card.
+On first launch, sACN Monitor lists the usable IPv4 interfaces and activates the first one.  
+The **Interfaces** control in the right column shows which one is active. Pick another if the show traffic arrives on a different card.
 
-Changing the interface restarts both receivers and clears the universe list. That is expected: the app
-starts listening again from scratch on the new card.
+Changing the interface restarts both receivers and clears the universe list. The app starts listening again from scratch on the new card.
 
-On macOS, allow **Local Network** access when the system asks. Without that permission the app receives
-nothing. It can be changed later under System Settings > Privacy & Security > Local Network.
+On macOS, allow **Local Network** access when the system asks. Without that permission the app receives nothing.
+It can be changed later under System Settings > Privacy & Security > Local Network.
 
 ## Get a signal on screen
 
 1. Make sure the console, node or media server sends sACN or ArtNet on the same network.
 2. Watch the **Universes** column. Any source that is sending shows up on its own.
-3. Select a universe. The centre column fills with its 512 channels and the right column shows the
-   sender and reception statistics.
+3. Select a universe. The centre column fills with its 512 channels and the right column shows the sender and reception statistics.
 
 If the list stays empty, check the [protocol filter](#switch-between-protocols), the selected interface,
-and the firewall. A source that does not implement sACN discovery has to be [added manually](/docs/universes/#add-an-sacn-universe-manually).
+and the firewall. A source that does not implement sACN discovery has to be [joined manually](/docs/universes/#add-an-sacn-universe-manually).
 
 ## Switch between protocols
 
@@ -37,7 +34,7 @@ The segmented control at the top of the right column filters the list:
 
 - **sACN** shows only sACN universes.
 - **ArtNet** shows only ArtNet universes.
-- **Both** shows everything and labels each row with the protocol it arrived on.
+- **Both** shows all universes and labels each row with the protocol it arrived on.
 
 The keyboard shortcuts are `Cmd/Ctrl+1`, `Cmd/Ctrl+2` and `Cmd/Ctrl+3`.
 

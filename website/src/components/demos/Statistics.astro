@@ -1,0 +1,40 @@
+<figure class="mock mock--stats" data-demo="statistics" aria-hidden="true">
+  <div class="stats-panel">
+    <div class="stats">
+      <div class="stat"><span>Universe</span><b>13</b></div>
+      <div class="stat"><span>Universe Hex</span><b>D</b></div>
+      <div class="stat"><span>Sender</span><b>192.168.1.40</b></div>
+      <div class="stat"><span>Source Name</span><b>grandMA3</b></div>
+      <div class="stat" data-st-row="status"><span>Status</span><b data-st="status">Receiving</b></div>
+      <div class="stat"><span>Mode</span><b>Multicast</b></div>
+      <div class="stat"><span>FPS</span><b data-st="fps">44</b></div>
+      <div class="stat"><span>Priority</span><b>100</b></div>
+      <div class="stat stat--sep"><span>Selected Channel</span><b>100</b></div>
+      <div class="stat"><span>Selected Value</span><b>237 (93%)</b></div>
+    </div>
+  </div>
+</figure>
+
+<script>
+  import { runDemo } from '../../lib/demo';
+
+  document.querySelectorAll<HTMLElement>('[data-demo="statistics"]').forEach((root) => {
+    const fps = root.querySelector<HTMLElement>('[data-st="fps"]')!;
+    const status = root.querySelector<HTMLElement>('[data-st="status"]')!;
+    const statusRow = root.querySelector<HTMLElement>('[data-st-row="status"]')!;
+
+    runDemo(root, async (ctx) => {
+      while (true) {
+        statusRow.classList.remove('stat--warn');
+        status.textContent = 'Receiving';
+        await ctx.count(fps, 0, 44, 1.2);
+        await ctx.wait(2.4);
+
+        status.textContent = 'Timeout';
+        statusRow.classList.add('stat--warn');
+        fps.textContent = '0';
+        await ctx.wait(1.4);
+      }
+    });
+  });
+</script>

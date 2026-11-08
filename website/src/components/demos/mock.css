@@ -1,0 +1,297 @@
+/* Mock UI for the animated feature demos: fragments of the sACN Monitor app. */
+
+.mock {
+  --mock-bg: #18181b;
+  --mock-panel: #232329;
+  --mock-panel-2: #1c1c21;
+  --mock-line: #3f3f46;
+  --mock-text: #e4e4e7;
+  --mock-muted: #a1a1aa;
+  --mock-sel: #3b82f6;
+  --mock-sel-strong: #1e40af;
+  --mock-ink: #06111a;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: var(--mock-bg);
+  color: var(--mock-text);
+  font-family: var(--font-body);
+}
+
+/* ---------- Universes list ---------- */
+.mock--list {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 1.4rem;
+}
+.list-panel {
+  display: flex;
+  flex-direction: column;
+  width: min(80%, 26rem);
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--mock-line);
+  border-radius: 8px;
+  background: var(--mock-panel-2);
+}
+.uv-list {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0;
+  min-height: 0;
+  padding: 0.35rem 0;
+}
+.uv {
+  display: flex;
+  flex: 1 1 0;
+  align-items: center;
+  gap: 0;
+  min-height: 0;
+  max-height: 2rem;
+}
+.uv__num {
+  display: grid;
+  flex: 0 0 3.5rem;
+  place-items: center;
+  height: 100%;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.uv__src {
+  overflow: hidden;
+  padding-left: 0.25rem;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: #cbd5e1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.uv__badge {
+  margin-left: auto;
+  margin-right: 0.6rem;
+  padding: 0.12rem 0.5rem;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--mock-line) 80%, transparent);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #cbd5e1;
+}
+.uv--sel {
+  background: var(--mock-sel-strong);
+}
+.uv--sel .uv__num {
+  background: var(--mock-sel);
+  color: #000000;
+}
+.uv--sel .uv__src,
+.uv--sel .uv__badge {
+  color: var(--mock-text);
+}
+
+/* ---------- Channel views ---------- */
+.mock--views {
+  display: flex;
+  flex-direction: column;
+  padding: 0.8rem 0.9rem 0;
+}
+.views__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+.seg {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 8px;
+  background: var(--mock-panel);
+}
+.seg__item {
+  padding: 0.28rem 0.68rem;
+  border-radius: 4px;
+  font-family: var(--font-body);
+  font-size: 0.62rem;
+  color: var(--mock-muted);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.seg__item--on {
+  background: var(--mock-sel);
+  color: var(--mock-ink);
+}
+.themes {
+  display: flex;
+  gap: 0.32rem;
+}
+.themes i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--dot);
+  opacity: 0.4;
+}
+.themes .i--on {
+  opacity: 1;
+}
+.ch-grid {
+  display: grid;
+  flex: 1;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-auto-rows: minmax(0, 1fr);
+  gap: 0;
+  min-height: 0;
+}
+.ch {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.ch__bar {
+  position: absolute;
+  inset: auto 0 0;
+  height: 100%;
+  background: var(--mock-sel);
+  transform: scaleY(var(--v, 0.3));
+  transform-origin: bottom;
+}
+.ch__num,
+.ch__val {
+  position: relative;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  line-height: 1;
+  color: #ffffff;
+  opacity: 0.9;
+}
+.ch__val {
+  display: none;
+}
+.ch--off .ch__num,
+.ch--off .ch__val {
+  opacity: 0.5;
+}
+.ch--sel {
+  border: 2px solid #cbd5e1;
+}
+.ch-grid--values .ch__num {
+  display: none;
+}
+.ch-grid--values .ch__val {
+  display: block;
+}
+.ch-grid--both .ch {
+  flex-direction: column;
+  gap: 1px;
+}
+.ch-grid--both .ch__num,
+.ch-grid--both .ch__val {
+  display: block;
+  font-size: 0.62rem;
+}
+.sel {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.1rem;
+  border-top: 1px solid var(--mock-line);
+  font-family: var(--font-body);
+  font-size: 0.66rem;
+  color: var(--mock-muted);
+}
+.sel b {
+  font-weight: 500;
+  color: var(--mock-text);
+}
+.sel span:not(:first-child) {
+  margin-left: 0.6rem;
+}
+
+/* ---------- Statistics ---------- */
+.mock--stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 1.4rem;
+}
+.stats-panel {
+  width: min(80%, 26rem);
+  overflow: hidden;
+  border: 1px solid var(--mock-line);
+  border-radius: 8px;
+  background: var(--mock-panel-2);
+}
+.stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.75rem 0.95rem 0.85rem;
+}
+.stat {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: #cbd5e1;
+}
+.stat b {
+  font-weight: 500;
+  color: var(--mock-text);
+  white-space: nowrap;
+}
+.stat--sep {
+  margin-top: 0.35rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid var(--mock-line);
+}
+.stat--warn b {
+  color: #f59e0b;
+}
+
+@media (max-width: 720px) {
+  .mock--list {
+    padding: 0.55rem 0.9rem;
+  }
+  .list-panel {
+    width: 92%;
+  }
+  .uv {
+    max-height: 1.6rem;
+  }
+  .uv__num {
+    flex-basis: 2.6rem;
+    font-size: 0.6rem;
+  }
+  .uv__src,
+  .uv__badge {
+    font-size: 0.6rem;
+  }
+  .uv__badge {
+    padding: 0.08rem 0.34rem;
+    margin-right: 0.3rem;
+  }
+  .mock--stats {
+    padding: 0.55rem 0.9rem;
+  }
+  .stats-panel {
+    width: 92%;
+  }
+  .stats {
+    gap: 0.14rem;
+    padding: 0.5rem 0.7rem 0.55rem;
+  }
+  .stat {
+    font-size: 0.5rem;
+  }
+  .stat--sep {
+    margin-top: 0.2rem;
+    padding-top: 0.25rem;
+  }
+}

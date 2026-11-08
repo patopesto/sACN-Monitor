@@ -9,13 +9,16 @@ import Feature from '@patopest/astro-theme/components/Feature.astro';
 import Screenshot from '@patopest/astro-theme/components/Screenshot.astro';
 import ProjectGrid from '@patopest/astro-theme/components/ProjectGrid.astro';
 import CallToAction from '@patopest/astro-theme/components/CallToAction.astro';
+import Universes from '../../components/demos/Universes.astro';
+import Channels from '../../components/demos/Channels.astro';
+import Statistics from '../../components/demos/Statistics.astro';
+import '../../components/demos/mock.css';
 import app from '../../assets/screenshots/app.png';
 import { project } from '../../project';
 
 <Hero
   eyebrow="macOS · Windows · Linux"
-  title="Every universe, one screen"
-  tagline="Discover the sACN and ArtNet universes on your network, watch their channels change in real time, and read the sender's statistics at a glance."
+  tagline="Discover the sACN and ArtNet universes on your network, monitor their DMX data, and get sender's statistics at a glance."
   primary={{ label: 'Download', href: '/download/' }}
   secondary={{ label: 'Read the docs', href: '/docs/getting-started/' }}
   meta={['sACN', 'ArtNet']}
@@ -23,7 +26,9 @@ import { project } from '../../project';
   imageAlt="sACN Monitor showing the universe list, the DMX channel grid and the statistics column"
   mediaLabel="DMX"
   ratio="2784 / 1720"
-/>
+>
+  <span slot="title">Every universe,<br />one <em>screen</em></span>
+</Hero>
 
 <FeatureGrid
   id="features"
@@ -44,7 +49,7 @@ import { project } from '../../project';
     Show sACN, ArtNet, or both. In both mode each universe is labelled with the protocol it arrived on.
   </Feature>
   <Feature icon="05" title="Interface selection">
-    Point the receivers at the network card that carries the show, and switch without restarting the app.
+    Point the receivers at the network card connected to your show network, and switch without restarting the app.
   </Feature>
   <Feature icon="06" title="Five themes">
     Cyan, blue, purple, red or neutral, with collapsible sidebars and universes that open in their own window.
@@ -54,36 +59,34 @@ import { project } from '../../project';
 <Screenshot
   eyebrow="Universes"
   title="Know what is on the wire"
-  image={app}
-  imageAlt="A universe selected in sACN Monitor, with its channels and packet statistics"
+  label="Universes"
   ratio="2784 / 1720"
-  calls={[
-    { x: '9%', y: '17%', label: 'Universe and sender' },
-    { x: '50%', y: '52%', label: 'Channel grid' },
-    { x: '86%', y: '27%', label: 'Reception statistics' },
-  ]}
 >
-  Every source is its own row, so the same universe sent by two consoles shows up twice. Select one to
-  see its channels and the sender's details: address, name, mode, FPS, and for sACN the priority and sync
-  address. A universe that stops sending turns from **Receiving** to **Timeout** after a couple of seconds.
+  Every source is its own row: universe number and sender IP address. Easily detect universe collisions on your show's network. Select a universe to monitor it's data.
+  <Universes slot="media" />
 </Screenshot>
 
 <Screenshot
   eyebrow="Views"
-  title="Channels, values, or both"
-  image={app}
-  imageAlt="The channel grid with the protocol filter and theme controls"
+  title="DMX Channels and values"
+  label="Channels"
   ratio="2784 / 1720"
   reverse
-  calls={[
-    { x: '85%', y: '58%', label: 'Protocol filter' },
-    { x: '85%', y: '72%', label: 'Theme' },
-    { x: '22%', y: '29%', label: 'Selected channel' },
-  ]}
 >
-  Flip between channel numbers, raw DMX values, and both at once. The coloured bar behind each channel
-  grows with its value, so a quick glance shows activity across the whole universe. The same view works
-  for sACN and ArtNet.
+  Flip between channel numbers, raw DMX values, or both at once. The coloured bar behind each channel grows with its value, so a quick glance shows activity across the whole universe. The same view works for sACN and ArtNet.
+  <Channels slot="media" />
+</Screenshot>
+
+<Screenshot
+  eyebrow="Statistics"
+  title="Troubleshoot the universes"
+  label="Statistics"
+  ratio="2784 / 1720"
+>
+  The right column follows the selected universe: sender address and source name, reception mode, FPS,
+  priority, and the selected channel value. When a source stops sending, **Receiving** turns into
+  **Timeout**.
+  <Statistics slot="media" />
 </Screenshot>
 
 <div class="container prose section">

@@ -7,7 +7,7 @@
 	<img alt="License" src="https://img.shields.io/badge/license-MIT-blue?style=for-the-badge">
 	<img alt="Platforms" src="https://img.shields.io/badge/platforms-macOS%20%7C%20Windows%20%7C%20Linux-blue?style=for-the-badge">
 
-  <img src="docs/static/images/app.png" alt="sACN Monitor App" width="600">
+  <img src="website/src/assets/screenshots/app.png" alt="sACN Monitor App" width="600">
 </div>
 
 📖 [Full Documentation](https://sacn-monitor.bambinito.net)

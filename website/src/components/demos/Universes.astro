@@ -1,0 +1,61 @@
+---
+const universes = [
+  { num: 1, src: '192.168.1.20', protocol: 'sACN' },
+  { num: 7, src: '10.0.0.12', protocol: 'ArtNet' },
+  { num: 13, src: '192.168.1.40', protocol: 'sACN', target: true },
+  { num: 21, src: '192.168.1.40', protocol: 'sACN' },
+  { num: 101, src: '192.168.1.40', protocol: 'sACN' },
+  { num: 255, src: '10.0.0.12', protocol: 'ArtNet' },
+  { num: 301, src: '192.168.1.77', protocol: 'sACN' },
+  { num: 512, src: '10.0.0.12', protocol: 'ArtNet' },
+  { num: 1024, src: '192.168.1.77', protocol: 'sACN' },
+];
+---
+<figure class="mock mock--list" data-demo="universes" aria-hidden="true">
+  <div class="list-panel">
+    <div class="uv-list">
+      {universes.map((universe) => (
+        <div class:list={['uv', universe.target && 'uv--sel']} data-uv data-target={universe.target || undefined}>
+          <span class="uv__num">{universe.num}</span>
+          <span class="uv__src">{universe.src}</span>
+          <span class="uv__badge">{universe.protocol}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+</figure>
+
+<script>
+  import { runDemo } from '../../lib/demo';
+
+  document.querySelectorAll<HTMLElement>('[data-demo="universes"]').forEach((root) => {
+    const rows = [...root.querySelectorAll<HTMLElement>('[data-uv]')];
+    const target = root.querySelector<HTMLElement>('[data-target]')!;
+
+    const select = (row: HTMLElement) => {
+      rows.forEach((item) => item.classList.remove('uv--sel'));
+      row.classList.add('uv--sel');
+    };
+
+    runDemo(root, async (ctx) => {
+      while (true) {
+        rows.forEach((row) => row.classList.remove('uv--sel'));
+        rows.forEach((row) => ctx.animate(row, { opacity: 0, x: -8 }, { duration: 0.2 }));
+        await ctx.wait(0.45);
+
+        for (let index = 0; index < rows.length; index += 1) {
+          ctx.animate(rows[index], { opacity: 1, x: 0 }, { duration: 0.25 });
+          await ctx.wait(0.12);
+        }
+        await ctx.wait(0.35);
+
+        select(target);
+        await ctx.wait(1.6);
+        select(rows[4]);
+        await ctx.wait(1.8);
+        select(target);
+        await ctx.wait(1.4);
+      }
+    });
+  });
+</script>
